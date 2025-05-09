@@ -1,0 +1,179 @@
+"use client"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
+import { motion } from "framer-motion"
+import { Zap, Star, Timer, Brain, Trophy, Clock, Hash, Square, Circle } from "lucide-react"
+import { SetupScreenProps } from "@/types/game"
+
+const SetupScreen = ({
+  onStartGame,
+  topic,
+  setTopic,
+  difficulty,
+  setDifficulty,
+  timerSetting,
+  setTimerSetting,
+  gameMode,
+  setGameMode,
+}: SetupScreenProps) => {
+  const topics = [
+    { value: "surprise", label: "Random Mix", icon: Brain },
+    { value: "addition", label: "Sum Pro", icon: Trophy },
+    { value: "subtraction", label: "Minus Master", icon: Star },
+    { value: "multiplication", label: "Times Titan", icon: Timer },
+    { value: "division", label: "Divide & Conquer", icon: Zap },
+    { value: "square", label: "Square Up", icon: Square },
+    { value: "squareRoot", label: "Root Raider", icon: Square },
+    { value: "unitCircle", label: "Unit Circle Sage", icon: Circle },
+  ]
+
+  const modes = [
+    {
+      value: "timed",
+      label: "Telekespeedsis",
+      icon: Clock,
+      description: "Race against time in this high-speed neural challenge",
+    },
+    {
+      value: "problems",
+      label: "Centurion Challenge",
+      icon: Hash,
+      description: "Conquer 100 problems within the time limit",
+    },
+  ]
+
+  const difficultyEmojis = ["🧠", "🧠🧠", "🧠🧠🧠"]
+  const difficultyLabels = ["Neuron", "Synapse", "Cortex"]
+  const problemModeTimes = [10, 5, 2.5] // in minutes
+
+  return (
+    <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-white/10 shadow-2xl rounded-xl overflow-hidden border border-purple-500/20">
+      <CardHeader className="bg-gradient-to-r from-indigo-900 to-purple-900 text-white p-6">
+        <CardTitle className="text-4xl font-bold text-center tracking-wider">BRAINIAC</CardTitle>
+        <div className="text-center opacity-90 mt-2 text-purple-200">Power up your mental math</div>
+      </CardHeader>
+      <CardContent className="p-8 bg-gradient-to-b from-gray-900/95 to-gray-900/90">
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-purple-200">Topic Selection</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {topics.map((t) => {
+                const Icon = t.icon
+                return (
+                  <motion.div key={t.value} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      onClick={() => setTopic(t.value)}
+                      variant={topic === t.value ? "default" : "outline"}
+                      className={`w-full h-16 relative group ${
+                        topic === t.value
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg border-0"
+                          : "bg-gray-900/50 hover:bg-gray-800/50 text-gray-300 border border-purple-500/30"
+                      }`}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <span className="group-hover:opacity-0 transition-opacity">{t.label}</span>
+                    </Button>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-purple-200">Neural Power</h3>
+            <div className="space-y-2">
+              <Slider
+                value={[difficultyEmojis.indexOf(difficulty) + 1]}
+                onValueChange={(value) => setDifficulty(difficultyEmojis[value[0] - 1])}
+                min={1}
+                max={3}
+                step={1}
+                className="py-4"
+              />
+              <div className="flex justify-between text-sm text-purple-300">
+                {difficultyLabels.map((label, i) => (
+                  <div key={label} className="text-center">
+                    <div className="text-xl mb-1">{difficultyEmojis[i]}</div>
+                    <div>{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-purple-200">Game Mode</h3>
+            <div className="grid grid-cols-1 gap-4">
+              {modes.map((m) => {
+                const Icon = m.icon
+                return (
+                  <motion.div key={m.value} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      onClick={() => setGameMode(m.value)}
+                      variant={gameMode === m.value ? "default" : "outline"}
+                      className={`w-full h-20 relative group ${
+                        gameMode === m.value
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg border-0"
+                          : "bg-gray-900/50 hover:bg-gray-800/50 text-gray-300 border border-purple-500/30"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center justify-center space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <Icon className="w-5 h-5" />
+                          <span className="font-semibold">{m.label}</span>
+                        </div>
+                        <span className="text-xs opacity-80">{m.description}</span>
+                      </div>
+                    </Button>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+
+          {gameMode === "timed" && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-purple-200">Synapse Speed</h3>
+              <Slider
+                value={[timerSetting]}
+                onValueChange={(value) => setTimerSetting(value[0])}
+                min={1}
+                max={10}
+                step={1}
+                className="py-4"
+              />
+              <p className="text-center text-purple-300 mt-2">
+                {Math.floor((timerSetting * 30) / 60)}m {(timerSetting * 30) % 60}s
+              </p>
+            </div>
+          )}
+
+          {gameMode === "problems" && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-purple-200">Time Limit</h3>
+              <p className="text-center text-purple-300 mt-2">
+                {problemModeTimes[difficultyEmojis.indexOf(difficulty)]} minutes
+              </p>
+            </div>
+          )}
+        </div>
+
+        <motion.div className="mt-8" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            onClick={() => onStartGame(difficulty, timerSetting * 30, gameMode)}
+            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xl font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-500 hover:to-purple-500 relative overflow-hidden group"
+          >
+            <span className="relative z-10">ACTIVATE NEURONS</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/30 to-purple-400/0 group-hover:translate-x-full duration-1000 transition-transform"></div>
+          </Button>
+        </motion.div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default SetupScreen
+
