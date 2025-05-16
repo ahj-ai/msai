@@ -1,29 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import { PricingSection } from "@/components/pricing-section"
-import { SectionTitle } from "@/components/SectionTitle"
+import { SignedIn, SignedOut } from '@clerk/nextjs';
+import { RedirectToDashboard } from '../components/redirect-to-dashboard';
+import { FeatureCard } from '../components/feature-card';
+import { Brain, Lightbulb, Rocket, Sparkles, ArrowRight } from 'lucide-react';
 
-function FeatureCard({ icon, title, description, link }: { 
-  icon: string; 
-  title: string; 
+interface Feature {
+  icon: React.ReactNode;
+  title: string;
   description: string;
   link: string;
-}) {
-  return (
-    <div className="bg-[#1a1a2e] p-6 rounded-lg flex flex-col">
-      <div className="text-4xl mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-400 mb-4">{description}</p>
-      <Link 
-        href={link}
-        className="mt-auto text-purple-400 hover:text-purple-300 text-sm"
-      >
-        Learn more →
-      </Link>
-    </div>
-  );
 }
 
 function ComparisonTable() {
@@ -59,98 +46,125 @@ function TestimonialCard({ quote, name, role }: {
   role: string;
 }) {
   return (
-    <div className="bg-[#1a1a2e] p-6 rounded-lg">
-      <p className="text-gray-300 mb-4">"{quote}"</p>
-      <div className="flex items-center">
-        <div className="w-10 h-10 bg-gray-600 rounded-full mr-3"></div>
+    <div className="border border-white/10 p-8 rounded-lg bg-white/5">
+      <p className="text-white/90 mb-6 leading-relaxed relative">
+        <span className="text-[#B619E7] text-xl absolute -left-3 -top-2">“</span>
+        {quote}
+        <span className="text-[#B619E7] text-xl">”</span>
+      </p>
+      <div className="flex items-center mt-6">
+        <div className="w-12 h-12 bg-[#B619E7]/20 rounded-full mr-4 border border-[#B619E7]/30"></div>
         <div>
-          <div className="font-semibold">{name}</div>
-          <div className="text-gray-400 text-sm">{role}</div>
+          <div className="font-semibold text-white">{name}</div>
+          <div className="text-white/70 text-sm">{role}</div>
         </div>
       </div>
     </div>
   );
 }
 
+
+
 export default function Home() {
+  const features: Feature[] = [
+    {
+      icon: <Brain className="w-8 h-8 text-[#6C63FF]" />,
+      title: 'AI-Powered Learning',
+      description: 'Get personalized math guidance from our advanced AI tutor that adapts to your learning style.',
+      link: '/why-mathstack-ai#ai-learning'
+    },
+    {
+      icon: <Lightbulb className="w-8 h-8 text-[#6C63FF]" />,
+      title: 'Concept Mastery',
+      description: 'Master difficult concepts with step-by-step explanations and interactive problem-solving.',
+      link: '/why-mathstack-ai#concept-mastery'
+    },
+    {
+      icon: <Rocket className="w-8 h-8 text-[#6C63FF]" />,
+      title: 'Practice Makes Perfect',
+      description: 'Access thousands of practice problems with instant feedback and detailed solutions.',
+      link: '/why-mathstack-ai#practice'
+    },
+    {
+      icon: <Sparkles className="w-8 h-8 text-[#6C63FF]" />,
+      title: 'Track Your Progress',
+      description: 'Monitor your improvement with detailed analytics and personalized recommendations.',
+      link: '/why-mathstack-ai#progress-tracking'
+    }
+  ];
+
   return (
     <>
-      <main className="min-h-screen bg-[#1a1a2e] text-white">
-         {/* Hero Section */}
-         <section className="container mx-auto px-4 pt-20 pb-12 text-center">
-           <SectionTitle
-             title="Elevate Your Math Skills with AI-Powered Tools"
-             subtitle="Sharpen mental math, tackle custom problem sets, and track your progress—all in one platform."
-           />
-           <Link href="/signup">
-             <Button 
-               size="lg" 
-               className="bg-purple-600 hover:bg-purple-700 text-xl py-6 px-8"
-             >
-               Try MathStack AI Free
-             </Button>
-           </Link>
-         </section>
+      <SignedIn>
+        <RedirectToDashboard />
+      </SignedIn>
+      <SignedOut>
+      <div className="overflow-hidden">
+        {/* Hero Section */}
+        <section className="section">
+          <div className="container">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                Master math with <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">AI-powered learning</span>
+              </h1>
+              <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Transform your math skills with personalized AI tutoring, interactive lessons, and unlimited practice problems designed to help you succeed.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link 
+                  href="/signup" 
+                  className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white"
+                >
+                  Get started for free
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+                <Link 
+                  href="/why-mathstack-ai" 
+                  className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-[#6C63FF] hover:bg-gray-50 rounded-full transition-colors"
+                >
+                  Learn more
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Features Section */}
-        <section className="container mx-auto px-4 pt-8 pb-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <FeatureCard
-            icon="📈"
-            title="Track Your Learning Progress"
-            description="Monitor your improvement over time with personalized insights."
-            link="/why-mathstack-ai#progress"
-          />
-          <FeatureCard
-            icon="🎮"
-            title="Adaptive Math Games"
-            description="Challenge yourself with adaptive learning experiences."
-            link="/products/brainiac"
-          />
-          <FeatureCard
-            icon="🧪"
-            title="Custom Problem Sets"
-            description="Create and solve problems tailored to your learning goals."
-            link="/products/problem-lab"
-          />
-        </section>
-
-        {/* Pricing Section */}
-        <section className="py-16 bg-purple-950">
-          <PricingSection />
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="container mx-auto px-4 py-16">
-          <h2 className="text-3xl font-bold text-center mb-12">See What Others Are Saying</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <TestimonialCard
-              quote="MathStackAI has transformed my approach to math. The adaptive games make learning fun and challenging!"
-              name="Alex Johnson"
-              role="High School Student"
-            />
-            <TestimonialCard
-              quote="As an educator, I find the custom problem sets invaluable for creating tailored assignments for my students."
-              name="Sarah Lee"
-              role="Math Teacher"
-            />
-            <TestimonialCard
-              quote="The AI-powered features have helped me brush up on math concepts I use in my work. Highly recommended!"
-              name="Mike Chen"
-              role="Software Engineer"
-            />
+        <section className="section bg-white">
+          <div className="container">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Why choose MathStack AI?</h2>
+              <p className="text-gray-600">Our platform combines cutting-edge AI technology with proven learning methodologies to help you master math at your own pace.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {features.map((feature, index) => (
+                <FeatureCard key={index} icon={feature.icon} title={feature.title} description={feature.description} link="/why-mathstack-ai" />
+              ))}
+            </div>
           </div>
-          <div className="text-center mt-12">
-            <Link href="/signup">
-              <Button 
-                size="lg"
-                className="bg-purple-600 hover:bg-purple-700"
+        </section>
+
+        {/* CTA Section */}
+        <section className="section bg-gradient-to-br from-indigo-50 to-purple-50">
+          <div className="container">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-6">Ready to transform your math learning?</h2>
+              <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+                Join thousands of students who are already mastering math with MathStack AI. Start your free trial today.
+              </p>
+              <Link 
+                href="/signup" 
+                className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white"
               >
-                Join Them Today
-              </Button>
-            </Link>
+                Start learning now
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </div>
           </div>
         </section>
-      </main>
+      </div>
+      </SignedOut>
     </>
   );
 }

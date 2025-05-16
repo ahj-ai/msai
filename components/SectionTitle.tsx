@@ -19,19 +19,14 @@ export const SectionTitle: React.FC<SectionTitleProps> = ({
   titleClassName = "",
   subtitleClassName = "",
 }) => (
-  <div className={clsx("text-center mb-12", className)}>
-    <h1
-      className={clsx(
-        "text-5xl md:text-6xl font-bold mb-4 text-gradient bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-transparent bg-clip-text",
-        titleClassName
-      )}
-    >
+  <div className={clsx("text-center mb-20", className)}>
+    <h1 className={clsx("text-5xl md:text-6xl font-bold mb-6 text-gray-900", titleClassName)}>
       {title}
     </h1>
     {subtitle && (
       <p
         className={clsx(
-          "text-lg md:text-xl text-gray-300 max-w-2xl mx-auto",
+          "text-lg md:text-xl text-white/80 max-w-2xl mx-auto",
           subtitleClassName
         )}
       >

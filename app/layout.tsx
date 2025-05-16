@@ -1,36 +1,142 @@
-import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { ClerkProvider } from "@clerk/nextjs"
-import { AuthProvider } from "@/lib/auth"
-import NavBar from "@/components/nav-bar"
-import { Footer } from "@/components/footer"
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs'
+import { GeistSans, GeistMono } from 'geist/font'
+import './globals.css'
+import NavBar from '@/components/nav-bar'
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-})
+const geistSans = GeistSans
+const geistMono = GeistMono
 
 export const metadata: Metadata = {
-  title: 'MathStack AI',
-  description: 'AI-Powered Math Learning Platform',
+  title: 'MathStack AI - AI-Powered Math Learning Platform',
+  description: 'Transform your math learning experience with AI-powered tools and personalized guidance.',
+  keywords: ['math', 'AI', 'learning', 'education', 'mathematics', 'tutoring', 'online learning'],
+  themeColor: '#6C63FF',
+  viewport: 'width=device-width, initial-scale=1',
+  icons: {
+    icon: '/favicon.ico',
+  },
+  openGraph: {
+    title: 'MathStack AI - AI-Powered Math Learning Platform',
+    description: 'Transform your math learning experience with AI-powered tools and personalized guidance.',
+    url: 'https://mathstackai.com',
+    siteName: 'MathStack AI',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'MathStack AI',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MathStack AI - AI-Powered Math Learning Platform',
+    description: 'Transform your math learning experience with AI-powered tools and personalized guidance.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
-    <ClerkProvider>
-      <AuthProvider>
-        <html lang="en">
-          <body className={inter.className}>
-            <NavBar />
-            <main className="min-h-screen">{children}</main>
-          </body>
-        </html>
-      </AuthProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: '#6C63FF',
+          colorTextOnPrimaryBackground: '#FFFFFF',
+          colorBackground: '#FFFFFF',
+          colorInputBackground: '#F9F9FF',
+          colorInputText: '#333333',
+        },
+        elements: {
+          formButtonPrimary: 'bg-[#6C63FF] hover:bg-[#5E60CE] transition-colors',
+          card: 'shadow-lg border border-gray-100',
+          headerTitle: 'text-gray-900',
+          headerSubtitle: 'text-gray-600',
+          socialButtonsBlockButton: 'border-gray-200 hover:bg-gray-50',
+          socialButtonsBlockButtonArrow: 'text-gray-700',
+          socialButtonsBlockButtonText: 'text-gray-700',
+          footerActionText: 'text-gray-600',
+          footerActionLink: 'text-[#6C63FF] hover:text-[#5E60CE]',
+          formFieldInput: 'border-gray-200 focus:border-[#6C63FF] focus:ring-1 focus:ring-[#6C63FF]',
+          formFieldLabel: 'text-gray-700',
+          dividerLine: 'bg-gray-200',
+          dividerText: 'text-gray-500',
+        },
+      }}
+    >
+      <html lang="en" className="scroll-smooth">
+        <body className={`${geistSans.className} ${geistMono.className} antialiased bg-gray-50`}>
+          <div className="min-h-screen flex flex-col">
+            <NavBar>
+              <div className="flex items-center space-x-3">
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#6C63FF] transition-colors">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg">
+                      Get Started
+                    </button>
+                  </SignUpButton>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton 
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: 'w-9 h-9',
+                        userButtonPopoverCard: 'shadow-lg border border-gray-100',
+                        userPreviewMainIdentifier: 'text-gray-900',
+                        userPreviewSecondaryIdentifier: 'text-gray-600',
+                        userButtonPopoverActionButtonText: 'text-gray-700 hover:text-[#6C63FF]',
+                        userButtonPopoverActionButtonIcon: 'text-gray-500',
+                      },
+                    }}
+                  />
+                </SignedIn>
+              </div>
+            </NavBar>
+            
+            <main className="flex-grow pt-16">
+              {children}
+            </main>
+            
+            <footer className="bg-white border-t border-gray-100 py-8 mt-12">
+              <div className="container mx-auto px-4 sm:px-6">
+                <div className="flex flex-col md:flex-row justify-between items-center">
+                  <div className="mb-4 md:mb-0">
+                    <span className="text-xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+                      MathStackAI
+                    </span>
+                    <p className="text-gray-500 text-sm mt-1">© {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
+                  </div>
+                  <div className="flex space-x-6">
+                    <a href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</a>
+                    <a href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</a>
+                  </div>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </body>
+      </html>
     </ClerkProvider>
   )
 }

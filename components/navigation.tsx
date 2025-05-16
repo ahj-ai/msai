@@ -46,12 +46,6 @@ export function Navigation() {
             >
               Pricing
             </Link>
-            <Link 
-              href="/contact" 
-              className={`text-gray-300 hover:text-purple-400 transition-colors ${(pathname ?? '') === '/contact' ? 'text-purple-400' : ''}`}
-            >
-              Contact Us
-            </Link>
           </div>
 
           {/* Authentication Links */}

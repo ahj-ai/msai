@@ -49,7 +49,14 @@ export default function ProblemLabPreviewPage() {
   )
 }
 
-function Feature({ icon: Icon, text }) {
+import { ComponentType, SVGProps } from "react";
+
+type FeatureProps = {
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  text: string;
+};
+
+function Feature({ icon: Icon, text }: FeatureProps) {
   return (
     <li className="flex items-center space-x-3 text-purple-200">
       <Icon className="w-6 h-6 text-purple-400" />
