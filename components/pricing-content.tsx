@@ -63,37 +63,48 @@ export const PricingContent = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Free Plan */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-              <div className="p-8 text-center">
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-indigo-50 overflow-hidden hover:shadow-lg transition-all relative">
+              <div className="bg-indigo-50 text-indigo-800 text-center py-2 text-xs font-semibold tracking-wider">
+                PERFECT FOR TRYING OUT
+              </div>
+              <div className="pt-8 pb-6 px-6 text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-4">$0</div>
-                <p className="text-gray-600 mb-6">Perfect for getting started</p>
-                <a href="/signup">
-                  <button className="w-full py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
+                <div className="text-4xl font-bold text-gray-900 mb-1">$0<span className="text-lg font-normal text-gray-600">/forever</span></div>
+                <p className="text-gray-600 mb-6">No credit card required</p>
+                <a href="/signup" className="block mb-6">
+                  <button className="w-full py-3 px-6 bg-white border-2 border-indigo-100 hover:bg-indigo-50 text-indigo-700 font-medium rounded-lg transition-all hover:shadow-sm">
                     Get Started Free
                   </button>
                 </a>
               </div>
-              <div className="border-t border-gray-100 p-8">
+              <div className="border-t border-gray-100 px-6 pb-8 pt-6">
                 <ul className="space-y-4">
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Basic Mental Math Game
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-indigo-400 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">Basic Mental Math Game</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Limited Problem Sets
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-indigo-400 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">Limited Problem Sets</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Basic Progress Tracking
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-indigo-400 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">Basic Progress Tracking</span>
                   </li>
-                  <li className="flex items-center text-gray-500">
-                    <span className="w-5 h-5 mr-2">•</span>
+                  <li className="flex items-start text-gray-400">
+                    <span className="w-5 h-5 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </span>
                     <span className="line-through">Personalized Insights</span>
                   </li>
-                  <li className="flex items-center text-gray-500">
-                    <span className="w-5 h-5 mr-2">•</span>
+                  <li className="flex items-start text-gray-400">
+                    <span className="w-5 h-5 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </span>
                     <span className="line-through">AI-Generated Features</span>
                   </li>
                 </ul>
@@ -101,80 +112,90 @@ export const PricingContent = () => {
             </div>
 
             {/* Monthly Plan */}
-            <div className="bg-white rounded-2xl shadow-md border-2 border-indigo-500 overflow-hidden transform hover:scale-105 transition-transform">
-              <div className="bg-indigo-600 text-white text-center py-2 text-sm font-medium">
+            <div className="bg-white rounded-2xl shadow-md border-2 border-indigo-500 overflow-hidden hover:shadow-lg transition-all relative">
+              <div className="bg-indigo-600 text-white text-center py-2 text-xs font-semibold tracking-wider">
                 MOST POPULAR
               </div>
-              <div className="p-8 text-center">
+              <div className="pt-8 pb-6 px-6 text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly</h3>
                 <div className="text-4xl font-bold text-gray-900 mb-1">$11.99<span className="text-lg font-normal text-gray-600">/month</span></div>
                 <p className="text-gray-600 mb-6">Billed monthly</p>
-                <a href="/signup">
-                  <button className="w-full py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                <a href="/signup" className="block mb-6">
+                  <button className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg">
                     Choose Monthly
                   </button>
                 </a>
               </div>
-              <div className="border-t border-gray-100 p-8">
+              <div className="border-t border-gray-100 px-6 pb-8 pt-6">
                 <ul className="space-y-4">
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Full Mental Math Game
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Full Mental Math Game</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Unlimited Problem Sets
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Unlimited Problem Sets</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Advanced Progress Tracking
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Advanced Progress Tracking</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Personalized Insights
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Personalized Insights</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    AI-Generated Features
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>AI-Generated Features</span>
                   </li>
                 </ul>
               </div>
             </div>
 
             {/* Annual Plan */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-              <div className="p-8 text-center">
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-indigo-100 overflow-hidden hover:shadow-lg transition-all relative">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-2 text-xs font-semibold tracking-wider">
+                SAVE 16%
+              </div>
+              <div className="pt-8 pb-6 px-6 text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Annual</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-1">$10<span className="text-lg font-normal text-gray-600">/month</span></div>
-                <div className="text-green-600 font-medium mb-2">Save 16%</div>
-                <p className="text-gray-600 mb-6">$120 billed annually</p>
-                <a href="/signup">
-                  <button className="w-full py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                <div className="text-4xl font-bold text-gray-900 mb-1">$120<span className="text-lg font-normal text-gray-600">/year</span></div>
+                <p className="text-gray-600 mb-6">Billed annually</p>
+                <a href="/signup" className="block mb-6">
+                  <button className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg">
                     Choose Annual
                   </button>
                 </a>
               </div>
-              <div className="border-t border-gray-100 p-8">
+              <div className="border-t border-gray-100 px-6 pb-8 pt-6">
                 <ul className="space-y-4">
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Full Mental Math Game
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Full Mental Math Game</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Unlimited Problem Sets
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Unlimited Problem Sets</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Advanced Progress Tracking
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Advanced Progress Tracking</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    Personalized Insights
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Personalized Insights</span>
                   </li>
-                  <li className="flex items-center text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2" />
-                    AI-Generated Features
+                  <li className="flex items-start text-gray-700">
+                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>AI-Generated Features</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-5 h-5 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
+                      <svg className="w-3 h-3 text-indigo-500" fill="currentColor" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3" />
+                      </svg>
+                    </span>
+                    <span className="font-medium text-indigo-700">Beta Test New Features</span>
                   </li>
                 </ul>
               </div>
@@ -231,7 +252,7 @@ export const PricingContent = () => {
               <AccordionItem value="item-0" className="border border-gray-200 rounded-lg p-4">
                 <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">How does the annual billing work?</AccordionTrigger>
                 <AccordionContent className="text-gray-600 mt-2">
-                  You pay $120 upfront for a full year of Premium access, which averages to $10/month. Your subscription will automatically renew each year unless you choose to cancel.
+                  You pay $120/year for Premium access. Your subscription will automatically renew each year unless you choose to cancel.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
