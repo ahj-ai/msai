@@ -2,10 +2,15 @@
 
 import React, { useEffect, useRef } from 'react'
 
-export function ParticleBackground() {
+interface ParticleBackgroundProps {
+  lightMode?: boolean;
+}
+
+export function ParticleBackground({ lightMode = false }: ParticleBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    // Add dependency to the effect to update when lightMode changes
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -37,16 +42,16 @@ export function ParticleBackground() {
       va: number
 
       constructor() {
-        this.x = Math.random() * canvas.width
-        this.y = Math.random() * canvas.height
+        this.x = Math.random() * (canvas?.width || window.innerWidth)
+        this.y = Math.random() * (canvas?.height || window.innerHeight)
         this.originalX = this.x
         this.originalY = this.y
         this.size = Math.random() * 2 + 1
         this.speedX = Math.random() * 1 - 0.5
         this.speedY = Math.random() * 1 - 0.5
-        this.opacity = Math.random() * 0.5 + 0.2
-        this.hue = Math.random() * 60 + 200 // Blue to purple range
-        this.color = `hsla(${this.hue}, 70%, 50%, ${this.opacity})`
+        this.opacity = Math.random() * 0.6 + 0.3
+        this.hue = Math.random() * 60 + 210 // Blue to purple range
+        this.color = `hsla(${this.hue}, 80%, 50%, ${this.opacity})`
         this.force = 0
         this.angle = Math.random() * Math.PI * 2
         this.va = Math.random() * 0.02 - 0.01
@@ -97,15 +102,15 @@ export function ParticleBackground() {
           const distance = Math.sqrt(dx * dx + dy * dy)
 
           if (distance < connectionDistance) {
-            const opacity = (1 - distance / connectionDistance) * 0.5
+            const opacity = (1 - distance / connectionDistance) * 0.7
             const gradient = ctx!.createLinearGradient(
               particles[i].x,
               particles[i].y,
               particles[j].x,
               particles[j].y
             )
-            gradient.addColorStop(0, `hsla(${particles[i].hue}, 70%, 50%, ${opacity})`)
-            gradient.addColorStop(1, `hsla(${particles[j].hue}, 70%, 50%, ${opacity})`)
+            gradient.addColorStop(0, `hsla(${particles[i].hue}, 80%, 50%, ${opacity})`)
+            gradient.addColorStop(1, `hsla(${particles[j].hue}, 80%, 50%, ${opacity})`)
 
             ctx!.strokeStyle = gradient
             ctx!.lineWidth = 0.5
@@ -123,8 +128,11 @@ export function ParticleBackground() {
     }
 
     function animate() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      if (ctx) {
+        // Create a slightly transparent background to create trail effect
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'
+        ctx.fillRect(0, 0, canvas?.width || 0, canvas?.height || 0)
+      }
       
       particles.forEach(particle => {
         particle.update()
@@ -156,8 +164,13 @@ export function ParticleBackground() {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
     }
-  }, [])
+  }, [lightMode])
 
-  return <canvas ref={canvasRef} className="fixed inset-0 -z-10" />
+  return (
+    <>
+      <div className="fixed inset-0 -z-20 bg-gradient-to-b from-white via-blue-50 to-indigo-50" />
+      <canvas ref={canvasRef} className="fixed inset-0 -z-10" style={{ opacity: 0.8 }} />
+    </>
+  )
 }
 

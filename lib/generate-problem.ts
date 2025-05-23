@@ -1,20 +1,16 @@
 "use server"
 
 import { generateMathProblem } from "@/utils/generate-math-problem"
+import { Difficulty, Problem, ProblemGenerationParams } from "@/types/math"
 
-interface GenerateProblemParams {
-  subject: string
-  topic: string
-  difficulty: string
-  wordProblems: boolean
-}
+type GenerateProblemResult = Problem | { comingSoon: boolean }
 
 export async function generateProblem({
   subject,
   topic,
   difficulty,
   wordProblems,
-}: GenerateProblemParams) {
+}: ProblemGenerationParams): Promise<GenerateProblemResult> {
   // Supported topics for native generation
   const nativeMap: Record<string, string[]> = {
     "algebra-1": [
@@ -52,8 +48,18 @@ export async function generateProblem({
     !wordProblems
   ) {
     try {
-      return generateMathProblem(subject, topic, difficulty.toLowerCase() as 'easy' | 'regular' | 'hard');
+      // Map our UI difficulty levels to the math problem generator's difficulty levels
+      const difficultyMap: Record<Difficulty, 'regular' | 'honors' | 'ap'> = {
+        'Regular': 'regular',
+        'Challenging': 'honors',
+        'Advanced': 'ap'
+      };
+      
+      const mathProblemDifficulty = difficultyMap[difficulty];
+      
+      return generateMathProblem(subject, topic, mathProblemDifficulty);
     } catch (error) {
+      console.error('Error generating math problem:', error);
       return { comingSoon: true };
     }
   }

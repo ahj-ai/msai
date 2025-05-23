@@ -37,14 +37,14 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
   const accuracy = totalQuestions > 0 ? ((correctAnswers / totalQuestions) * 100).toFixed(1) : "0.0"
 
   return (
-    <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-white/10 shadow-2xl rounded-xl overflow-hidden border border-purple-500/20">
-      <CardHeader className="bg-gradient-to-r from-indigo-900 to-purple-900 text-white p-6">
+    <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-white shadow-lg rounded-xl overflow-hidden border border-indigo-100">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
         <CardTitle className="text-4xl font-bold text-center tracking-wider">GAME OVER</CardTitle>
-        <div className="text-center opacity-90 mt-2 text-purple-200">
+        <div className="text-center opacity-90 mt-2 text-white">
           {gameMode === "timed" ? "Mindathlon Complete!" : "Mindurance Challenge Complete!"}
         </div>
       </CardHeader>
-      <CardContent className="p-8 bg-gradient-to-b from-gray-900/95 to-gray-900/90">
+      <CardContent className="p-8 bg-white">
         <div className="space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -52,8 +52,8 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
             transition={{ duration: 0.5 }}
             className="text-center"
           >
-            <p className="text-3xl font-bold text-purple-200">Final Score</p>
-            <p className="text-6xl font-bold text-purple-400 mt-2">{score}</p>
+            <p className="text-3xl font-bold text-gray-800">Final Score</p>
+            <p className="text-6xl font-bold text-indigo-600 mt-2">{score}</p>
           </motion.div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -61,13 +61,13 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="bg-indigo-900/50 p-4 rounded-lg"
+              className="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100"
             >
-              <div className="flex items-center text-blue-300 mb-2">
+              <div className="flex items-center text-indigo-600 mb-2">
                 <Clock className="w-5 h-5 mr-2" />
                 <span>Total Time</span>
               </div>
-              <p className="text-2xl font-bold text-blue-200">{formatTime(totalTime)}</p>
+              <p className="text-2xl font-bold text-gray-800">{formatTime(totalTime)}</p>
             </motion.div>
 
             <motion.div
@@ -80,7 +80,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
                 <Hash className="w-5 h-5 mr-2" />
                 <span>Problems</span>
               </div>
-              <p className="text-2xl font-bold text-green-200">{totalQuestions}</p>
+              <p className="text-2xl font-bold text-gray-800">{totalQuestions}</p>
             </motion.div>
 
             <motion.div
@@ -93,59 +93,59 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
                 <CheckCircle className="w-5 h-5 mr-2" />
                 <span>Correct</span>
               </div>
-              <p className="text-2xl font-bold text-green-200">{correctAnswers}</p>
+              <p className="text-2xl font-bold text-gray-800">{correctAnswers}</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="bg-indigo-900/50 p-4 rounded-lg"
+              className="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100"
             >
-              <div className="flex items-center text-red-300 mb-2">
+              <div className="flex items-center text-red-500 mb-2">
                 <XCircle className="w-5 h-5 mr-2" />
                 <span>Incorrect</span>
               </div>
-              <p className="text-2xl font-bold text-red-200">{incorrectAnswers}</p>
+              <p className="text-2xl font-bold text-gray-800">{incorrectAnswers}</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="bg-indigo-900/50 p-4 rounded-lg"
+              className="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100"
             >
-              <div className="flex items-center text-purple-300 mb-2">
+              <div className="flex items-center text-purple-600 mb-2">
                 <Trophy className="w-5 h-5 mr-2" />
                 <span>Accuracy</span>
               </div>
-              <p className="text-2xl font-bold text-purple-200">{accuracy}%</p>
+              <p className="text-2xl font-bold text-gray-800">{accuracy}%</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              className="bg-indigo-900/50 p-4 rounded-lg"
+              className="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100"
             >
-              <div className="flex items-center text-yellow-300 mb-2">
+              <div className="flex items-center text-amber-600 mb-2">
                 <Zap className="w-5 h-5 mr-2" />
                 <span>Avg Response</span>
               </div>
-              <p className="text-2xl font-bold text-yellow-200">{averageResponseTime.toFixed(2)}s</p>
+              <p className="text-2xl font-bold text-gray-800">{averageResponseTime.toFixed(2)}s</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.7 }}
-              className="col-span-2 bg-indigo-900/50 p-4 rounded-lg"
+              className="col-span-2 bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100"
             >
-              <div className="flex items-center text-purple-300 mb-2">
+              <div className="flex items-center text-purple-600 mb-2">
                 <Zap className="w-5 h-5 mr-2" />
                 <span>Max Streak</span>
               </div>
-              <p className="text-2xl font-bold text-purple-200">{maxStreak}</p>
+              <p className="text-2xl font-bold text-gray-800">{maxStreak}</p>
             </motion.div>
           </div>
 

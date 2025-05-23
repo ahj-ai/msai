@@ -13,6 +13,17 @@ function generateNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+// Choose a random element from an array
+function randomChoice<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+// Round to a specific number of decimal places
+function roundTo(num: number, places: number): number {
+  const factor = Math.pow(10, places)
+  return Math.round(num * factor) / factor
+}
+
 export function generateProblem(topic: string, difficulty: Difficulty): ProblemType {
   switch (topic) {
     case "addition":
@@ -29,10 +40,33 @@ export function generateProblem(topic: string, difficulty: Difficulty): ProblemT
       return generateSquareRootProblem(difficulty)
     case "unitCircle":
       return generateUnitCircleProblem(difficulty)
+    case "mixed":
+      return generateMixedOperationProblem(difficulty)
+    case "algebra":
+      return generateAlgebraProblem(difficulty)
+    case "exponents":
+      return generateExponentProblem(difficulty)
+    case "logarithms":
+      return generateLogarithmProblem(difficulty)
+    case "fractions":
+      return generateFractionProblem(difficulty)
+    case "percentages":
+      return generatePercentageProblem(difficulty)
+    case "sequences":
+      return generateSequenceProblem(difficulty)
     case "surprise":
     default:
-      const topics = ["addition", "subtraction", "multiplication", "division", "square", "squareRoot", "unitCircle"]
-      const randomTopic = topics[Math.floor(Math.random() * topics.length)]
+      // Add all new topics to the random pool
+      const topics = [
+        "addition", "subtraction", "multiplication", "division", 
+        "square", "squareRoot", "unitCircle", "mixed", "algebra", 
+        "exponents", "fractions", "percentages", "sequences"
+      ]
+      // For 🧠 difficulty, exclude more complex topics
+      const availableTopics = difficulty === "🧠" 
+        ? topics.filter(t => !["logarithms", "sequences", "algebra"].includes(t))
+        : topics
+      const randomTopic = randomChoice(availableTopics)
       return generateProblem(randomTopic, difficulty)
   }
 }
@@ -96,17 +130,21 @@ function generateSquareRootProblem(difficulty: Difficulty): ProblemType {
 }
 
 function generateUnitCircleProblem(difficulty: Difficulty): ProblemType {
+  // Include common angles from the unit circle at all difficulty levels
+  // These correspond to π/6, π/4, π/3, π/2, etc.
   const commonAngles = {
-    "🧠": [0, 90, 180, 270, 360],
-    "🧠🧠": [0, 30, 45, 60, 90, 120, 135, 150, 180],
+    "🧠": [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330, 360],
+    "🧠🧠": [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330, 360],
     "🧠🧠🧠": [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330, 360],
   }
 
   const angles = commonAngles[difficulty]
-  const angle = angles[Math.floor(Math.random() * angles.length)]
+  const angle = randomChoice(angles)
 
   const functions = ["sin", "cos", "tan"]
-  const func = functions[Math.floor(Math.random() * (angle % 90 === 0 ? functions.length : 2))]
+  // Only use tangent if the angle isn't a multiple of 90° (avoiding undefined tan values)
+  const availableFunctions = angle % 90 === 0 ? functions.slice(0, 2) : functions
+  const func = randomChoice(availableFunctions)
 
   function angleToLatex(degrees: number): string {
     if (degrees === 0) return "0"
@@ -124,7 +162,7 @@ function generateUnitCircleProblem(difficulty: Difficulty): ProblemType {
     return `\\frac{${numerator}\\pi}{${denominator}}`
   }
 
-  let answer: number
+  let answer = 0
   const radians = degreesToRadians(angle)
 
   switch (func) {
@@ -142,6 +180,409 @@ function generateUnitCircleProblem(difficulty: Difficulty): ProblemType {
   return {
     question: `\\${func}(${angleToLatex(angle)})`,
     answer: answer,
+  }
+}
+
+function generateMixedOperationProblem(difficulty: Difficulty): ProblemType {
+  let a, b, c, operation1, operation2, question, answer
+  
+  const maxValues = {
+    "🧠": 10,
+    "🧠🧠": 20,
+    "🧠🧠🧠": 50
+  }
+  
+  const max = maxValues[difficulty]
+  const operations = ['+', '-', '×', '÷']
+  
+  // Ensure division results in whole numbers
+  if (difficulty === "🧠") {
+    // Simple 2-operation problem for easier difficulty
+    a = generateNumber(2, max)
+    b = generateNumber(2, max)
+    
+    operation1 = randomChoice(operations.slice(0, 2)) // Only + and -
+    
+    question = `${a} ${operation1} ${b}`
+    answer = operation1 === '+' ? a + b : a - b
+  } else {
+    // More complex problems for medium and hard difficulties
+    a = generateNumber(2, max)
+    b = generateNumber(2, max)
+    c = generateNumber(2, max)
+    
+    // Choose operations based on difficulty
+    if (difficulty === "🧠🧠") {
+      operation1 = randomChoice(operations)
+      operation2 = randomChoice(operations.slice(0, 2)) // Second operation is + or -
+    } else {
+      operation1 = randomChoice(operations)
+      operation2 = randomChoice(operations)
+    }
+    
+    // Build PEMDAS-aware expression
+    if (['×', '÷'].includes(operation1)) {
+      // First operation has precedence
+      let firstResult
+      if (operation1 === '×') {
+        firstResult = a * b
+      } else {
+        // Ensure division results in whole numbers
+        b = generateNumber(1, 10)
+        a = b * generateNumber(1, 10)
+        firstResult = a / b
+      }
+      
+      question = `(${a} ${operation1} ${b}) ${operation2} ${c}`
+      
+      if (operation2 === '+') answer = firstResult + c
+      else if (operation2 === '-') answer = firstResult - c
+      else if (operation2 === '×') answer = firstResult * c
+      else {
+        // Ensure division results in whole numbers
+        c = generateNumber(1, 5)
+        answer = firstResult / c
+        question = `(${a} ${operation1} ${b}) ${operation2} ${c}`
+      }
+    } else {
+      // Second operation has precedence if it's × or ÷
+      if (['×', '÷'].includes(operation2)) {
+        let secondResult
+        if (operation2 === '×') {
+          secondResult = b * c
+        } else {
+          // Ensure division results in whole numbers
+          c = generateNumber(1, 10)
+          b = c * generateNumber(1, 10)
+          secondResult = b / c
+        }
+        
+        question = `${a} ${operation1} (${b} ${operation2} ${c})`
+        
+        if (operation1 === '+') answer = a + secondResult
+        else answer = a - secondResult
+      } else {
+        // Both operations are + or -
+        question = `${a} ${operation1} ${b} ${operation2} ${c}`
+        
+        if (operation1 === '+' && operation2 === '+') answer = a + b + c
+        else if (operation1 === '+' && operation2 === '-') answer = a + b - c
+        else if (operation1 === '-' && operation2 === '+') answer = a - b + c
+        else answer = a - b - c
+      }
+    }
+  }
+  
+  return {
+    question: `${question} = ?`,
+    answer: answer
+  }
+}
+
+function generateAlgebraProblem(difficulty: Difficulty): ProblemType {
+  // Simple equation solving: ax + b = c
+  const maxValues = {
+    "🧠": 5,
+    "🧠🧠": 12,
+    "🧠🧠🧠": 25
+  }
+  
+  const max = maxValues[difficulty]
+  let a, b, c, x, question, answer
+  
+  if (difficulty === "🧠") {
+    // Simple x + b = c or ax = c
+    const problemType = Math.random() > 0.5 ? 'addition' : 'multiplication'
+    
+    if (problemType === 'addition') {
+      x = generateNumber(1, max)
+      b = generateNumber(1, max)
+      c = x + b
+      question = `x + ${b} = ${c}`
+      answer = x
+    } else {
+      x = generateNumber(1, max)
+      a = generateNumber(2, 5)
+      c = a * x
+      question = `${a}x = ${c}`
+      answer = x
+    }
+  } else if (difficulty === "🧠🧠") {
+    // ax + b = c
+    x = generateNumber(1, max)
+    a = generateNumber(2, 6)
+    b = generateNumber(1, max)
+    c = a * x + b
+    question = `${a}x + ${b} = ${c}`
+    answer = x
+  } else {
+    // ax + b = cx + d
+    x = generateNumber(1, max)
+    a = generateNumber(2, 8)
+    b = generateNumber(1, max)
+    c = generateNumber(1, a - 1) // Ensure c < a for positive solution
+    const d = a * x + b - c * x
+    question = `${a}x + ${b} = ${c}x + ${d}`
+    answer = x
+  }
+  
+  return {
+    question: `Find x: ${question}`,
+    answer: answer
+  }
+}
+
+function generateExponentProblem(difficulty: Difficulty): ProblemType {
+  const maxBase = {
+    "🧠": 5,
+    "🧠🧠": 10,
+    "🧠🧠🧠": 20
+  }[difficulty]
+  
+  const maxExponent = {
+    "🧠": 2,
+    "🧠🧠": 3,
+    "🧠🧠🧠": 4
+  }[difficulty]
+  
+  const base = generateNumber(2, maxBase)
+  const exponent = generateNumber(2, maxExponent)
+  
+  return {
+    question: `${base}^{${exponent}} = ?`,
+    answer: Math.pow(base, exponent)
+  }
+}
+
+function generateLogarithmProblem(difficulty: Difficulty): ProblemType {
+  // Generate log problems where the answers are whole numbers
+  // log_a(b) = c means a^c = b
+  
+  const maxBase = {
+    "🧠": 3,
+    "🧠🧠": 5,
+    "🧠🧠🧠": 10
+  }[difficulty]
+  
+  const maxExponent = {
+    "🧠": 3,
+    "🧠🧠": 4,
+    "🧠🧠🧠": 5
+  }[difficulty]
+  
+  const base = generateNumber(2, maxBase)
+  const exponent = generateNumber(2, maxExponent)
+  const result = Math.pow(base, exponent)
+  
+  // Create the problem log_base(result) = ?
+  return {
+    question: `\\log_{${base}}(${result}) = ?`,
+    answer: exponent
+  }
+}
+
+function generateFractionProblem(difficulty: Difficulty): ProblemType {
+  const operations = ['+', '-', '×', '÷']
+  let operation
+  
+  if (difficulty === "🧠") {
+    operation = randomChoice(operations.slice(0, 2)) // Only + and - for easy
+  } else {
+    operation = randomChoice(operations)
+  }
+  
+  // Generate fractions with reasonable denominators
+  const maxDenominator = {
+    "🧠": 6,
+    "🧠🧠": 12,
+    "🧠🧠🧠": 20
+  }[difficulty]
+  
+  const num1 = generateNumber(1, maxDenominator - 1)
+  const den1 = generateNumber(num1 + 1, maxDenominator) // Ensure proper fraction
+  
+  const num2 = generateNumber(1, maxDenominator - 1)
+  const den2 = generateNumber(num2 + 1, maxDenominator) // Ensure proper fraction
+  
+  let answer: number
+  
+  // Calculate the result based on the operation
+  switch (operation) {
+    case '+':
+      answer = (num1 * den2 + num2 * den1) / (den1 * den2)
+      break
+    case '-':
+      answer = (num1 * den2 - num2 * den1) / (den1 * den2)
+      break
+    case '×':
+      answer = (num1 * num2) / (den1 * den2)
+      break
+    case '÷':
+      answer = (num1 * den2) / (den1 * num2)
+      break
+    default:
+      answer = 0
+  }
+  
+  // Round to 2 decimal places for simplicity
+  answer = roundTo(answer, 2)
+  
+  return {
+    question: `\\frac{${num1}}{${den1}} ${operation} \\frac{${num2}}{${den2}} = ?`,
+    answer: answer
+  }
+}
+
+function generatePercentageProblem(difficulty: Difficulty): ProblemType {
+  const problemTypes = ['find_percentage', 'find_value', 'increase', 'decrease']
+  let type
+  
+  if (difficulty === "🧠") {
+    type = randomChoice(problemTypes.slice(0, 2)) // Simpler problems for easy
+  } else {
+    type = randomChoice(problemTypes)
+  }
+  
+  const maxValue = {
+    "🧠": 100,
+    "🧠🧠": 500,
+    "🧠🧠🧠": 1000
+  }[difficulty]
+  
+  // Generate percentages that make sense
+  const percentOptions = {
+    "🧠": [5, 10, 20, 25, 50, 75, 100],
+    "🧠🧠": [5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 80, 90, 100],
+    "🧠🧠🧠": [5, 10, 15, 20, 25, 30, 33.33, 40, 50, 60, 66.67, 75, 80, 90, 100, 120, 150, 200]
+  }[difficulty]
+  
+  const percent = randomChoice(percentOptions)
+  let value, question, answer
+  
+  switch (type) {
+    case 'find_percentage':
+      value = generateNumber(10, maxValue)
+      question = `What is ${percent}% of ${value}?`
+      answer = (percent / 100) * value
+      break
+    case 'find_value':
+      answer = generateNumber(10, maxValue)
+      value = (answer * 100) / percent
+      question = `${percent}% of what number is ${answer}?`
+      break
+    case 'increase':
+      value = generateNumber(10, maxValue)
+      question = `${value} increased by ${percent}% is what number?`
+      answer = value + (percent / 100) * value
+      break
+    case 'decrease':
+      value = generateNumber(10, maxValue)
+      question = `${value} decreased by ${percent}% is what number?`
+      answer = value - (percent / 100) * value
+      break
+    default:
+      value = generateNumber(10, maxValue)
+      question = `What is ${percent}% of ${value}?`
+      answer = (percent / 100) * value
+  }
+  
+  // Round to 2 decimal places
+  answer = roundTo(answer, 2)
+  
+  return { question, answer }
+}
+
+function generateSequenceProblem(difficulty: Difficulty): ProblemType {
+  const sequenceTypes = [
+    'arithmetic', // a, a+d, a+2d, a+3d, ...
+    'geometric',  // a, ar, ar², ar³, ...
+    'square',     // 1, 4, 9, 16, 25, ...
+    'cube',       // 1, 8, 27, 64, 125, ...
+    'fibonacci',  // 1, 1, 2, 3, 5, 8, 13, ...
+    'triangular'  // 1, 3, 6, 10, 15, ...
+  ]
+  
+  // For easier difficulty, use simpler sequences
+  let availableTypes
+  if (difficulty === "🧠") {
+    availableTypes = sequenceTypes.slice(0, 2) // Only arithmetic and geometric
+  } else if (difficulty === "🧠🧠") {
+    availableTypes = sequenceTypes.slice(0, 4) // Add square and cube
+  } else {
+    availableTypes = sequenceTypes // All types
+  }
+  
+  const sequenceType = randomChoice(availableTypes)
+  let sequence: number[] = []
+  let answer: number
+  
+  // Generate the sequence based on type
+  switch (sequenceType) {
+    case 'arithmetic':
+      const a = generateNumber(1, 10)
+      const d = generateNumber(1, 5) * (Math.random() > 0.5 ? 1 : -1) // Allow negative common difference
+      for (let i = 0; i < 5; i++) {
+        sequence.push(a + i * d)
+      }
+      answer = a + 5 * d // 6th term
+      break
+    
+    case 'geometric':
+      const firstTerm = generateNumber(1, 5)
+      const ratio = generateNumber(2, 3)
+      let term = firstTerm
+      for (let i = 0; i < 5; i++) {
+        sequence.push(term)
+        term *= ratio
+      }
+      answer = sequence[4] * ratio // 6th term
+      break
+    
+    case 'square':
+      for (let i = 1; i <= 5; i++) {
+        sequence.push(i * i)
+      }
+      answer = 6 * 6 // 6th term
+      break
+    
+    case 'cube':
+      for (let i = 1; i <= 5; i++) {
+        sequence.push(i * i * i)
+      }
+      answer = 6 * 6 * 6 // 6th term
+      break
+    
+    case 'fibonacci':
+      sequence = [1, 1]
+      for (let i = 2; i < 6; i++) {
+        sequence.push(sequence[i-1] + sequence[i-2])
+      }
+      answer = sequence[4] + sequence[5] // 7th term
+      break
+    
+    case 'triangular':
+      for (let i = 1; i <= 5; i++) {
+        sequence.push((i * (i + 1)) / 2)
+      }
+      answer = (6 * 7) / 2 // 6th term
+      break
+    
+    default:
+      // Fallback to arithmetic sequence
+      const start = generateNumber(1, 10)
+      const diff = generateNumber(1, 5)
+      for (let i = 0; i < 5; i++) {
+        sequence.push(start + i * diff)
+      }
+      answer = start + 5 * diff // 6th term
+  }
+  
+  // Format the sequence as a string
+  const sequenceStr = sequence.join(', ')
+  
+  return {
+    question: `Find the next number in the sequence: ${sequenceStr}, ?`,
+    answer: answer
   }
 }
 

@@ -48,15 +48,15 @@ const SetupScreen = ({
   const problemModeTimes = [10, 5, 2.5] // in minutes
 
   return (
-    <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-white/10 shadow-2xl rounded-xl overflow-hidden border border-purple-500/20">
-      <CardHeader className="bg-gradient-to-r from-indigo-900 to-purple-900 text-white p-6">
+    <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-white shadow-lg rounded-xl overflow-hidden border border-indigo-100">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
         <CardTitle className="text-4xl font-bold text-center tracking-wider">BRAINIAC</CardTitle>
-        <div className="text-center opacity-90 mt-2 text-purple-200">Power up your mental math</div>
+        <div className="text-center opacity-90 mt-2 text-white">Power up your mental math</div>
       </CardHeader>
-      <CardContent className="p-8 bg-gradient-to-b from-gray-900/95 to-gray-900/90">
+      <CardContent className="p-8 bg-white">
         <div className="space-y-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-purple-200">Topic Selection</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Topic Selection</h3>
             <div className="grid grid-cols-2 gap-4">
               {topics.map((t) => {
                 const Icon = t.icon
@@ -68,7 +68,7 @@ const SetupScreen = ({
                       className={`w-full h-16 relative group ${
                         topic === t.value
                           ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg border-0"
-                          : "bg-gray-900/50 hover:bg-gray-800/50 text-gray-300 border border-purple-500/30"
+                          : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-indigo-100"
                       }`}
                     >
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -83,7 +83,7 @@ const SetupScreen = ({
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-purple-200">Neural Power</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Neural Power</h3>
             <div className="space-y-2">
               <Slider
                 value={[difficultyEmojis.indexOf(difficulty) + 1]}
@@ -93,7 +93,7 @@ const SetupScreen = ({
                 step={1}
                 className="py-4"
               />
-              <div className="flex justify-between text-sm text-purple-300">
+              <div className="flex justify-between text-sm text-gray-600">
                 {difficultyLabels.map((label, i) => (
                   <div key={label} className="text-center">
                     <div className="text-xl mb-1">{difficultyEmojis[i]}</div>
@@ -105,7 +105,7 @@ const SetupScreen = ({
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-purple-200">Game Mode</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Game Mode</h3>
             <div className="grid grid-cols-1 gap-4">
               {modes.map((m) => {
                 const Icon = m.icon
@@ -117,7 +117,7 @@ const SetupScreen = ({
                       className={`w-full h-20 relative group ${
                         gameMode === m.value
                           ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg border-0"
-                          : "bg-gray-900/50 hover:bg-gray-800/50 text-gray-300 border border-purple-500/30"
+                          : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-indigo-100"
                       }`}
                     >
                       <div className="flex flex-col items-center justify-center space-y-1">
@@ -136,7 +136,7 @@ const SetupScreen = ({
 
           {gameMode === "timed" && (
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-purple-200">Synapse Speed</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Synapse Speed</h3>
               <Slider
                 value={[timerSetting]}
                 onValueChange={(value) => setTimerSetting(value[0])}
@@ -153,8 +153,8 @@ const SetupScreen = ({
 
           {gameMode === "problems" && (
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-purple-200">Time Limit</h3>
-              <p className="text-center text-purple-300 mt-2">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Time Limit</h3>
+              <p className="text-center text-gray-600 mt-2">
                 {problemModeTimes[difficultyEmojis.indexOf(difficulty)]} minutes
               </p>
             </div>
@@ -164,7 +164,7 @@ const SetupScreen = ({
         <motion.div className="mt-8" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
             onClick={() => onStartGame(difficulty, timerSetting * 30, gameMode)}
-            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xl font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-500 hover:to-purple-500 relative overflow-hidden group"
+            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xl font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-purple-500 relative overflow-hidden group"
           >
             <span className="relative z-10">ACTIVATE NEURONS</span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/30 to-purple-400/0 group-hover:translate-x-full duration-1000 transition-transform"></div>
