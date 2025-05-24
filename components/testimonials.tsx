@@ -3,6 +3,14 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
+interface TestimonialCardProps {
+  name: string;
+  role: string;
+  content: string;
+  avatar: string;
+  index: number;
+}
+
 export const Testimonials = () => {
   const testimonials = [
     {
@@ -46,7 +54,7 @@ export const Testimonials = () => {
   )
 }
 
-const TestimonialCard = ({ name, role, content, avatar, index }) => (
+const TestimonialCard = ({ name, role, content, avatar, index }: TestimonialCardProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
