@@ -1,26 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase client configuration - use environment variables for security
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  throw new Error('NEXT_PUBLIC_SUPABASE_URL is not defined');
-}
+// Client-side Supabase client (safe for browser)
+export const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined');
-}
+// Server-side Supabase client (for API routes, webhooks, etc.)
+export const supabaseServer = (() => {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url) throw new Error('SUPABASE_URL is not defined');
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not defined');
+  return createClient(url, key);
+})();
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Create a singleton Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Function to record user login
+// Function to record user login (always use server client)
 export async function recordUserLogin(userId: string, userEmail?: string, metadata: any = {}) {
   console.log('Recording user login for:', { userId, userEmail });
-  
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('user_logins')
       .insert([
         {
@@ -31,12 +31,10 @@ export async function recordUserLogin(userId: string, userEmail?: string, metada
         }
       ])
       .select();
-      
     if (error) {
       console.error('Error recording user login:', error);
       return { success: false, error };
     }
-    
     console.log('User login recorded successfully:', data);
     return { success: true, data };
   } catch (error) {
@@ -44,3 +42,4 @@ export async function recordUserLogin(userId: string, userEmail?: string, metada
     return { success: false, error };
   }
 }
+
