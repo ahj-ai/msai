@@ -11,8 +11,8 @@ function getSupabaseClient() {
   
   // Get environment variables at runtime
   // Support both local development (NEXT_PUBLIC_ prefix) and Vercel production (no prefix)
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
   
   // Validate environment variables
   if (!supabaseUrl || !supabaseAnonKey) {
