@@ -1,7 +1,8 @@
 "use server"
 
-import { generateMathProblem } from "@/utils/generate-math-problem"
+import { supabase } from "@/lib/supabase"
 import { Difficulty, Problem, ProblemGenerationParams } from "@/types/math"
+import { getFilteredProblems, MathProblemRecord, mapDbProblemToProblem } from "@/lib/problems"
 
 type GenerateProblemResult = Problem | { comingSoon: boolean }
 
@@ -11,60 +12,39 @@ export async function generateProblem({
   difficulty,
   wordProblems,
 }: ProblemGenerationParams): Promise<GenerateProblemResult> {
-  // Supported topics for native generation
-  const nativeMap: Record<string, string[]> = {
-    "algebra-1": [
-      "Linear Equations",
-      "Systems of Equations",
-      "Factoring Quadratics",
-      "Inequalities",
-      "Functions"
-    ],
-    "geometry": [
-      "Angles",
-      "Triangles",
-      "Circles",
-      "Area/Volume"
-    ],
-    "trigonometry": [
-      "Unit Circle",
-      "Trig Identities",
-      "Solving Triangles"
-    ],
-    "pre-calculus": [
-      "Limits",
-      "Sequences and Series"
-    ],
-    "calculus": [
-      "Derivatives (basic)",
-      "Integrals (basic)",
-      "Limits"
-    ]
-  };
+  try {
+    // First try to find a matching problem in the database
+    const problems = await getFilteredProblems({
+      subject,
+      topic,
+      difficulty,
+      limit: 1
+    });
 
-  // If topic is supported natively and not a word problem, generate natively
-  if (
-    nativeMap[subject]?.includes(topic) &&
-    !wordProblems
-  ) {
-    try {
-      // Map our UI difficulty levels to the math problem generator's difficulty levels
-      const difficultyMap: Record<Difficulty, 'regular' | 'honors' | 'ap'> = {
-        'Regular': 'regular',
-        'Challenging': 'honors',
-        'Advanced': 'ap'
-      };
-      
-      const mathProblemDifficulty = difficultyMap[difficulty];
-      
-      return generateMathProblem(subject, topic, mathProblemDifficulty);
-    } catch (error) {
-      console.error('Error generating math problem:', error);
-      return { comingSoon: true };
+    if (problems.length > 0) {
+      // Return a random problem from the filtered results
+      const randomIndex = Math.floor(Math.random() * problems.length);
+      return problems[randomIndex];
     }
-  }
 
-  // All other topics (including word problems) require AI (coming soon)
-  return { comingSoon: true };
+    // If no problems found, check if we have any problems for this subject/topic without difficulty filter
+    const fallbackProblems = await getFilteredProblems({
+      subject,
+      topic,
+      limit: 1
+    });
+
+    if (fallbackProblems.length > 0) {
+      // Return a random problem from the fallback results
+      const randomIndex = Math.floor(Math.random() * fallbackProblems.length);
+      return fallbackProblems[randomIndex];
+    }
+
+    // If still no problems found, return coming soon
+    return { comingSoon: true };
+  } catch (error) {
+    console.error('Error generating problem:', error);
+    return { comingSoon: true };
+  }
 }
 
