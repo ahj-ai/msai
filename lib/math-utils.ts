@@ -10,21 +10,22 @@ export function generateProblem(difficulty: Difficulty): MathProblem {
   
   // Update based on difficulty
   switch (difficulty) {
-    case 'easy':
     case 'Regular':
       num1 = Math.floor(Math.random() * 10) + 1
       num2 = Math.floor(Math.random() * 10) + 1
       break
-    case 'medium':
     case 'Challenging':
       num1 = Math.floor(Math.random() * 50) + 1
       num2 = Math.floor(Math.random() * 50) + 1
       break
-    case 'hard':
     case 'Advanced':
       num1 = Math.floor(Math.random() * 100) + 1
       num2 = Math.floor(Math.random() * 100) + 1
       break
+    default:
+      // This should never happen if the Difficulty type is used correctly
+      const _exhaustiveCheck: never = difficulty
+      throw new Error(`Unhandled difficulty: ${difficulty}`)
   }
 
   let answer: number
