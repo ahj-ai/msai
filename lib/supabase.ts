@@ -1,9 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase client configuration - explicitly use MathStackAI2 project
-// Hardcoding the URL and key to ensure we're using the correct project
-const supabaseUrl = 'https://uhyamvvoehtbtbqikujd.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoeWFtdnZvZWh0YnRicWlrdWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0OTk1NDYsImV4cCI6MjA2MzA3NTU0Nn0.oxdvNEUft5QTu4unGP4va-UsCNqDx4yR14myJRxJ-qY';
+// Supabase client configuration - use environment variables for security
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  throw new Error('NEXT_PUBLIC_SUPABASE_URL is not defined');
+}
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined');
+}
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // Create a singleton Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
