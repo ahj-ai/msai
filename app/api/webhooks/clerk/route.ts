@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { recordUserLogin, supabaseServer } from '@/lib/supabase';
+import { recordUserLogin } from '@/lib/supabase';
 import { initializeUserProgress } from '../../../../lib/user-progress';
 
 export async function POST(req: Request) {
