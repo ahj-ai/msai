@@ -1,44 +1,50 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   swcMinify: true,
+  compiler: {
+    // Enable styled-components support
+    styledComponents: true,
+  },
+  // Ignore ESLint during builds (if using external CI/CD)
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  // Environment variables for build time
   env: {
-    // Expose these environment variables to the client-side
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-  // Required for webpack to include environment variables in the build
-  webpack: (config) => {
-    // Exclude node_modules from being processed by babel
-    config.module.rules.push({
-      test: /\.m?js$/,
-      exclude: /node_modules/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env'],
-        },
-      },
-    });
+  // Webpack configuration
+  webpack: (config, { isServer }) => {
+    // Fixes npm packages that depend on `fs` module
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
     return config;
   },
-  // Enable server-side environment variables
+  // Server-side environment variables
   serverRuntimeConfig: {
-    // Will only be available on the server side
     SUPABASE_URL: process.env.SUPABASE_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
   },
-  // Environment variables that will be available on both server and client
+  // Client-side environment variables
   publicRuntimeConfig: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-}
+  // Experimental features
+  experimental: {
+    // Required for Supabase server components
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
+  },
+  // Configure page extensions
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

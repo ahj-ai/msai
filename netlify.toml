@@ -1,14 +1,45 @@
 [build]
-  command = "next build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
+  NEXT_USE_NETLIFY_EDGE = "false"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@clerk/nextjs"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    enableStaticFile404 = true
+    enableStaticFile404Paths = ["/_next/static/*", "/static/*"]
+
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+[dev]
+  framework = "next"
+  targetPort = 3000
+  command = "npm run dev"
+  publish = ".next"
+  port = 3000
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.clerk.accounts.dev;"

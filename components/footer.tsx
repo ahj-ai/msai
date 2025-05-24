@@ -9,11 +9,6 @@ export function Footer() {
           <h3 className="font-bold mb-4">Company</h3>
           <ul className="space-y-2">
             <li>
-              <Link href="/about" className="hover:text-purple-300 transition-colors">
-                About Us
-              </Link>
-            </li>
-            <li>
               <Link href="/why-mathstack-ai" className="hover:text-purple-300 transition-colors">
                 Why MathStack AI?
               </Link>
