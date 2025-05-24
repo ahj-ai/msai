@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { motion } from "framer-motion"
-import { Zap, Star, Timer, Brain, Trophy, Clock, Hash, Square, Circle } from "lucide-react"
-import { SetupScreenProps } from "@/types/game"
+import { Zap, Star, Timer, Brain, Trophy, Clock, Hash, Square, Circle, type LucideIcon } from "lucide-react"
+import { type SetupScreenProps, type Topic, type GameMode, type DifficultyLevel } from "@/types/game"
 
 const SetupScreen = ({
   onStartGame,
@@ -17,7 +17,7 @@ const SetupScreen = ({
   gameMode,
   setGameMode,
 }: SetupScreenProps) => {
-  const topics = [
+  const topics: { value: Topic; label: string; icon: LucideIcon }[] = [
     { value: "surprise", label: "Random Mix", icon: Brain },
     { value: "addition", label: "Sum Pro", icon: Trophy },
     { value: "subtraction", label: "Minus Master", icon: Star },
@@ -28,7 +28,7 @@ const SetupScreen = ({
     { value: "unitCircle", label: "Unit Circle Sage", icon: Circle },
   ]
 
-  const modes = [
+  const modes: { value: GameMode; label: string; icon: LucideIcon; description: string }[] = [
     {
       value: "timed",
       label: "Telekespeedsis",
@@ -43,7 +43,7 @@ const SetupScreen = ({
     },
   ]
 
-  const difficultyEmojis = ["🧠", "🧠🧠", "🧠🧠🧠"]
+  const difficultyEmojis: DifficultyLevel[] = ["🧠", "🧠🧠", "🧠🧠🧠"]
   const difficultyLabels = ["Neuron", "Synapse", "Cortex"]
   const problemModeTimes = [10, 5, 2.5] // in minutes
 
