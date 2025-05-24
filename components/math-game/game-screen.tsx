@@ -3,17 +3,23 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { generateProblem } from '@/lib/math-utils'
-import type { Difficulty } from '../math-game'
+import type { DifficultyLevel } from '@/types/game'
 
 interface GameScreenProps {
-  difficulty: Difficulty
+  difficulty: DifficultyLevel
   onGameOver: (score: number) => void
 }
+
+const difficultyMap: Record<DifficultyLevel, "Regular" | "Challenging" | "Advanced"> = {
+  "🧠": "Regular",
+  "🧠🧠": "Challenging",
+  "🧠🧠🧠": "Advanced"
+};
 
 export function GameScreen({ difficulty, onGameOver }: GameScreenProps) {
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(60)
-  const [problem, setProblem] = useState(generateProblem(difficulty))
+  const [problem, setProblem] = useState(generateProblem(difficultyMap[difficulty]))
   const [answer, setAnswer] = useState('')
 
   useEffect(() => {
@@ -33,7 +39,7 @@ export function GameScreen({ difficulty, onGameOver }: GameScreenProps) {
     e.preventDefault()
     if (Number(answer) === problem.answer) {
       setScore(prev => prev + 1)
-      setProblem(generateProblem(difficulty))
+      setProblem(generateProblem(difficultyMap[difficulty]))
       setAnswer('')
     }
   }

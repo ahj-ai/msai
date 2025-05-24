@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Flask, Sparkles } from 'lucide-react'
+import { Beaker, Sparkles } from 'lucide-react'
 
 export function ChemicalReactionLoader() {
   return (
@@ -21,7 +21,7 @@ export function ChemicalReactionLoader() {
           }}
           className="relative"
         >
-          <Flask className="w-16 h-16 text-blue-400" />
+          <Beaker className="w-16 h-16 text-blue-400" />
           <motion.div
             initial={{ opacity: 0.5 }}
             animate={{

@@ -70,7 +70,16 @@ export function Dashboard() {
   )
 }
 
-function QuickAccessCard({ title, icon: Icon, description, linkHref, linkText, isPremiumLocked = false }) {
+interface QuickAccessCardProps {
+  title: string;
+  icon: React.ElementType;
+  description: string;
+  linkHref: string;
+  linkText: string;
+  isPremiumLocked?: boolean;
+}
+
+function QuickAccessCard({ title, icon: Icon, description, linkHref, linkText, isPremiumLocked = false }: QuickAccessCardProps) {
   return (
     <Card className="bg-gray-800/50 border-purple-500/20">
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -90,7 +99,17 @@ function QuickAccessCard({ title, icon: Icon, description, linkHref, linkText, i
   )
 }
 
-function StatisticsCard({ userStats }) {
+interface UserStats {
+  correctProblems: number;
+  totalProblems: number;
+  streak: number;
+}
+
+interface StatisticsCardProps {
+  userStats: UserStats;
+}
+
+function StatisticsCard({ userStats }: StatisticsCardProps) {
   const accuracy = ((userStats.correctProblems / userStats.totalProblems) * 100).toFixed(1)
 
   return (
@@ -135,7 +154,11 @@ function DailyChallenge() {
   )
 }
 
-function Achievements({ userStats }) {
+interface AchievementsProps {
+  userStats: UserStats;
+}
+
+function Achievements({ userStats }: AchievementsProps) {
   const achievements = [
     { name: "Problem Solver", icon: Zap, earned: true },
     { name: "Streak Master", icon: Star, earned: userStats.streak >= 5 },

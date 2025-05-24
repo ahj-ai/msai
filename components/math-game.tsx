@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import dynamic from "next/dynamic"
 import { generateProblem } from "@/utils/generate-problem"
+import type { Topic, GameMode } from "@/types/game"
 import { useSoundEffects } from "@/hooks/use-sound-effects"
 
 const SetupScreen = dynamic(() => import("./setup-screen"), { ssr: false })
@@ -17,13 +18,14 @@ const MathGame = () => {
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(60)
   const [isGameActive, setIsGameActive] = useState(false)
-  const [topic, setTopic] = useState("surprise")
-  const [difficulty, setDifficulty] = useState("🧠")
+  const [topic, setTopic] = useState<Topic>("surprise")
+  type Difficulty = "🧠" | "🧠🧠" | "🧠🧠🧠"
+const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
   const [timerSetting, setTimerSetting] = useState(1)
   const [streak, setStreak] = useState(0)
   const [maxStreak, setMaxStreak] = useState(0)
-  const [lastAnswerTime, setLastAnswerTime] = useState(null)
-  const [questionStartTime, setQuestionStartTime] = useState(null)
+  const [lastAnswerTime, setLastAnswerTime] = useState<number | null>(null)
+  const [questionStartTime, setQuestionStartTime] = useState<number | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isIncorrect, setIsIncorrect] = useState(false)
@@ -33,7 +35,7 @@ const MathGame = () => {
   const [incorrectAnswers, setIncorrectAnswers] = useState(0)
   const [totalTime, setTotalTime] = useState(0)
   const [totalResponseTime, setTotalResponseTime] = useState(0)
-  const [gameMode, setGameMode] = useState("timed")
+  const [gameMode, setGameMode] = useState<GameMode>("timed")
   const [problemsLeft, setProblemsLeft] = useState(100)
 
   const soundEffects = useSoundEffects()
@@ -49,12 +51,13 @@ const MathGame = () => {
   }, [topic, difficulty, gameMode])
 
   const checkAnswer = useCallback(() => {
+    if (questionStartTime === null) return;
     const answerTime = (Date.now() - questionStartTime) / 1000
     setLastAnswerTime(answerTime)
     setTotalResponseTime((prev) => prev + answerTime)
 
     const submittedAnswer = Number.parseFloat(userAnswer)
-    const correctAnswer = Number.parseFloat(problem.answer)
+    const correctAnswer = problem.answer
     const isCorrect = Math.abs(submittedAnswer - correctAnswer) < 0.01
 
     if (isCorrect) {
@@ -131,7 +134,7 @@ const MathGame = () => {
   }, [])
 
   useEffect(() => {
-    let timer
+    let timer: ReturnType<typeof setInterval>
     if (isGameActive && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prev) => {

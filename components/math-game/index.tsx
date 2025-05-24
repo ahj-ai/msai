@@ -22,11 +22,13 @@ export function MathGame() {
   const [score, setScore] = useState(0)
   const sounds = useSoundEffects()
 
-  const handleStartGame = (selectedDifficulty: Difficulty) => {
-    setDifficulty(selectedDifficulty)
-    setGameState('playing')
-    setScore(0)
-    sounds.playCorrect()
+  const handleStartGame = (selectedDifficulty: DifficultyLevel, timer: number, mode: GameMode) => {
+    setDifficulty(selectedDifficulty);
+    setTimerSetting(timer);
+    setGameMode(mode);
+    setGameState('playing');
+    setScore(0);
+    sounds.playCorrect();
   }
 
   const handleGameOver = (finalScore: number) => {

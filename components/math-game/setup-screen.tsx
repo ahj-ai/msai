@@ -22,13 +22,13 @@ const SetupScreen = ({
     <div className="text-center space-y-8">
       <h2 className="text-2xl font-bold">Choose Difficulty</h2>
       <div className="grid grid-cols-3 gap-4">
-        <Button onClick={() => onStartGame('easy')} variant="outline">
+        <Button onClick={() => onStartGame('🧠', timerSetting, gameMode)} variant="outline">
           Easy
         </Button>
-        <Button onClick={() => onStartGame('medium')} variant="outline">
+        <Button onClick={() => onStartGame('🧠🧠', timerSetting, gameMode)} variant="outline">
           Medium
         </Button>
-        <Button onClick={() => onStartGame('hard')} variant="outline">
+        <Button onClick={() => onStartGame('🧠🧠🧠', timerSetting, gameMode)} variant="outline">
           Hard
         </Button>
       </div>

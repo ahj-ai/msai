@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Keyboard, Send, Backspace } from 'lucide-react'
+import { Keyboard, Send, Delete as Backspace } from 'lucide-react'
 
 interface ProblemInputProps {
   onSubmit: (text: string) => void

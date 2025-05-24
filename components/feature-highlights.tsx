@@ -34,7 +34,14 @@ export const FeatureHighlights = () => {
   )
 }
 
-const FeatureCard = ({ icon: Icon, title, description, index }) => (
+interface FeatureCardProps {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  index: number;
+}
+
+const FeatureCard = ({ icon: Icon, title, description, index }: FeatureCardProps) => (
   <motion.div 
     className="bg-gray-800/50 rounded-lg p-6 shadow-lg border border-purple-500/20"
     initial={{ opacity: 0, y: 20 }}

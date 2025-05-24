@@ -2,7 +2,7 @@ import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { recordUserLogin } from '@/lib/supabase';
-import { initializeUserProgress } from '@/lib/user-progress';
+import { initializeUserProgress } from '../../../../lib/user-progress';
 
 export async function POST(req: Request) {
   // Get the webhook signature from the headers
