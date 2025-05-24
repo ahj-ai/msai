@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import {
   ClerkProvider,
   SignInButton,
@@ -14,12 +14,17 @@ import NavBar from '@/components/nav-bar'
 const geistSans = GeistSans
 const geistMono = GeistMono
 
+// Define viewport separately from metadata
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#6C63FF',
+}
+
 export const metadata: Metadata = {
   title: 'MathStack AI - AI-Powered Math Learning Platform',
   description: 'Transform your math learning experience with AI-powered tools and personalized guidance.',
   keywords: ['math', 'AI', 'learning', 'education', 'mathematics', 'tutoring', 'online learning'],
-  themeColor: '#6C63FF',
-  viewport: 'width=device-width, initial-scale=1',
   icons: {
     icon: '/favicon.ico',
   },
