@@ -40,7 +40,9 @@ const subjects = {
       "Basic Operations": [
         "Order of Operations",
         "Fractions",
-        "Decimals"
+        "Decimals",
+        "Decimal Place Value Mastery",
+        "Adding and Subtracting Integers"
       ],
       "Algebra Foundations": [
         "Variables & Expressions",
