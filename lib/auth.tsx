@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { useUser } from "@clerk/nextjs"
 
 interface User {
   id: string
@@ -21,37 +22,37 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  // Use Clerk's useUser hook to get the current authenticated user
+  const { user: clerkUser, isLoaded: clerkIsLoaded } = useUser()
 
+  // Set up user state based on Clerk authentication
   useEffect(() => {
-    // Check if user is logged in (e.g., by checking for a token in localStorage)
-    const token = localStorage.getItem("authToken")
-    if (token) {
-      // In a real application, you would validate the token and fetch user data from your API
-      // For this example, we'll just set some mock user data
+    if (clerkIsLoaded && clerkUser) {
+      // User is authenticated with Clerk
       setUser({
-        id: "1",
-        name: "Alex",
-        email: "alex@example.com",
-        isPremium: token === "premium_token",
+        id: clerkUser.id,
+        name: clerkUser.firstName || clerkUser.username || clerkUser.emailAddresses[0]?.emailAddress.split('@')[0] || 'User',
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        isPremium: false, // Set based on your premium logic
       })
+    } else if (clerkIsLoaded && !clerkUser) {
+      // User is not authenticated
+      setUser(null)
     }
-  }, [])
+  }, [clerkUser, clerkIsLoaded])
 
+  // These functions are now just placeholders since Clerk handles auth
+  // You can use them for additional logic specific to your app
   const login = async (email: string, password: string) => {
-    // Implement your login logic here
-    // For this example, we'll just set a token in localStorage and some mock user data
-    localStorage.setItem("authToken", "user_token")
-    setUser({
-      id: "1",
-      name: "Alex",
-      email: email,
-      isPremium: false,
-    })
+    // Clerk handles actual authentication
+    console.log('Custom login logic would go here if needed')
+    // Actual login is handled by Clerk components
   }
 
   const logout = () => {
-    localStorage.removeItem("authToken")
-    setUser(null)
+    // Clerk handles logout
+    console.log('Custom logout logic would go here if needed')
+    // Actual logout is handled by Clerk components
   }
 
   return <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, logout }}>{children}</AuthContext.Provider>

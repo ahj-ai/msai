@@ -2,6 +2,21 @@ export type GameMode = 'timed' | 'problems'
 export type Topic = 'surprise' | 'addition' | 'subtraction' | 'multiplication' | 'division' | 'square' | 'squareRoot' | 'unitCircle'
 export type DifficultyLevel = '🧠' | '🧠🧠' | '🧠🧠🧠'
 
+/**
+ * Interface for game statistics used for tracking user progress
+ */
+export interface GameStats {
+  score: number
+  totalQuestions: number
+  correctAnswers: number
+  incorrectAnswers: number
+  maxStreak: number
+  averageResponseTime: number
+  totalTime: number
+  gameMode: GameMode
+  difficulty: DifficultyLevel
+}
+
 export interface SetupScreenProps {
   onStartGame: (difficulty: DifficultyLevel, timer: number, mode: GameMode) => void
   topic: Topic

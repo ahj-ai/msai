@@ -1,9 +1,14 @@
 "use client"
+import { useEffect } from "react"
 import type React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { Trophy, Clock, CheckCircle, XCircle, Zap, Hash } from "lucide-react"
+import { useAuth } from "@/lib/auth"
+import { saveUserProgress } from "@/lib/supabase"
+import { toast } from "@/components/ui/use-toast"
+import type { GameStats, GameMode, DifficultyLevel } from "@/types/game"
 
 interface GameOverScreenProps {
   score: number
@@ -14,7 +19,8 @@ interface GameOverScreenProps {
   maxStreak: number
   onRestart: () => void
   averageResponseTime: number
-  gameMode: "timed" | "problems"
+  gameMode: GameMode
+  difficulty?: DifficultyLevel
 }
 
 const GameOverScreen: React.FC<GameOverScreenProps> = ({
@@ -27,7 +33,50 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
   onRestart,
   averageResponseTime,
   gameMode,
+  difficulty = "🧠",
 }) => {
+  const { user, isLoggedIn } = useAuth()
+  
+  // Save user progress to Supabase when game ends
+  useEffect(() => {
+    const saveProgress = async () => {
+      if (isLoggedIn && user) {
+        try {
+          // Prepare game stats for saving
+          const gameStats: GameStats = {
+            score,
+            totalQuestions,
+            correctAnswers,
+            incorrectAnswers,
+            maxStreak,
+            averageResponseTime,
+            totalTime,
+            gameMode,
+            difficulty,
+          }
+
+          // Save the user's progress
+          const result = await saveUserProgress(user.id, gameStats)
+          
+          if (result.success) {
+            console.log('Progress saved successfully')
+            // Optional: Show a success toast
+            toast({
+              title: "Progress Saved",
+              description: "Your game progress has been saved to your dashboard.",
+              variant: "default",
+            })
+          } else {
+            console.error('Failed to save progress:', result.error)
+          }
+        } catch (error) {
+          console.error('Error saving progress:', error)
+        }
+      }
+    }
+    
+    saveProgress()
+  }, [score, totalQuestions, correctAnswers, incorrectAnswers, maxStreak, averageResponseTime, totalTime, gameMode, difficulty, isLoggedIn, user])
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60

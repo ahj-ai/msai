@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Brain, FlaskConical, Home, Menu, X, Trophy, Zap, Lock, LucideIcon } from "lucide-react";
+import { Brain, FlaskConical, Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 
@@ -34,20 +36,79 @@ interface UserStats {
   highScore: number;
   gamesPlayed: number;
   problemsSolved: number;
+  lastPlayed?: string;
+  averageResponseTime?: number;
+  totalTimePlayed?: number;
+  bestStreak?: number;
+  accuracy?: number;
 }
 
 const LoggedInDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-
-  // Mock user data - replace with actual data from your auth provider
-  const user = { name: "Alex" };
-  const userStats = {
+  const [isLoading, setIsLoading] = useState(true);
+  const [userStats, setUserStats] = useState<UserStats>({
     highScore: 0,
     gamesPlayed: 0,
     problemsSolved: 0,
-  };
+  });
+  const [error, setError] = useState<string | null>(null);
+  
+  // Get actual user data from auth context
+  const { user } = useAuth();
 
+  // Fetch user progress data from Supabase
+  useEffect(() => {
+    if (user) {
+      setIsLoading(true);
+      setError(null);
+      
+      const fetchUserProgress = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('user_progress')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (error) {
+            if (error.code === 'PGRST116') { // Record not found
+              console.log('No progress data found for user');
+              // Keep the default values for userStats
+            } else {
+              console.error('Error fetching user progress:', error);
+              setError('Failed to load your progress data');
+            }
+          } else if (data) {
+            // Calculate accuracy if data available
+            const totalAttempts = data.additional_stats?.total_questions_attempted || 0;
+            const accuracy = totalAttempts > 0 
+              ? Math.round((data.additional_stats?.total_correct_answers || 0) / totalAttempts * 100) 
+              : 0;
+              
+            setUserStats({
+              highScore: data.high_score || 0,
+              gamesPlayed: data.games_played || 0,
+              problemsSolved: data.problems_solved || 0,
+              lastPlayed: data.last_played_at,
+              averageResponseTime: data.additional_stats?.last_game?.averageResponseTime,
+              totalTimePlayed: data.additional_stats?.total_time_played,
+              bestStreak: data.additional_stats?.best_streak,
+              accuracy
+            });
+          }
+        } catch (err) {
+          console.error('Failed to fetch user progress:', err);
+          setError('An unexpected error occurred');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchUserProgress();
+    }
+  }, [user]);
+  
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const renderContent = () => {
@@ -220,6 +281,26 @@ const BrainiacDashboard = ({ stats }: { stats: UserStats }) => (
       <StatCard title="Games Played" value={stats.gamesPlayed} />
       <StatCard title="Problems Solved" value={stats.problemsSolved} />
     </div>
+    
+    {stats.lastPlayed && (
+      <div className="mb-8">
+        <h2 className="mb-4 text-lg font-medium text-gray-900">Your Stats</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          {stats.bestStreak !== undefined && (
+            <StatCard title="Best Streak" value={stats.bestStreak} />
+          )}
+          {stats.accuracy !== undefined && (
+            <StatCard title="Accuracy" value={`${stats.accuracy}%`} />
+          )}
+          {stats.averageResponseTime !== undefined && (
+            <StatCard title="Avg Response" value={`${stats.averageResponseTime.toFixed(2)}s`} />
+          )}
+          {stats.totalTimePlayed !== undefined && (
+            <StatCard title="Time Played" value={`${Math.round(stats.totalTimePlayed / 60)} min`} />
+          )}
+        </div>
+      </div>
+    )}
 
     <div className="mb-8">
       <h2 className="mb-4 text-lg font-medium text-gray-900">Game Modes</h2>

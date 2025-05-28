@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { Problem, Difficulty } from '@/types/math'
-import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
+import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight } from 'lucide-react'
 import { getFilteredProblems, getAllTopics, getAllSubjects } from '@/lib/problems'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
@@ -117,7 +117,13 @@ const TestTubeMeter = ({ progress }: { progress: number }) => {
   );
 };
 
+// Tab type definition
+type ProblemLabTab = 'main' | 'ask' | 'snap';
+
 export function ProblemLab() {
+  // Active tab state
+  const [activeTab, setActiveTab] = useState<ProblemLabTab>('main');
+  
   // Setup states
   const [subject, setSubject] = useState<keyof typeof subjects>("pre-algebra");
   const [topic, setTopic] = useState("");
@@ -323,13 +329,154 @@ export function ProblemLab() {
   const PremiumIndicator = () => (
     <Sparkles className="w-3 h-3 text-yellow-400 inline ml-1" />
   );
+  
+  // Component for the Ask Lab tab
+  const AskLabTab = () => (
+    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
+        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <MessageSquare className="w-8 h-8" />
+          Ask the Lab
+        </CardTitle>
+        <p className="text-indigo-100 mt-2">Get instant help with any math question</p>
+      </CardHeader>
+      <CardContent className="p-8 pt-6 bg-white">
+        <div className="space-y-6">
+          <div className="pb-4">
+            <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem can I help you with?</h3>
+            <div className="relative">
+              <textarea 
+                className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
+                placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
+              />
+              <Button className="absolute bottom-3 right-3 w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700">
+                <ArrowRight className="w-4 h-4 text-white" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-100 pt-6">
+            <h3 className="text-base font-medium text-gray-700 mb-4">Examples you can ask:</h3>
+            <div className="space-y-3">
+              {[
+                "How do I find the derivative of f(x) = x³ + 2x² - 4x + 7?",
+                "Explain the concept of standard deviation with an example.",
+                "What's the difference between permutation and combination?"
+              ].map((example, index) => (
+                <Button 
+                  key={index}
+                  variant="outline" 
+                  className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all"
+                >
+                  <span>{example}</span>
+                  <ChevronRight className="w-4 h-4 text-indigo-400" />
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+  
+  // Component for the Snap + Solve tab
+  const SnapSolveTab = () => (
+    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
+        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <Camera className="w-8 h-8" />
+          Snap + Solve
+        </CardTitle>
+        <p className="text-indigo-100 mt-2">Upload a photo of your math problem for instant solutions</p>
+      </CardHeader>
+      <CardContent className="p-8 pt-6 bg-white">
+        <div className="space-y-8">
+          <div className="border-2 border-dashed border-indigo-200 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer bg-indigo-50/50">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center">
+                <Camera className="w-8 h-8 text-indigo-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Upload a Photo</h3>
+                <p className="text-gray-600 mt-1">Take a picture or upload an image of your math problem</p>
+              </div>
+              <Button className="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white">
+                Choose Image
+              </Button>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-100 pt-6">
+            <h3 className="text-base font-medium text-gray-700 mb-4">Tips for best results:</h3>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center mt-0.5">
+                  <span className="text-indigo-600 text-xs font-bold">1</span>
+                </div>
+                <span>Make sure the problem is clearly visible and well-lit</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center mt-0.5">
+                  <span className="text-indigo-600 text-xs font-bold">2</span>
+                </div>
+                <span>Avoid shadows and glare on the paper</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center mt-0.5">
+                  <span className="text-indigo-600 text-xs font-bold">3</span>
+                </div>
+                <span>Include the full problem with all relevant parts</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center py-12 px-4 overflow-hidden">
       <ParticleBackground />
       
-      {/* No Problems Found Message */}
-      {noProblemsFound && (
+      {/* Tab Navigation */}
+      <div className="w-full max-w-3xl mx-auto mb-6 bg-white/80 backdrop-blur-sm rounded-xl border border-indigo-100 shadow-md overflow-hidden">
+        <div className="flex">
+          <button 
+            onClick={() => setActiveTab('main')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'main' ? 
+              'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
+          >
+            <Beaker className="w-4 h-4" />
+            Problem Lab
+          </button>
+          <button 
+            onClick={() => setActiveTab('ask')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'ask' ? 
+              'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            Ask the Lab
+          </button>
+          <button 
+            onClick={() => setActiveTab('snap')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'snap' ? 
+              'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
+          >
+            <Camera className="w-4 h-4" />
+            Snap + Solve
+          </button>
+        </div>
+      </div>
+      
+      {/* Render content based on selected tab */}
+      {activeTab === 'ask' ? (
+        <AskLabTab />
+      ) : activeTab === 'snap' ? (
+        <SnapSolveTab />
+      ) : (
+        /* Main Problem Lab Content - Original content */
+        <>
+          {noProblemsFound && (
         <motion.div
           key="no-problems"
           initial={{ opacity: 0 }}
@@ -716,6 +863,8 @@ export function ProblemLab() {
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
           <SimpleLoadingIndicator />
         </div>
+      )}
+        </>
       )}
     </div>
   );

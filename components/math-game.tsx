@@ -200,6 +200,7 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
               averageResponseTime={totalResponseTime / totalQuestions}
               onRestart={restartGame}
               gameMode={gameMode}
+              difficulty={difficulty}
             />
           </motion.div>
         ) : (
