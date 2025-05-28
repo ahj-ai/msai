@@ -16,8 +16,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
   [plugins.inputs]
-    enableStaticFile404 = true
-    enableStaticFile404Paths = ["/_next/static/*", "/static/*"]
+    # No additional inputs needed for the latest version
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
