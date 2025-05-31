@@ -31,7 +31,7 @@ const SetupScreen = ({
   const modes: { value: GameMode; label: string; icon: LucideIcon; description: string }[] = [
     {
       value: "timed",
-      label: "Telekespeedsis",
+      label: "Neuro Blitz",
       icon: Clock,
       description: "Race against time in this high-speed neural challenge",
     },
@@ -44,7 +44,7 @@ const SetupScreen = ({
   ]
 
   const difficultyEmojis: DifficultyLevel[] = ["🧠", "🧠🧠", "🧠🧠🧠"]
-  const difficultyLabels = ["Neuron", "Synapse", "Cortex"]
+  const difficultyLabels = ["Genius", "Mastermind", "Brainiac"]
   const problemModeTimes = [10, 5, 2.5] // in minutes
 
   return (
@@ -83,7 +83,7 @@ const SetupScreen = ({
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">Neural Power</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Difficulty Level</h3>
             <div className="space-y-2">
               <Slider
                 value={[difficultyEmojis.indexOf(difficulty) + 1]}
@@ -136,7 +136,7 @@ const SetupScreen = ({
 
           {gameMode === "timed" && (
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Synapse Speed</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Time Limit</h3>
               <Slider
                 value={[timerSetting]}
                 onValueChange={(value) => setTimerSetting(value[0])}
@@ -166,7 +166,7 @@ const SetupScreen = ({
             onClick={() => onStartGame(difficulty, timerSetting * 30, gameMode)}
             className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xl font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-purple-500 relative overflow-hidden group"
           >
-            <span className="relative z-10">ACTIVATE NEURONS</span>
+            <span className="relative z-10">START CHALLENGE</span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/30 to-purple-400/0 group-hover:translate-x-full duration-1000 transition-transform"></div>
           </Button>
         </motion.div>

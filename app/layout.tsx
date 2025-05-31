@@ -12,6 +12,7 @@ import './globals.css'
 import NavBar from '@/components/nav-bar'
 import { Toaster } from '@/components/ui/toaster'
 import { AuthProvider } from '@/lib/auth'
+import Link from 'next/link'
 
 const geistSans = GeistSans
 const geistMono = GeistMono
@@ -135,11 +136,11 @@ export default function RootLayout({
                     <span className="text-xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
                       MathStackAI
                     </span>
-                    <p className="text-gray-500 text-sm mt-1">© {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
+                    <p className="text-gray-500 text-sm mt-1"> {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
                   </div>
                   <div className="flex space-x-6">
-                    <a href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</a>
-                    <a href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</a>
+                    <Link href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</Link>
+                    <Link href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</Link>
                   </div>
                 </div>
               </div>
@@ -151,4 +152,3 @@ export default function RootLayout({
     </ClerkProvider>
   )
 }
-

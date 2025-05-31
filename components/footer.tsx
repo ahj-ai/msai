@@ -2,6 +2,8 @@ import Link from "next/link"
 import { Twitter, Instagram, Linkedin } from "lucide-react"
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-purple-950/50 text-gray-300 py-12">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -67,11 +69,35 @@ export function Footer() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 mt-8 pt-8 border-t border-purple-800">
-        <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} MathStackAI. All rights reserved.
-        </p>
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="mb-4 md:mb-0">
+            <p className="text-gray-600 text-sm">
+              &copy; {currentYear} MathStackAI. All rights reserved.
+            </p>
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-x-8">
+            <Link 
+              href="/terms" 
+              className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
+            >
+              Terms of Service
+            </Link>
+            <Link 
+              href="/privacy" 
+              className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
+            >
+              Privacy Policy
+            </Link>
+            <a 
+              href="mailto:support@mathstackai.com" 
+              className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
+            >
+              Contact Us
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
   )
 }
-

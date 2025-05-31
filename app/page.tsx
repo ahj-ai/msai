@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { SignedIn, SignedOut } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignUpButton } from '@clerk/nextjs';
 import { RedirectToDashboard } from '../components/redirect-to-dashboard';
 import { FeatureCard } from '../components/feature-card';
 import { Brain, Lightbulb, Rocket, Sparkles, ArrowRight } from 'lucide-react';
@@ -111,13 +111,14 @@ export default function Home() {
                 Transform your math skills with personalized AI tutoring, interactive lessons, and unlimited practice problems designed to help you succeed.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link 
-                  href="/signup" 
-                  className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white"
-                >
-                  Get started for free
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
+                <SignUpButton mode="modal">
+                  <button 
+                    className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white"
+                  >
+                    Get started for free
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </button>
+                </SignUpButton>
                 <Link 
                   href="/why-mathstack-ai" 
                   className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-[#6C63FF] hover:bg-gray-50 rounded-full transition-colors"
@@ -153,13 +154,14 @@ export default function Home() {
               <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
                 Join thousands of students who are already mastering math with MathStack AI. Start your free trial today.
               </p>
-              <Link 
-                href="/signup" 
-                className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white"
-              >
-                Start learning now
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
+              <SignUpButton mode="modal">
+                <button 
+                  className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white"
+                >
+                  Start learning now
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </button>
+              </SignUpButton>
             </div>
           </div>
         </section>
