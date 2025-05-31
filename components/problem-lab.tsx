@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { Problem, Difficulty } from '@/types/math'
-import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight } from 'lucide-react'
+import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle } from 'lucide-react'
 import { getFilteredProblems, getAllTopics, getAllSubjects } from '@/lib/problems'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { generateProblem } from "@/lib/generate-problem"
 import { ParticleBackground } from "@/components/particle-background"
+import { ImageUpload } from "@/components/image-upload"
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css'; 
 
 // A simple loading component to avoid import issues
 function SimpleLoadingIndicator() {
@@ -135,6 +140,12 @@ export function ProblemLab() {
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
   
+  // Snap & Solve states
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [solution, setSolution] = useState<string | null>(null);
+  const [isLoadingSnap, setIsLoadingSnap] = useState(false);
+  const [snapError, setSnapError] = useState<string | null>(null);
+  
   // Load topics and subjects from database
   useEffect(() => {
     async function loadTopicsAndSubjects() {
@@ -171,6 +182,51 @@ export function ProblemLab() {
   // Track experiment setup progress
   const [setupProgress, setSetupProgress] = useState(0);
   
+  // Handle image selection for Snap & Solve
+  const handleImageSelect = (file: File | null) => {
+    setSelectedImage(file);
+    setSolution(null); // Clear previous solution
+    setSnapError(null); // Clear previous error
+  };
+
+  // Handle Snap & Solve submission
+  const handleSnapSolve = async () => {
+    if (!selectedImage) {
+      setSnapError("Please select an image first.");
+      return;
+    }
+
+    setIsLoadingSnap(true);
+    setSnapError(null);
+    setSolution(null);
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    try {
+      const response = await fetch('/api/solve-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP error! status: ${response.status}`);
+      }
+
+      setSolution(result.solution);
+    } catch (error) {
+      console.error("Snap & Solve error:", error);
+      if (error instanceof Error) {
+        setSnapError(error.message);
+      } else {
+        setSnapError("An unknown error occurred while solving the problem.");
+      }
+    } finally {
+      setIsLoadingSnap(false);
+    }
+  };
   // Calculate setup progress as selections are made
   useEffect(() => {
     let progress = 0;
@@ -379,56 +435,63 @@ export function ProblemLab() {
     </Card>
   );
   
-  // Component for the Snap + Solve tab
-  const SnapSolveTab = () => (
-    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
-        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <Camera className="w-8 h-8" />
-          Snap + Solve
+  // Component for the Screenshot & Solve tab
+  const ScreenshotSolveTab = () => (
+    <Card className="w-full max-w-2xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+        <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
+          <Camera className="w-7 h-7" />
+          Screenshot & Solve
         </CardTitle>
-        <p className="text-indigo-100 mt-2">Upload a photo of your math problem for instant solutions</p>
+        <p className="text-indigo-100 mt-1 text-sm">Upload a screenshot of your math problem for an AI-powered solution!</p>
       </CardHeader>
-      <CardContent className="p-8 pt-6 bg-white">
-        <div className="space-y-8">
-          <div className="border-2 border-dashed border-indigo-200 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer bg-indigo-50/50">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center">
-                <Camera className="w-8 h-8 text-indigo-500" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Upload a Photo</h3>
-                <p className="text-gray-600 mt-1">Take a picture or upload an image of your math problem</p>
-              </div>
-              <Button className="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white">
-                Choose Image
-              </Button>
+      <CardContent className="p-6 bg-white">
+        <div className="space-y-6">
+          {/* Image upload component */}
+          <div className="w-full">
+            <ImageUpload onImageSelect={handleImageSelect} currentImage={selectedImage} />
+          </div>
+
+          {snapError && (
+            <div className="flex items-center p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+              <span className="text-sm">{snapError}</span>
             </div>
-          </div>
-          
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="text-base font-medium text-gray-700 mb-4">Tips for best results:</h3>
-            <ul className="space-y-3 text-sm text-gray-600">
-              <li className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center mt-0.5">
-                  <span className="text-indigo-600 text-xs font-bold">1</span>
-                </div>
-                <span>Make sure the problem is clearly visible and well-lit</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center mt-0.5">
-                  <span className="text-indigo-600 text-xs font-bold">2</span>
-                </div>
-                <span>Avoid shadows and glare on the paper</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center mt-0.5">
-                  <span className="text-indigo-600 text-xs font-bold">3</span>
-                </div>
-                <span>Include the full problem with all relevant parts</span>
-              </li>
-            </ul>
-          </div>
+          )}
+
+          <Button
+            onClick={handleSnapSolve}
+            disabled={!selectedImage || isLoadingSnap}
+            className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+          >
+            {isLoadingSnap ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Solving...
+              </>
+            ) : (
+              <>
+                Solve with Gemini <Send className="w-4 h-4" />
+              </>
+            )}
+          </Button>
+
+          {solution && !isLoadingSnap && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Solution:</h3>
+              <div className="prose prose-sm lg:prose-base max-w-none text-gray-700">
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  children={typeof solution === 'string' ? solution : String(solution)}
+                />
+              </div>
+            </motion.div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -436,7 +499,7 @@ export function ProblemLab() {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center py-12 px-4 overflow-hidden">
-      <ParticleBackground />
+      <ParticleBackground lightMode={true} />
       
       {/* Tab Navigation */}
       <div className="w-full max-w-3xl mx-auto mb-6 bg-white/80 backdrop-blur-sm rounded-xl border border-indigo-100 shadow-md overflow-hidden">
@@ -463,7 +526,7 @@ export function ProblemLab() {
               'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
           >
             <Camera className="w-4 h-4" />
-            Snap + Solve
+            Screenshot & Solve
           </button>
         </div>
       </div>
@@ -472,7 +535,7 @@ export function ProblemLab() {
       {activeTab === 'ask' ? (
         <AskLabTab />
       ) : activeTab === 'snap' ? (
-        <SnapSolveTab />
+        <ScreenshotSolveTab />
       ) : (
         /* Main Problem Lab Content - Original content */
         <>
