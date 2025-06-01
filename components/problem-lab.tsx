@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Problem, Difficulty } from '@/types/math'
-import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle } from 'lucide-react'
+import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye } from 'lucide-react'
 import { getFilteredProblems, getAllTopics, getAllSubjects } from '@/lib/problems'
+import LatexKeyboard from './latex-keyboard'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -139,6 +140,12 @@ export function ProblemLab() {
   // States for dynamic topics and subjects
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  
+  // Ask the Lab states
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [isAskingQuestion, setIsAskingQuestion] = useState(false);
+  const questionTextareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Snap & Solve states
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -386,6 +393,58 @@ export function ProblemLab() {
     <Sparkles className="w-3 h-3 text-yellow-400 inline ml-1" />
   );
   
+  // Handle inserting LaTeX symbols into the textarea
+  const handleInsertLaTeX = (latex: string) => {
+    if (!questionTextareaRef.current) return;
+    
+    const textarea = questionTextareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    
+    // Insert the LaTeX symbol at the cursor position
+    const newText = text.substring(0, start) + latex + text.substring(end);
+    setQuestion(newText);
+    
+    // Focus back on the textarea and set cursor position after the inserted text
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + latex.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  // Handle asking a question
+  const handleAskQuestion = async () => {
+    if (!question.trim()) return;
+    
+    setIsAskingQuestion(true);
+    setAnswer(null);
+    
+    try {
+      // Call the Gemini API endpoint
+      const response = await fetch('/api/ask-question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setAnswer(data.answer);
+      } else {
+        console.error('Error from API:', data.error);
+        setAnswer(`Sorry, there was an error processing your question: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error asking question:', error);
+      setAnswer('Sorry, there was an error processing your question. Please try again.');
+    } finally {
+      setIsAskingQuestion(false);
+    }
+  };
+  
   // Component for the Ask Lab tab
   const AskLabTab = () => (
     <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
@@ -400,14 +459,38 @@ export function ProblemLab() {
         <div className="space-y-6">
           <div className="pb-4">
             <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem can I help you with?</h3>
-            <div className="relative">
-              <textarea 
-                className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
-                placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
-              />
-              <Button className="absolute bottom-3 right-3 w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700">
-                <ArrowRight className="w-4 h-4 text-white" />
-              </Button>
+            <div className="space-y-2">
+              <div className="relative">
+                <textarea 
+                  ref={questionTextareaRef}
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
+                  placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
+                />
+                <Button 
+                  className="absolute bottom-3 right-3 w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
+                  onClick={handleAskQuestion}
+                  disabled={isAskingQuestion || !question.trim()}
+                >
+                  {isAskingQuestion ? (
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4 text-white" />
+                  )}
+                </Button>
+              </div>
+              
+              {/* Label and hint for LaTeX keyboard */}
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-indigo-500 font-medium flex items-center gap-1">
+                  <span>Need to write math expressions?</span>
+                  <span className="inline-block animate-bounce">👇</span>
+                </div>
+              </div>
+              
+              {/* LaTeX Keyboard */}
+              <LatexKeyboard onInsert={handleInsertLaTeX} />
             </div>
           </div>
           
@@ -423,6 +506,12 @@ export function ProblemLab() {
                   key={index}
                   variant="outline" 
                   className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all"
+                  onClick={() => {
+                    setQuestion(example);
+                    if (questionTextareaRef.current) {
+                      questionTextareaRef.current.focus();
+                    }
+                  }}
                 >
                   <span>{example}</span>
                   <ChevronRight className="w-4 h-4 text-indigo-400" />
@@ -430,6 +519,24 @@ export function ProblemLab() {
               ))}
             </div>
           </div>
+          
+          {/* Display answer */}
+          {answer && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Answer:</h3>
+              <div className="prose prose-sm lg:prose-base max-w-none text-gray-700">
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  children={typeof answer === 'string' ? answer : String(answer)}
+                />
+              </div>
+            </motion.div>
+          )}
         </div>
       </CardContent>
     </Card>
