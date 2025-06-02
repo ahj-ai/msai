@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Problem, Difficulty } from '@/types/math'
-import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye } from 'lucide-react'
+import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
+import Link from 'next/link'
 import { getFilteredProblems, getAllTopics, getAllSubjects } from '@/lib/problems'
+import { saveUserProblems, getUserProblems } from '@/lib/supabase'
 import LatexKeyboard from './latex-keyboard'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
@@ -136,6 +139,13 @@ export function ProblemLab() {
   const [difficulty, setDifficulty] = useState<Difficulty>('Regular');
   const [wordProblems, setWordProblems] = useState(false);
   const [problemCount, setProblemCount] = useState(1);
+  
+  // User authentication and saved problems states
+  const { isSignedIn, userId } = useAuth();
+  const [savedProblems, setSavedProblems] = useState<Problem[]>([]);
+  const [showSavedProblems, setShowSavedProblems] = useState(false);
+  const [isSavingProblems, setIsSavingProblems] = useState(false);
+  const [problemsSaved, setProblemsSaved] = useState(false);
   
   // States for dynamic topics and subjects
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
@@ -271,6 +281,7 @@ export function ProblemLab() {
     setCurrentHintIndex(0);
     setIsCorrect(null);
     setShowAllSteps(false);
+    setProblemsSaved(false);
     
     try {
       let generatedProblems: Problem[] = [];
@@ -297,6 +308,9 @@ export function ProblemLab() {
         // This ensures we only take the number of problems the user requested
         generatedProblems = fetchedProblems.slice(0, problemCount).map(problem => ({
           ...problem,
+          subject: subjectName, // Ensure subject is always set
+          topic: topic, // Ensure topic is always set
+          difficulty: difficulty, // Ensure difficulty is always set
           userAnswer: "",
           isCorrect: undefined as boolean | undefined,
           showHint: false,
@@ -330,6 +344,77 @@ export function ProblemLab() {
       setIsLoading(false);
     }
   }, [subject, topic, difficulty, problemCount, wordProblems]);
+  
+  // Function to save generated problems to Supabase
+  const saveProblemsToSupabase = async () => {
+    if (!isSignedIn || !userId || problems.length === 0) return;
+    
+    setIsSavingProblems(true);
+    setProblemsSaved(false);
+    
+    try {
+      const result = await saveUserProblems(userId, problems);
+      
+      if (result.success) {
+        console.log('Problems saved successfully:', result.data);
+        setProblemsSaved(true);
+        
+        // Update saved problems list if it's open
+        if (showSavedProblems) {
+          loadSavedProblems();
+        }
+      } else {
+        console.error('Error saving problems:', result.error);
+      }
+    } catch (error) {
+      console.error('Failed to save problems:', error);
+    } finally {
+      setIsSavingProblems(false);
+    }
+  };
+  
+  // Function to load saved problems from Supabase
+  const loadSavedProblems = async () => {
+    if (!isSignedIn || !userId) return;
+    
+    try {
+      const result = await getUserProblems(userId, 20, 'problem-lab');
+      
+      if (result.success && result.data) {
+        // Convert from Supabase format to Problem type
+        const problems = result.data.map(item => ({
+          id: item.id,
+          subject: item.subject,
+          topic: item.topic,
+          difficulty: item.difficulty as Difficulty,
+          question: item.question,
+          solution: item.solution,
+          answer: item.answer,
+          hints: item.hints || [],
+          solutionSteps: item.solution_steps || [],
+          userAnswer: item.metadata?.userAnswer || '',
+          isCorrect: item.metadata?.isCorrect,
+          showHint: false,
+          currentHintIndex: 0
+        }));
+        
+        setSavedProblems(problems);
+      } else {
+        console.error('Error loading saved problems:', result.error);
+        setSavedProblems([]);
+      }
+    } catch (error) {
+      console.error('Failed to load saved problems:', error);
+      setSavedProblems([]);
+    }
+  };
+  
+  // Load saved problems when the component mounts and user is signed in
+  useEffect(() => {
+    if (isSignedIn && userId && showSavedProblems) {
+      loadSavedProblems();
+    }
+  }, [isSignedIn, userId, showSavedProblems]);
   
   // Handle user answer submission
   const checkAnswer = () => {
@@ -862,6 +947,19 @@ export function ProblemLab() {
                     )}
                   </Button>
                 </div>
+                {isSignedIn && (
+                  <div className="mt-4">
+                    <Link href="/dashboard">
+                      <Button
+                        variant="outline"
+                        className="w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 flex items-center justify-center gap-2"
+                      >
+                        <Book className="w-4 h-4" />
+                        View Saved Problems
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -1002,6 +1100,38 @@ export function ProblemLab() {
                           </li>
                         ))}
                       </ol>
+                      
+                      {/* Save button for signed-in users */}
+                      {isSignedIn && !problemsSaved && (
+                        <div className="mt-4 flex justify-end">
+                          <Button
+                            onClick={saveProblemsToSupabase}
+                            disabled={isSavingProblems}
+                            variant="outline"
+                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 flex items-center gap-2"
+                          >
+                            {isSavingProblems ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="w-4 h-4" />
+                                Save Problem
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {/* Success message after saving */}
+                      {problemsSaved && (
+                        <div className="mt-4 p-2 bg-green-50 border border-green-100 rounded text-green-700 text-sm flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Problem saved successfully!
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

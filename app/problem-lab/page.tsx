@@ -10,13 +10,7 @@ export default function ProblemLabPage() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground lightMode={true} />
-      <nav className="container mx-auto px-4 py-4 relative z-10">
-        <Link href="/" passHref>
-          <Button variant="ghost" className="text-indigo-600 hover:text-indigo-700">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to MathStackAI
-          </Button>
-        </Link>
-      </nav>
+      {/* Navigation removed for cleaner interface */}
       <div className="container mx-auto px-4 py-8 relative z-10">
         <ProblemLab />
       </div>

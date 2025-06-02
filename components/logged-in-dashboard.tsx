@@ -2,9 +2,13 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Brain, FlaskConical, Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle } from "lucide-react";
+import { Brain, FlaskConical, Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { supabase, getUserProblems } from "@/lib/supabase";
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 
@@ -41,6 +45,22 @@ interface UserStats {
   totalTimePlayed?: number;
   bestStreak?: number;
   accuracy?: number;
+}
+
+interface SavedProblem {
+  id?: string;
+  user_id?: string;
+  subject: string;
+  topic: string;
+  difficulty: string;
+  question: string;
+  solution: string;
+  answer?: string;
+  hints?: string[];
+  solution_steps?: string[];
+  source?: string;
+  created_at?: string;
+  metadata?: Record<string, any>;
 }
 
 const LoggedInDashboard = () => {
@@ -334,80 +354,197 @@ const BrainiacDashboard = ({ stats }: { stats: UserStats }) => (
 );
 
 const ProblemLabDashboard = () => {
-  const subjects = ["Arithmetic", "Algebra", "Geometry", "Calculus"];
-  const difficulties = ["Beginner", "Intermediate", "Advanced"];
-  const problemTypes = [
-    { name: "Multiple Choice", premium: false },
-    { name: "Free Response", premium: false },
-    { name: "Word Problems", premium: true },
-    { name: "Step-by-Step Solutions", premium: true },
-  ];
+  const { user } = useAuth();
+  const [savedProblems, setSavedProblems] = useState<SavedProblem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProblem, setSelectedProblem] = useState<SavedProblem | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user's saved problems from Supabase
+  useEffect(() => {
+    const fetchSavedProblems = async () => {
+      if (!user?.id) return;
+      
+      setIsLoading(true);
+      try {
+        const result = await getUserProblems(user.id, 50, 'problem-lab');
+        if (result.success && result.data) {
+          setSavedProblems(result.data);
+        } else {
+          setError('Failed to load your saved problems');
+        }
+      } catch (err) {
+        console.error('Error fetching saved problems:', err);
+        setError('Failed to load your saved problems');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSavedProblems();
+  }, [user]);
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Problem Lab</h1>
-        <p className="text-gray-600">Generate custom math problems to practice</p>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Subject Areas</h2>
-        <div className="flex flex-wrap gap-2">
-          {subjects.map((subject) => (
-            <span
-              key={subject}
-              className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-800"
-            >
-              {subject}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Difficulty Levels</h2>
-        <div className="flex flex-wrap gap-2">
-          {difficulties.map((difficulty) => (
-            <span
-              key={difficulty}
-              className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800"
-            >
-              {difficulty}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Problem Types</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {problemTypes.map((type) => (
-            <div
-              key={type.name}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-            >
-              <span className="text-sm font-medium text-gray-900">{type.name}</span>
-              {type.premium && (
-                <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
-                  <Lock className="mr-1 h-3 w-3" />
-                  Premium
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
+        <p className="text-gray-600">Your saved math problems</p>
       </div>
 
       <div>
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Recently Generated Problems</h2>
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-          <p className="text-sm text-gray-500">
-            Your recently generated problems will appear here
-          </p>
-          <Button className="mt-4" variant="outline">
-            Generate New Problem
-          </Button>
-        </div>
+        <h2 className="mb-4 text-lg font-medium text-gray-900">Your Saved Problems</h2>
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center p-12">
+            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : error ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
+            <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        ) : savedProblems.length === 0 ? (
+          <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+            <Book className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+            <p className="text-sm text-gray-500">
+              You haven't saved any problems yet
+            </p>
+            <Link href="/problem-lab">
+              <Button className="mt-4" variant="outline">
+                Go to Problem Lab
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {selectedProblem ? (
+              <Card className="overflow-hidden">
+                <CardHeader className="bg-blue-50 flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">
+                      {selectedProblem.subject} - {selectedProblem.topic}
+                    </CardTitle>
+                    <CardDescription>
+                      {selectedProblem.difficulty} Difficulty
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setSelectedProblem(null)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="mb-6">
+                    <h3 className="text-md font-medium mb-2">Question</h3>
+                    <div className="p-4 bg-gray-50 rounded-md">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={{
+                          // Applying classes to the root element
+                          p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
+                        }}
+                      >
+                        {selectedProblem.question}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="text-md font-medium mb-2">Solution</h3>
+                    <div className="p-4 bg-gray-50 rounded-md">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={{
+                          // Applying classes to the root element
+                          p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
+                        }}
+                      >
+                        {selectedProblem.solution}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                  {selectedProblem.solution_steps && selectedProblem.solution_steps.length > 0 && (
+                    <div>
+                      <h3 className="text-md font-medium mb-2">Solution Steps</h3>
+                      <div className="space-y-3">
+                        {selectedProblem.solution_steps.map((step, index) => (
+                          <div key={index} className="p-3 bg-gray-50 rounded-md">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                              components={{
+                                p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
+                              }}
+                            >
+                              {step}
+                            </ReactMarkdown>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="mt-6">
+                    <Link href="/problem-lab">
+                      <Button className="w-full">
+                        <FlaskConical className="mr-2 h-4 w-4" />
+                        Practice in Problem Lab
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {savedProblems.map((problem, index) => (
+                  <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow" 
+                        onClick={() => setSelectedProblem(problem)}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-md">{problem.subject}</CardTitle>
+                          <CardDescription>{problem.topic}</CardDescription>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          problem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                          problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {problem.difficulty}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="text-sm line-clamp-2 text-gray-700">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                          components={{
+                            p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
+                          }}
+                        >
+                          {problem.question}
+                        </ReactMarkdown>
+                      </div>
+                      <div className="flex justify-end mt-2">
+                        <Button variant="ghost" size="sm" className="text-blue-600">
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

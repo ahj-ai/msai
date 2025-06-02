@@ -83,6 +83,30 @@ export async function POST(req: Request) {
         console.error('Error recording login in Supabase:', error);
       }
     }
+  } else if (eventType === 'session.ended' || eventType === 'session.removed') {
+    // Extract user ID from the session event
+    const userId = event.data.user_id;
+    
+    console.log(`Session ${eventType} for user ID:`, userId);
+    
+    if (userId) {
+      try {
+        // Record the logout in Supabase
+        const result = await recordUserLogin(
+          userId, 
+          undefined,  // We may not have the email in this context
+          { 
+            eventType,
+            sessionId: event.data.id,
+            timestamp: new Date().toISOString(),
+            action: 'logout'
+          }
+        );
+        console.log('Logout recorded result:', result);
+      } catch (error) {
+        console.error(`Error recording ${eventType} in Supabase:`, error);
+      }
+    }
   } else if (eventType === 'user.created') {
     // Extract user information
     const userId = event.data.id;

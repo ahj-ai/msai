@@ -17,11 +17,15 @@ export default function NavBar({ children }: NavBarProps) {
     <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 border-b border-gray-100 shadow-sm">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold tracking-wide bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
-              MathStackAI
-            </span>
-          </Link>
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center">
+              <img 
+                src="/images/logos/mathstack-logo.svg" 
+                alt="MathStack AI Logo" 
+                className="h-10 w-auto" 
+              />
+            </Link>
+          </div>
 
           {/* Main Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">

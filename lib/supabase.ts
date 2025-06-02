@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { GameStats } from '@/types/game';
+import { Problem } from '@/types/math';
 
 // Lazy-loaded Supabase client to avoid issues during build time
 // This approach prevents Next.js from trying to access env vars during build
@@ -182,6 +183,93 @@ export async function saveUserProgress(userId: string, gameStats: GameStats) {
     }
   } catch (error) {
     console.error('Failed to save user progress:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Save user-generated problems to Supabase
+ * @param userId The Clerk user ID
+ * @param problems Array of problems to save
+ * @param source Source of the problems (e.g., 'problem-lab', 'ask-lab', 'screenshot')
+ */
+export async function saveUserProblems(userId: string, problems: Problem[], source: string = 'problem-lab') {
+  console.log(`Saving ${problems.length} problems for user:`, userId);
+  
+  try {
+    const now = new Date().toISOString();
+    
+    // Prepare data for insertion
+    const problemsToInsert = problems.map(problem => ({
+      user_id: userId,
+      subject: problem.subject || '',
+      topic: problem.topic || '',
+      difficulty: problem.difficulty || 'Regular',
+      question: problem.question,
+      solution: problem.solution,
+      answer: problem.answer?.toString() || '',
+      hints: problem.hints || [],
+      solution_steps: problem.solutionSteps || problem.steps || [],
+      source,
+      created_at: now,
+      metadata: {
+        isCorrect: problem.isCorrect,
+        userAnswer: problem.userAnswer
+      }
+    }));
+    
+    // Insert the problems
+    const { data, error } = await supabase
+      .from('user_problems')
+      .insert(problemsToInsert)
+      .select();
+    
+    if (error) {
+      console.error('Error saving user problems:', error);
+      return { success: false, error };
+    }
+    
+    console.log(`${data.length} problems saved successfully`);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to save user problems:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Get problems saved by a specific user
+ * @param userId The Clerk user ID
+ * @param limit Maximum number of problems to return
+ * @param source Optional filter by source
+ */
+export async function getUserProblems(userId: string, limit: number = 50, source?: string) {
+  console.log(`Getting problems for user: ${userId}`);
+  
+  try {
+    let query = supabase
+      .from('user_problems')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    
+    // Apply source filter if provided
+    if (source) {
+      query = query.eq('source', source);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching user problems:', error);
+      return { success: false, error };
+    }
+    
+    console.log(`Retrieved ${data.length} problems for user`);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to fetch user problems:', error);
     return { success: false, error };
   }
 }

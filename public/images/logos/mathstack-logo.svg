@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 180 50" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Simple, elegant gradient -->
+    <linearGradient id="modernGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main Logo -->
+  <g transform="translate(10, 10)">
+    <!-- Simple geometric mark -->
+    <rect x="0" y="0" width="30" height="4" fill="url(#modernGradient)" />
+    <rect x="0" y="8" width="20" height="4" fill="url(#modernGradient)" opacity="0.8" />
+    <rect x="0" y="16" width="12" height="4" fill="url(#modernGradient)" opacity="0.6" />
+    
+    <!-- Clean Typography -->
+    <text x="38" y="20" font-family="Inter, system-ui" font-size="20" font-weight="700" fill="#1E1B4B">
+      MathStack
+      <tspan fill="#4F46E5">AI</tspan>
+    </text>
+  </g>
+</svg>
