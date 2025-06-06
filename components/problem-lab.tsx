@@ -28,12 +28,12 @@ function SimpleLoadingIndicator() {
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-8">
       <div className="relative h-16 w-16">
-        <div className="absolute animate-ping h-full w-full rounded-full bg-blue-400 opacity-75"></div>
-        <div className="relative flex justify-center items-center h-16 w-16 rounded-full bg-blue-500">
+        <div className="absolute animate-ping h-full w-full rounded-full bg-indigo-400 opacity-75"></div>
+        <div className="relative flex justify-center items-center h-16 w-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600">
           <FlaskConical className="h-8 w-8 text-white" />
         </div>
       </div>
-      <p className="text-lg font-medium text-blue-700 animate-pulse">
+      <p className="text-lg font-medium text-indigo-700 animate-pulse">
         Generating Problem...
       </p>
     </div>
@@ -46,29 +46,150 @@ const subjects = {
     name: "Pre-Algebra",
     available: true,
     topicGroups: {
-      "Basic Operations": [
-        "Order of Operations",
-        "Fractions",
-        "Decimals",
+      "Foundational Number Skills 🧱": [
         "Decimal Place Value Mastery",
-        "Adding and Subtracting Integers"
+        "Rounding with Confidence"
       ],
-      "Algebra Foundations": [
-        "Variables & Expressions",
-        "One-Step Equations",
-        "Multi-Step Equations"
+      "Arithmetic Operations 🔢": [
+        "Adding and Subtracting Integers",
+        "Multiplying and Dividing Integers",
+        "Adding and Subtracting Decimals",
+        "Multiplying & Dividing Decimals",
+        "Fractions Operations",
+        "Mixed Number Operations",
+        "Converting Fractions 🤝 Decimals",
+        "Order of Operations"
+      ],
+      "Number Theory Unlocked 🔑": [
+        "Fractions 🤝 Percents",
+        "Decimals 🤝 Percents",
+        "Divisibility Rules & Factors",
+        "Prime Factorization Power",
+        "Finding GCF (Greatest Common Factor)",
+        "Nailing LCM (Least Common Multiple)"
+      ],
+      "Expressions & Variables 🚀": [
+        "The Language of Algebra: Variables & Verbal Expressions (Words to Algebra)",
+        "Evaluating Variable Expressions",
+        "The Distributive Property in Action",
+        "Simplifying by Combining Like Terms"
+      ],
+      "Equations & Inequalities 💡": [
+        "One-Step Equations (Integers, Decimals, Fractions)",
+        "Two-Step Equations (Integers, Decimals)",
+        "Tackling Multi-Step Equations",
+        "Real-World Equation Challenges: One-Step & Two-Step Word Problems"
+      ],
+      "Exponents, Sci-No & Roots ⚡": [
+        "Exponent Expertise: Multiplication & Division Properties",
+        "Powers of Products & Quotients",
+        "Big & Small: Scientific Notation",
+        "Root Camp: Understanding Square Root"
+      ],
+      "Real-World Ratios: Proportions & Percentages 🎯": [
+        "Master Conversions: Percents ↔ Fractions ↔ Decimals",
+        "Ratios & Proportions: Understanding & Solving Proportions",
+        "Proportion Word Problems: Real-Life Applications",
+        "Scaling Up: Similar Figures & Word Problems",
+        "Straightforward Percent Problems",
+        "Calculating Percent Change",
+        "Markup, Discount, & Tax (Easy & Hard Scenarios)",
+        "Simple & Compound Interest"
+      ],
+      "Lines & Systems 📈": [
+        "Finding Slope (points, equations)",
+        "Writing Linear Equations",
+        "Systems of Equations: Solve by Substitution",
+        "System of Equations: Solve by Elimination",
+        "Systems Word Problems"
+      ],
+      "Polynomial Powerhouse 🧱": [
+        "Factoring Monomials (Advanced)",
+        "Adding & Subtracting Polynomials",
+        "Multiplying Polynomials by Monomials",
+        "Multiplying Binomials (FOIL & Beyond)"
       ]
     }
   },
   "algebra-1": {
     name: "Algebra I",
-    available: false,
-    topicGroups: {}
+    available: true,
+    topicGroups: {
+      "🔢 Foundations & Arithmetic": [
+        "Order of Operations",
+        "Evaluating Expressions",
+        "Simplifying Variable Expressions",
+        "Distributive Property",
+        "Absolute Value",
+        "One-Step Equations",
+        "One-Step Equation Word Problems",
+        "Two-Step & Multi-Step Equations"
+      ],
+      "📏 Equations & More": [
+        "Absolute Value Equations",
+        "Literal Equations"
+      ],
+      "⚖️ Inequalities & Applications": [
+        "One-Step, Two-Step, Multi-Step Inequalities",
+        "Compound & Absolute Value Inequalities",
+        "Word Problems with Inequalities",
+        "Graphing Single-Variable Inequalities"
+      ],
+      "📈 Linear Equations & Inequalities": [
+        "Finding Slope",
+        "Graphing: Slope-Intercept, Standard Form, Absolute Value Equations",
+        "Writing Linear Equations",
+        "Graphing Linear Inequalities"
+      ],
+      "🔗 Systems of Equations & Inequalities": [
+        "Solving by Graphing",
+        "Solving Substitution",
+        "Solving Elimination",
+        "Systems Word Problems",
+        "Graphing Systems of Inequalities"
+      ],
+      "🔢 Exponents & Radicals": [
+        "Properties of Exponents",
+        "Scientific Notation",
+        "Square Roots",
+        "Radical Expressions: Simplify, Add/Subtract, Multiply, Divide",
+        "Solving Radical Equations",
+        "Pythagorean Theorem",
+      ],
+      "🌐 Word Problems": [
+        "Word Problems"
+      ]
+    }
   },
   "algebra-2": {
     name: "Algebra II",
-    available: false,
-    topicGroups: {}
+    available: true,
+    topicGroups: {
+      "📊 Functions": [
+        "Function notation and evaluation",
+        "Domain and range",
+        "Function composition",
+        "Inverse functions",
+        "Even and odd functions",
+        "Function transformations (translations, reflections, stretches, compressions)"
+      ],
+      "🎪 Quadratic Functions": [
+        "Quadratic Functions: Standard form",
+        "Quadratic Functions: Vertex form",
+        "Quadratic Functions: Factored form"
+      ],
+      "📐 Linear Equations": [
+        "Slope-intercept and point-slope forms",
+        "Parallel and perpendicular lines"
+      ],
+      "📏 Absolute Value": [
+        "Absolute value functions and equations"
+      ],
+      "🔢 Systems of Equations": [
+        "Systems of linear equations: substitution",
+        "Systems of linear equations: elimination"
+      ]
+    }
   }
 };
 
@@ -78,6 +199,8 @@ const difficulties: Difficulty[] = ['Regular', 'Challenging', 'Advanced'];
 // Topics that can have word problems
 const wordProblemTopics = [
   "Word Problems",
+  "Word Problems with Inequalities",
+  "One-Step Equation Word Problems",
   "Related Rates (word problems)",
 ];
 
@@ -85,10 +208,10 @@ const wordProblemTopics = [
 const ProblemCountButton = ({ count, selected, onClick }: { count: number; selected: boolean; onClick: () => void }) => (
   <button
     onClick={onClick}
-    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 ${
+    className={`w-9 h-9 rounded-md flex items-center justify-center transition-colors duration-200 ${
       selected
-        ? 'bg-indigo-600 text-white'
-        : 'bg-white border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-300'
+        ? 'bg-indigo-600 text-white shadow-sm'
+        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
     }`}
   >
     {count}
@@ -99,27 +222,27 @@ const ProblemCountButton = ({ count, selected, onClick }: { count: number; selec
 const TestTubeMeter = ({ progress }: { progress: number }) => {
   const isFull = progress >= 100;
   return (
-    <div className="relative w-12 h-32 bg-gray-100 rounded-b-lg border-2 border-gray-200 overflow-hidden">
-      <div className="absolute bottom-0 left-0 right-0 bg-indigo-500 transition-all duration-1000" 
+    <div className="relative w-10 h-28 bg-gray-50 rounded-b-md border border-gray-200 overflow-hidden shadow-sm">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-indigo-600 to-purple-600 transition-all duration-1000" 
            style={{ height: `${progress}%` }} />
       
       {/* Enhanced bubbles animation when test tube is full */}
       {isFull && (
         <div className="absolute inset-0 overflow-hidden">
           {/* Larger, more visible bubbles */}
-          <div className="absolute bottom-2 left-1/4 w-3 h-3 rounded-full bg-white/90 animate-bubble-1"></div>
-          <div className="absolute bottom-4 left-2/3 w-4 h-4 rounded-full bg-white/80 animate-bubble-2"></div>
-          <div className="absolute bottom-6 left-1/3 w-2.5 h-2.5 rounded-full bg-white/90 animate-bubble-3"></div>
+          <div className="absolute bottom-2 left-1/4 w-2 h-2 rounded-full bg-white/90 animate-bubble-1"></div>
+          <div className="absolute bottom-4 left-2/3 w-3 h-3 rounded-full bg-white/80 animate-bubble-2"></div>
+          <div className="absolute bottom-6 left-1/3 w-2 h-2 rounded-full bg-white/90 animate-bubble-3"></div>
           {/* Add more bubbles for better effect */}
-          <div className="absolute bottom-3 right-1/4 w-2 h-2 rounded-full bg-white/85 animate-bubble-1" style={{ animationDelay: '0.3s' }}></div>
-          <div className="absolute bottom-8 left-1/5 w-3 h-3 rounded-full bg-white/75 animate-bubble-2" style={{ animationDelay: '0.7s' }}></div>
+          <div className="absolute bottom-3 right-1/4 w-1.5 h-1.5 rounded-full bg-white/85 animate-bubble-1" style={{ animationDelay: '0.3s' }}></div>
+          <div className="absolute bottom-8 left-1/5 w-2 h-2 rounded-full bg-white/75 animate-bubble-2" style={{ animationDelay: '0.7s' }}></div>
         </div>
       )}
       
       <div className="absolute inset-0 flex items-center justify-center">
-        <TestTube className="w-8 h-28 text-gray-300 opacity-30" />
+        <TestTube className="w-6 h-24 text-gray-300 opacity-30" />
       </div>
-      <div className="absolute bottom-1 left-0 right-0 text-center text-xs font-bold text-white">
+      <div className="absolute bottom-1 left-0 right-0 text-center text-xs font-medium text-white">
         {Math.round(progress)}%
       </div>
     </div>
@@ -605,20 +728,90 @@ export function ProblemLab() {
             </div>
           </div>
           
-          {/* Display answer */}
+          {/* Display answer with sections */}
           {answer && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              className="mt-6 space-y-6"
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Answer:</h3>
-              <div className="prose prose-sm lg:prose-base max-w-none text-gray-700">
-                <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
-                  children={typeof answer === 'string' ? answer : String(answer)}
-                />
+              {/* Problem Section */}
+              <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
+                <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Problem</h3>
+                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h3: ({node, ...props}) => {
+                        // Hide the original '### Problem' heading
+                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
+                          String(props.children[0]) : '';
+                        return content === 'Problem' ? null : <h3 {...props} />
+                      },
+                      // Only show content until the next '### Solution' heading
+                      p: ({node, ...props}) => {
+                        const content = props.children ? String(props.children) : '';
+                        if (content.includes('### Solution')) {
+                          return null;
+                        }
+                        return <p {...props} />;
+                      }
+                    }}
+                  >
+                    {typeof answer === 'string' ? answer.split('### Solution')[0] : ''}
+                  </ReactMarkdown>
+                </div>
+              </div>
+              
+              {/* Solution Section */}
+              <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
+                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Solution</h3>
+                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h3: ({node, ...props}) => {
+                        // Hide the original '### Solution' heading
+                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
+                          String(props.children[0]) : '';
+                        return content === 'Solution' ? null : <h3 {...props} />
+                      }
+                    }}
+                  >
+                    {typeof answer === 'string' ? 
+                      answer.includes('### Solution') ? 
+                        answer.split('### Solution')[1]?.split('### Answer')[0] || '' : 
+                        '' : 
+                      ''}
+                  </ReactMarkdown>
+                </div>
+              </div>
+              
+              {/* Answer Section */}
+              <div className="p-5 bg-green-50 border border-green-100 rounded-lg shadow-sm">
+                <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Answer</h3>
+                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h3: ({node, ...props}) => {
+                        // Hide the original '### Answer' heading
+                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
+                          String(props.children[0]) : '';
+                        return content === 'Answer' ? null : <h3 {...props} />
+                      }
+                    }}
+                  >
+                    {typeof answer === 'string' ? 
+                      answer.includes('### Answer') ? 
+                        answer.split('### Answer')[1] || '' : 
+                        '' : 
+                      ''}
+                  </ReactMarkdown>
+                </div>
               </div>
             </motion.div>
           )}
@@ -672,15 +865,85 @@ export function ProblemLab() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              className="mt-6 space-y-6"
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Solution:</h3>
-              <div className="prose prose-sm lg:prose-base max-w-none text-gray-700">
-                <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
-                  children={typeof solution === 'string' ? solution : String(solution)}
-                />
+              {/* Problem Section */}
+              <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
+                <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Problem</h3>
+                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h3: ({node, ...props}) => {
+                        // Hide the original '### Problem' heading
+                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
+                          String(props.children[0]) : '';
+                        return content === 'Problem' ? null : <h3 {...props} />
+                      },
+                      // Only show content until the next '### Solution' heading
+                      p: ({node, ...props}) => {
+                        const content = props.children ? String(props.children) : '';
+                        if (content.includes('### Solution')) {
+                          return null;
+                        }
+                        return <p {...props} />;
+                      }
+                    }}
+                  >
+                    {typeof solution === 'string' ? solution.split('### Solution')[0] : ''}
+                  </ReactMarkdown>
+                </div>
+              </div>
+              
+              {/* Solution Section */}
+              <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
+                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Solution</h3>
+                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h3: ({node, ...props}) => {
+                        // Hide the original '### Solution' heading
+                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
+                          String(props.children[0]) : '';
+                        return content === 'Solution' ? null : <h3 {...props} />
+                      }
+                    }}
+                  >
+                    {typeof solution === 'string' ? 
+                      solution.includes('### Solution') ? 
+                        solution.split('### Solution')[1]?.split('### Answer')[0] || '' : 
+                        '' : 
+                      ''}
+                  </ReactMarkdown>
+                </div>
+              </div>
+              
+              {/* Answer Section */}
+              <div className="p-5 bg-green-50 border border-green-100 rounded-lg shadow-sm">
+                <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Answer</h3>
+                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      h3: ({node, ...props}) => {
+                        // Hide the original '### Answer' heading
+                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
+                          String(props.children[0]) : '';
+                        return content === 'Answer' ? null : <h3 {...props} />
+                      }
+                    }}
+                  >
+                    {typeof solution === 'string' ? 
+                      solution.includes('### Answer') ? 
+                        solution.split('### Answer')[1] || '' : 
+                        '' : 
+                      ''}
+                  </ReactMarkdown>
+                </div>
               </div>
             </motion.div>
           )}
@@ -694,28 +957,28 @@ export function ProblemLab() {
       <ParticleBackground lightMode={true} />
       
       {/* Tab Navigation */}
-      <div className="w-full max-w-3xl mx-auto mb-6 bg-white/80 backdrop-blur-sm rounded-xl border border-indigo-100 shadow-md overflow-hidden">
+      <div className="w-full max-w-3xl mx-auto mb-6 bg-white shadow-sm border border-gray-200 rounded-md overflow-hidden">
         <div className="flex">
           <button 
             onClick={() => setActiveTab('main')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'main' ? 
-              'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'main' ? 
+              'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
             <Beaker className="w-4 h-4" />
-            Problem Lab
+            The Algebratory
           </button>
           <button 
             onClick={() => setActiveTab('ask')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'ask' ? 
-              'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'ask' ? 
+              'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
             <MessageSquare className="w-4 h-4" />
             Ask the Lab
           </button>
           <button 
             onClick={() => setActiveTab('snap')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'snap' ? 
-              'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-indigo-50'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'snap' ? 
+              'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
             <Camera className="w-4 h-4" />
             Screenshot & Solve
@@ -737,23 +1000,23 @@ export function ProblemLab() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center bg-white/90 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-white/95 backdrop-blur-sm"
         >
-          <div className="mb-8">
-            <FlaskConical className="w-20 h-20 text-indigo-300 mx-auto mb-4" />
+          <div className="mb-6">
+            <FlaskConical className="w-16 h-16 text-indigo-300 mx-auto mb-3" />
           </div>
-          <h2 className="text-2xl font-bold text-indigo-600 mb-4">No Problems Available Yet</h2>
-          <p className="text-gray-600 max-w-md mb-6">
+          <h2 className="text-xl font-bold text-indigo-600 mb-3">No Problems Available Yet</h2>
+          <p className="text-gray-700 max-w-md mb-4 text-sm">
             We don't have any problems for this specific combination of subject, topic, and difficulty level in our database yet.
           </p>
-          <p className="text-gray-500 max-w-md mb-8">
+          <p className="text-gray-500 max-w-md mb-6 text-sm">
             Try selecting a different topic or difficulty level, or check back later as we continue to add more problems.
           </p>
           <Button
             onClick={() => {
               setNoProblemsFound(false);
             }}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 text-sm h-9 px-4"
           >
             Back to Setup
           </Button>
@@ -767,24 +1030,24 @@ export function ProblemLab() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-indigo-100 border border-indigo-200 text-indigo-800 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3"
+            className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-green-50 border border-green-200 text-green-700 px-5 py-2.5 rounded-md shadow-sm z-50 flex items-center gap-2"
           >
-            <CheckCircle className="w-5 h-5 text-green-500" />
-            <span className="font-medium">Experiment complete! All {problemCount} problems solved!</span>
+            <CheckCircle className="w-4 h-4 text-green-500" />
+            <span className="font-medium text-sm">Experiment complete! All {problemCount} problems solved!</span>
           </motion.div>
         )}
       </AnimatePresence>
       
       {!showProblemSolving ? (
-        <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
-            <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <FlaskConical className="w-8 h-8" />
-              Problem Lab
+        <Card className="w-full max-w-3xl mx-auto bg-white shadow-md border border-gray-100 rounded-xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 pb-5">
+            <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
+              <FlaskConical className="w-7 h-7" />
+              The Algebratory
             </CardTitle>
-            <p className="text-indigo-100 mt-2">Generate custom math problems with step-by-step solutions</p>
+            <p className="text-indigo-100 mt-1">Hypothesis: You'll get better with practice. Let's test it.</p>
           </CardHeader>
-          <CardContent className="p-8 pt-6 bg-white">
+          <CardContent className="p-6 bg-white">
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -793,10 +1056,10 @@ export function ProblemLab() {
                     value={subject} 
                     onValueChange={(value: keyof typeof subjects) => setSubject(value as keyof typeof subjects)}
                   >
-                    <SelectTrigger className="mt-2 bg-white border-indigo-100 text-gray-800 h-11 hover:bg-indigo-50 hover:border-indigo-200 transition-colors duration-150">
+                    <SelectTrigger className="mt-2 bg-white border border-gray-200 text-gray-800 h-10 hover:bg-gray-50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150">
                       <SelectValue placeholder="Select subject" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-indigo-100">
+                    <SelectContent className="bg-white border border-gray-200 shadow-md">
                       {Object.entries(subjects).map(([key, { name, available }]) => (
                         <SelectItem 
                           key={key} 
@@ -819,20 +1082,20 @@ export function ProblemLab() {
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Topic</Label>
                   <Select value={topic} onValueChange={setTopic}>
-                    <SelectTrigger className="mt-2 bg-white border-indigo-100 text-gray-800 h-11 hover:bg-gray-50 transition-colors">
+                    <SelectTrigger className="mt-2 bg-white border border-gray-200 text-gray-800 h-10 hover:bg-gray-50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                       <SelectValue placeholder="Select topic" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-indigo-100 max-h-80">
+                    <SelectContent className="bg-white border border-gray-200 shadow-md max-h-80">
                       {Object.entries(subjects[subject].topicGroups).map(([groupName, topics]) => (
                         <div key={groupName}>
-                          <div className="px-2 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 sticky top-0 z-10">
+                          <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10">
                             {groupName}
                           </div>
                               {(topics as string[]).map((t) => (
                                 <SelectItem 
                                   key={t} 
                                   value={t} 
-                                  className="text-gray-800 pl-4 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
+                                  className="text-gray-700 pl-4 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-150"
                                 >
                                   {t}
                                 </SelectItem>
@@ -848,15 +1111,15 @@ export function ProblemLab() {
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Difficulty</Label>
                   <Select value={difficulty} onValueChange={handleDifficultyChange}>
-                    <SelectTrigger className="mt-2 bg-white border-indigo-100 text-gray-800 h-11 hover:bg-indigo-50 hover:border-indigo-200 transition-colors duration-150">
+                    <SelectTrigger className="mt-2 bg-white border border-gray-200 text-gray-800 h-10 hover:bg-gray-50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-indigo-100">
+                    <SelectContent className="bg-white border border-gray-200 shadow-md">
                       {difficulties.map((diff) => (
                         <SelectItem 
                           key={diff} 
                           value={diff} 
-                          className="text-gray-800 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
+                          className="text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-150"
                         >
                           {diff}
                         </SelectItem>
@@ -903,11 +1166,11 @@ export function ProblemLab() {
                   <div className="flex-1">
                     <div className="flex justify-between text-sm text-gray-600 mb-1">
                       <span className="font-medium">Experiment Setup</span>
-                      <span className="font-semibold text-indigo-700">{setupProgress}% complete</span>
+                      <span className="font-semibold text-indigo-600">{setupProgress}% complete</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                       <motion.div 
-                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full"
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 h-full rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${setupProgress}%` }}
                         transition={{ duration: 0.5 }}
@@ -919,11 +1182,11 @@ export function ProblemLab() {
                   <Button
                     onClick={generateProblems}
                     disabled={!topic || isLoading || setupProgress < 100}
-                    className="h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium text-base tracking-wide rounded-xl transition-all duration-300 hover:shadow-md w-full flex items-center justify-center gap-2 group relative overflow-hidden"
+                    className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm tracking-wide rounded-md transition-all duration-200 shadow-sm w-full flex items-center justify-center gap-2 group relative overflow-hidden"
                   >
                     {isLoading ? (
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500"
+                        className="absolute inset-0 bg-indigo-500"
                         initial={{ opacity: 0 }}
                         animate={{
                           opacity: [0.3, 0.6, 0.3],
@@ -986,17 +1249,16 @@ export function ProblemLab() {
               </CardHeader>
               
               <CardContent className="p-8 pt-6 bg-white">
-                <div className="mb-6 rounded-lg bg-gray-50 border border-gray-100 p-5 shadow-sm">
-                  {/* Use dangerouslySetInnerHTML to render LaTeX, but in a real app use a proper LaTeX renderer */}
-                  <div 
-                    className="whitespace-pre-wrap text-lg font-medium text-gray-800" 
-                    dangerouslySetInnerHTML={{ 
-                      __html: currentProblem.question
-                        .replace(/\$/g, '')
-                        .replace(/\\times/g, '\u00d7')
-                        .replace(/\\frac{([^}]*)}{([^}]*)}/g, '$1/$2')
-                    }}
-                  />
+                <div className="mb-8 rounded-lg bg-gray-50 border border-gray-100 p-6 shadow-sm">
+                  <h3 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-3">Problem</h3>
+                  <div className="whitespace-pre-wrap text-lg font-medium text-gray-800">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                    >
+                      {currentProblem.question}
+                    </ReactMarkdown>
+                  </div>
                 </div>
                 
                 <div className="space-y-4">
@@ -1084,22 +1346,26 @@ export function ProblemLab() {
                   </div>
                   {/* Solution Steps (shown when correct or stumped) */}
                   {(isCorrect || showAllSteps) && currentProblem.solutionSteps && (
-                    <div className="mt-6 border-t pt-4">
-                      <h3 className="font-medium text-gray-700 mb-2 text-sm flex items-center gap-2">
-                        <Check className="w-4 h-4 text-indigo-600" /> Solution Steps:
+                    <div className="mt-8 pt-6 border-t border-gray-100">
+                      <h3 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <Check className="w-4 h-4" /> Solution Steps
                       </h3>
-                      <ol className="list-decimal pl-5 space-y-2">
-                        {currentProblem.solutionSteps.map((step, index) => (
-                          <li key={index} className="text-gray-700 text-sm">
-                            <div dangerouslySetInnerHTML={{ 
-                              __html: step
-                                .replace(/\$/g, '')
-                                .replace(/\\times/g, '\u00d7')
-                                .replace(/\\frac{([^}]*)}{([^}]*)}/g, '$1/$2')
-                            }} />
-                          </li>
-                        ))}
-                      </ol>
+                      <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <ol className="list-decimal pl-5 space-y-4">
+                          {currentProblem.solutionSteps.map((step, index) => (
+                            <li key={index} className="text-gray-700 text-base">
+                              <div className="bg-white p-3 rounded-md shadow-xs">
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkMath]}
+                                  rehypePlugins={[rehypeKatex]}
+                                >
+                                  {step}
+                                </ReactMarkdown>
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
                       
                       {/* Save button for signed-in users */}
                       {isSignedIn && !problemsSaved && (

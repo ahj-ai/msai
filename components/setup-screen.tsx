@@ -37,9 +37,9 @@ const SetupScreen = ({
     },
     {
       value: "problems",
-      label: "Centurion Challenge",
+      label: "Brainiac Challenge",
       icon: Hash,
-      description: "Conquer 100 problems within the time limit",
+      description: "Can you beat the California State Math Standards? Challenge yourself!",
     },
   ]
 

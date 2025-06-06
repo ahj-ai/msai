@@ -258,14 +258,14 @@ const MainDashboard = () => (
         title="Brainiac"
         description="Challenge yourself with mental math exercises and improve your calculation speed."
         icon={Brain}
-        linkText="Start Practicing"
+        linkText="Play Brainiac"
         linkHref="/brainiac"
       />
       <FeatureCard
         title="Problem Lab"
-        description="Generate custom math problems tailored to your skill level and learning goals."
+        description="Generate custom math problems tailored to your skill level and learning goals. Practice with step-by-step solutions."
         icon={FlaskConical}
-        linkText="Try Problem Lab"
+        linkText="Open Problem Lab"
         linkHref="/problem-lab"
       />
     </div>
@@ -307,7 +307,7 @@ const BrainiacDashboard = ({ stats }: { stats: UserStats }) => (
         <h2 className="mb-4 text-lg font-medium text-gray-900">Your Stats</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {stats.bestStreak !== undefined && (
-            <StatCard title="Best Streak" value={stats.bestStreak} />
+            <StatCard title="Longest Streak" value={stats.bestStreak} />
           )}
           {stats.accuracy !== undefined && (
             <StatCard title="Accuracy" value={`${stats.accuracy}%`} />
@@ -326,18 +326,18 @@ const BrainiacDashboard = ({ stats }: { stats: UserStats }) => (
       <h2 className="mb-4 text-lg font-medium text-gray-900">Game Modes</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <GameModeCard
-          title="Timed Challenge"
+          title="Speed Mode"
           description="Solve as many problems as you can in 60 seconds"
           icon={Zap}
-          linkText="Start Timed"
-          linkHref="/brainiac/timed"
+          linkText="Play Speed Mode"
+          linkHref="/brainiac"
         />
         <GameModeCard
-          title="Endless Mode"
+          title="Practice Mode"
           description="Practice at your own pace with no time limit"
           icon={Trophy}
-          linkText="Start Endless"
-          linkHref="/brainiac/endless"
+          linkText="Play Practice Mode"
+          linkHref="/brainiac?mode=practice"
         />
       </div>
     </div>
@@ -359,6 +359,13 @@ const ProblemLabDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProblem, setSelectedProblem] = useState<SavedProblem | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [problemStats, setProblemStats] = useState({
+    problemsSolved: 0,
+    popularSubjects: ['Pre-Algebra', 'Algebra I'],
+    favoriteTopics: ['One-Step Equations', 'Order of Operations'],
+    totalPracticeTime: 120, // in minutes
+    accuracyRate: 85, // percentage
+  });
 
   // Fetch user's saved problems from Supabase
   useEffect(() => {
@@ -370,6 +377,16 @@ const ProblemLabDashboard = () => {
         const result = await getUserProblems(user.id, 50, 'problem-lab');
         if (result.success && result.data) {
           setSavedProblems(result.data);
+          
+          // In a real app, you would calculate these stats from actual user data
+          // For now, we're using placeholder stats that would be calculated from user data
+          setProblemStats({
+            problemsSolved: result.data.length + 42, // Example: saved problems + solved problems
+            popularSubjects: ['Pre-Algebra', 'Algebra I'],
+            favoriteTopics: ['One-Step Equations', 'Order of Operations'],
+            totalPracticeTime: 120,
+            accuracyRate: 85,
+          });
         } else {
           setError('Failed to load your saved problems');
         }
@@ -388,7 +405,58 @@ const ProblemLabDashboard = () => {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Problem Lab</h1>
-        <p className="text-gray-600">Your saved math problems</p>
+        <p className="text-gray-600">Generate custom math problems tailored to your skill level and learning goals. Practice with step-by-step solutions.</p>
+      </div>
+      
+      {/* Stats Section */}
+      <div className="mb-8">
+        <h2 className="mb-4 text-lg font-medium text-gray-900">Your Progress</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <StatCard title="Problems Solved" value={problemStats.problemsSolved} />
+          <StatCard title="Practice Time" value={`${problemStats.totalPracticeTime} min`} />
+          <StatCard title="Accuracy Rate" value={`${problemStats.accuracyRate}%`} />
+          <StatCard title="Saved Problems" value={savedProblems.length} />
+        </div>
+      </div>
+      
+      {/* Problem Modes Section */}
+      <div className="mb-8">
+        <h2 className="mb-4 text-lg font-medium text-gray-900">Problem Modes</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <GameModeCard
+            title="Problem Lab"
+            description="Generate custom problems based on topic and difficulty"
+            icon={FlaskConical}
+            linkText="Open Lab"
+            linkHref="/problem-lab"
+          />
+          <GameModeCard
+            title="Snapshot & Solve"
+            description="Take a photo of a math problem and get step-by-step solutions"
+            icon={Eye}
+            linkText="Try Snapshot"
+            linkHref="/problem-lab/snapshot"
+          />
+          <GameModeCard
+            title="Daily Challenge"
+            description="Tackle a new set of curated problems each day"
+            icon={Zap}
+            linkText="Start Challenge"
+            linkHref="/problem-lab/daily"
+          />
+        </div>
+      </div>
+      
+      {/* Tips & Tricks Section */}
+      <div className="mb-8 rounded-lg bg-indigo-50 p-6">
+        <h3 className="mb-3 text-lg font-medium text-indigo-800">Tips & Tricks</h3>
+        <ul className="space-y-2 text-indigo-700">
+          <li className="flex items-start">• Start with topics you're comfortable with before tackling challenging ones</li>
+          <li className="flex items-start">• Review the step-by-step solutions to understand problem-solving approaches</li>
+          <li className="flex items-start">• Practice regularly to build and maintain your skills</li>
+          <li className="flex items-start">• Try different difficulty levels to gradually improve</li>
+          <li className="flex items-start">• Use the performance insights to focus on areas that need improvement</li>
+        </ul>
       </div>
 
       <div>

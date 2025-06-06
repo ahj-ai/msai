@@ -8,6 +8,7 @@
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  NETLIFY_NEXT_PLUGIN_FORCE_BUILD = "true"
 
 [functions]
   node_bundler = "esbuild"
