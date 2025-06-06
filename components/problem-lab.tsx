@@ -176,7 +176,9 @@ const subjects = {
       "🎪 Quadratic Functions": [
         "Quadratic Functions: Standard form",
         "Quadratic Functions: Vertex form",
-        "Quadratic Functions: Factored form"
+        "Quadratic Functions: Factored form",
+        "Quadratic formula and discriminant",
+        "Applications and word problems"
       ],
       "📐 Linear Equations": [
         "Slope-intercept and point-slope forms",
@@ -188,6 +190,12 @@ const subjects = {
       "🔢 Systems of Equations": [
         "Systems of linear equations: substitution",
         "Systems of linear equations: elimination"
+      ],
+      "🔄 Sequences and Series": [
+        "Arithmetic sequences and series",
+        "Geometric sequences and series",
+        "Infinite geometric series",
+        "Sigma notation"
       ]
     }
   }

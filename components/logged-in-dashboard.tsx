@@ -2,7 +2,7 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Brain, FlaskConical, Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase, getUserProblems } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
@@ -133,12 +133,10 @@ const LoggedInDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "brainiac":
-        return <BrainiacDashboard stats={userStats} />;
-      case "problem-lab":
-        return <ProblemLabDashboard />;
+      case "saved-problems":
+        return <SavedProblemsDashboard />;
       default:
-        return <MainDashboard />;
+        return <MainDashboard stats={userStats} />;
     }
   };
 
@@ -178,16 +176,10 @@ const LoggedInDashboard = () => {
             onClick={() => setActiveTab("dashboard")}
           />
           <NavItem
-            icon={Brain}
-            label="Brainiac"
-            active={activeTab === "brainiac"}
-            onClick={() => setActiveTab("brainiac")}
-          />
-          <NavItem
-            icon={FlaskConical}
-            label="Problem Lab"
-            active={activeTab === "problem-lab"}
-            onClick={() => setActiveTab("problem-lab")}
+            icon={Book}
+            label="Saved Problems"
+            active={activeTab === "saved-problems"}
+            onClick={() => setActiveTab("saved-problems")}
           />
         </nav>
         <div className="absolute bottom-0 w-full border-t border-gray-200 p-4">
@@ -250,122 +242,255 @@ const NavItem = ({ icon: Icon, label, active, onClick }: NavItemProps) => (
   </button>
 );
 
-const MainDashboard = () => (
-  <div>
-    <h1 className="mb-6 text-2xl font-bold text-gray-900">Welcome back!</h1>
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <FeatureCard
-        title="Brainiac"
-        description="Challenge yourself with mental math exercises and improve your calculation speed."
-        icon={Brain}
-        linkText="Play Brainiac"
-        linkHref="/brainiac"
-      />
-      <FeatureCard
-        title="Problem Lab"
-        description="Generate custom math problems tailored to your skill level and learning goals. Practice with step-by-step solutions."
-        icon={FlaskConical}
-        linkText="Open Problem Lab"
-        linkHref="/problem-lab"
-      />
-    </div>
-    <div className="mt-8">
-      <h2 className="mb-4 text-lg font-medium text-gray-900">Quick Tips</h2>
-      <ul className="space-y-2">
-        <li className="flex items-start">
-          <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-          <span>Practice for at least 10 minutes daily for best results</span>
-        </li>
-        <li className="flex items-start">
-          <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-          <span>Try different difficulty levels to challenge yourself</span>
-        </li>
-        <li className="flex items-start">
-          <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-          <span>Track your progress in the Brainiac section</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-);
+const MainDashboard = ({ stats }: { stats: UserStats }) => {
+  // Functions to determine color based on value
+  const getAccuracyColor = (value: number) => {
+    if (value >= 80) return "text-green-500 bg-green-50";
+    if (value >= 60) return "text-yellow-500 bg-yellow-50";
+    return "text-red-500 bg-red-50";
+  };
 
-const BrainiacDashboard = ({ stats }: { stats: UserStats }) => (
-  <div>
-    <div className="mb-8">
-      <h1 className="text-2xl font-bold text-gray-900">Brainiac</h1>
-      <p className="text-gray-600">Improve your mental math skills with fun challenges</p>
-    </div>
-    
-    <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-      <StatCard title="High Score" value={stats.highScore} />
-      <StatCard title="Games Played" value={stats.gamesPlayed} />
-      <StatCard title="Problems Solved" value={stats.problemsSolved} />
-    </div>
-    
-    {stats.lastPlayed && (
-      <div className="mb-8">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Your Stats</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          {stats.bestStreak !== undefined && (
-            <StatCard title="Longest Streak" value={stats.bestStreak} />
-          )}
-          {stats.accuracy !== undefined && (
-            <StatCard title="Accuracy" value={`${stats.accuracy}%`} />
-          )}
-          {stats.averageResponseTime !== undefined && (
-            <StatCard title="Avg Response" value={`${stats.averageResponseTime.toFixed(2)}s`} />
-          )}
-          {stats.totalTimePlayed !== undefined && (
-            <StatCard title="Time Played" value={`${Math.round(stats.totalTimePlayed / 60)} min`} />
-          )}
+  const getStreakColor = (value: number) => {
+    if (value >= 10) return "text-indigo-600 bg-indigo-50";
+    if (value >= 5) return "text-blue-500 bg-blue-50";
+    return "text-gray-600 bg-gray-50";
+  };
+
+  // Calculate the width percentage for progress bars
+  const accuracyWidth = stats.accuracy ? `${stats.accuracy}%` : "0%";
+  const problemsWidth = stats.problemsSolved > 100 ? "100%" : `${stats.problemsSolved}%`;
+  const timeWidth = stats.averageResponseTime ? `${Math.min(100, stats.averageResponseTime * 10)}%` : "0%";
+  
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="mb-6 text-2xl font-bold text-gray-900">Welcome back!</h1>
+        
+        {/* Performance Overview Section */}
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold text-gray-800">Performance Overview</h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {/* Circular Progress for Accuracy */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm text-center">
+              <div className="relative inline-flex items-center justify-center">
+                <svg className="w-24 h-24">
+                  <circle 
+                    className="text-gray-200" 
+                    strokeWidth="8" 
+                    stroke="currentColor" 
+                    fill="transparent" 
+                    r="40" 
+                    cx="48" 
+                    cy="48"
+                  />
+                  <circle 
+                    className={stats.accuracy ? (stats.accuracy >= 80 ? "text-green-500" : stats.accuracy >= 60 ? "text-yellow-500" : "text-red-500") : "text-gray-300"}
+                    strokeWidth="8" 
+                    strokeDasharray={`${stats.accuracy ? stats.accuracy * 2.51 : 0} 251`} 
+                    strokeLinecap="round" 
+                    stroke="currentColor" 
+                    fill="transparent" 
+                    r="40" 
+                    cx="48" 
+                    cy="48"
+                    transform="rotate(-90 48 48)"
+                  />
+                </svg>
+                <span className="absolute text-xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
+              </div>
+              <p className="mt-2 text-sm font-medium text-gray-500">Accuracy</p>
+            </div>
+            
+            {/* High Score with Badge */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">High Score</p>
+                  <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.highScore}</p>
+                </div>
+                <div className={`rounded-full p-3 ${stats.highScore > 500 ? "bg-indigo-100" : "bg-gray-100"}`}>
+                  <Trophy className={`h-8 w-8 ${stats.highScore > 500 ? "text-indigo-600" : "text-gray-400"}`} />
+                </div>
+              </div>
+              {stats.highScore > 500 && (
+                <div className="mt-3 inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-800">
+                  🏆 Elite Score
+                </div>
+              )}
+            </div>
+            
+            {/* Problems Solved with Progress Bar */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-medium text-gray-500">Problems Solved</p>
+              <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.problemsSolved}</p>
+              <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
+                <div 
+                  className="h-2 rounded-full bg-blue-500" 
+                  style={{ width: problemsWidth }}
+                ></div>
+              </div>
+              {stats.problemsSolved >= 50 && (
+                <div className="mt-3 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                  🌟 {stats.problemsSolved >= 100 ? "Problem Master" : "50+ Problems"}
+                </div>
+              )}
+            </div>
+            
+            {/* Streak with Status */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-medium text-gray-500">Current Streak</p>
+              <div className="flex items-baseline">
+                <p className="text-3xl font-semibold text-gray-900">{stats.bestStreak || 0}</p>
+                <p className="ml-2 text-sm text-gray-500">days</p>
+              </div>
+              {stats.bestStreak && stats.bestStreak > 0 && (
+                <div className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStreakColor(stats.bestStreak)}`}>
+                  {stats.bestStreak >= 10 ? "🔥 On Fire!" : stats.bestStreak >= 5 ? "👍 Good Streak" : "🌱 Just Started"}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Topic Progress */}
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold text-gray-800">Your Learning Journey</h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Brainiac Stats Card */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+                  Brainiac
+                </h3>
+                <Link href="/brainiac" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
+                  Practice
+                </Link>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1 text-sm">
+                    <span>Games Played</span>
+                    <span>{stats.gamesPlayed}</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-gray-200">
+                    <div 
+                      className="h-2 rounded-full bg-yellow-500" 
+                      style={{ width: `${Math.min(100, stats.gamesPlayed * 2)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1 text-sm">
+                    <span>Response Time</span>
+                    <span>{stats.averageResponseTime ? `${stats.averageResponseTime.toFixed(1)}s` : "N/A"}</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-gray-200">
+                    <div 
+                      className="h-2 rounded-full bg-green-500" 
+                      style={{ width: timeWidth }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {stats.totalTimePlayed && (
+                  <div className="pt-2 text-sm">
+                    <span className="font-medium">Total Play Time:</span> 
+                    <span className="ml-2">{Math.round(stats.totalTimePlayed / 60)} minutes</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Problem Lab Stats Card */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <Book className="mr-2 h-5 w-5 text-blue-500" />
+                  Problem Lab
+                </h3>
+                <Link href="/problem-lab" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
+                  Browse
+                </Link>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1 text-sm">
+                    <span>Accuracy</span>
+                    <span>{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-gray-200">
+                    <div 
+                      className={`h-2 rounded-full ${stats.accuracy && stats.accuracy >= 80 ? "bg-green-500" : stats.accuracy && stats.accuracy >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
+                      style={{ width: accuracyWidth }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1 text-sm">
+                    <span>Problems</span>
+                    <span>{stats.problemsSolved}</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-gray-200">
+                    <div 
+                      className="h-2 rounded-full bg-blue-500" 
+                      style={{ width: problemsWidth }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 pt-2">
+                  {stats.problemsSolved >= 10 && (
+                    <div className="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                      10+ Problems
+                    </div>
+                  )}
+                  {stats.accuracy && stats.accuracy >= 80 && (
+                    <div className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                      High Accuracy
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Quick Tips Section */}
+        <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-6">
+          <h2 className="mb-4 text-lg font-medium text-indigo-800">Quick Tips</h2>
+          <ul className="space-y-2 text-indigo-700">
+            <li className="flex items-start">
+              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
+              <span>Practice for at least 10 minutes daily for best results</span>
+            </li>
+            <li className="flex items-start">
+              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
+              <span>Challenge yourself with higher difficulty levels to improve faster</span>
+            </li>
+            <li className="flex items-start">
+              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
+              <span>Check your progress regularly to identify areas for improvement</span>
+            </li>
+          </ul>
         </div>
       </div>
-    )}
-
-    <div className="mb-8">
-      <h2 className="mb-4 text-lg font-medium text-gray-900">Game Modes</h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GameModeCard
-          title="Speed Mode"
-          description="Solve as many problems as you can in 60 seconds"
-          icon={Zap}
-          linkText="Play Speed Mode"
-          linkHref="/brainiac"
-        />
-        <GameModeCard
-          title="Practice Mode"
-          description="Practice at your own pace with no time limit"
-          icon={Trophy}
-          linkText="Play Practice Mode"
-          linkHref="/brainiac?mode=practice"
-        />
-      </div>
     </div>
+  );
+};
 
-    <div className="rounded-lg bg-indigo-50 p-6">
-      <h3 className="mb-3 text-lg font-medium text-indigo-800">Tips & Tricks</h3>
-      <ul className="space-y-2 text-indigo-700">
-        <li className="flex items-start">• Focus on accuracy first, then speed</li>
-        <li className="flex items-start">• Practice daily for best results</li>
-        <li className="flex items-start">• Try to beat your high score</li>
-      </ul>
-    </div>
-  </div>
-);
 
-const ProblemLabDashboard = () => {
+
+const SavedProblemsDashboard = () => {
   const { user } = useAuth();
   const [savedProblems, setSavedProblems] = useState<SavedProblem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProblem, setSelectedProblem] = useState<SavedProblem | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [problemStats, setProblemStats] = useState({
-    problemsSolved: 0,
-    popularSubjects: ['Pre-Algebra', 'Algebra I'],
-    favoriteTopics: ['One-Step Equations', 'Order of Operations'],
-    totalPracticeTime: 120, // in minutes
-    accuracyRate: 85, // percentage
-  });
 
   // Fetch user's saved problems from Supabase
   useEffect(() => {
@@ -374,19 +499,10 @@ const ProblemLabDashboard = () => {
       
       setIsLoading(true);
       try {
-        const result = await getUserProblems(user.id, 50, 'problem-lab');
+        // Get all saved problems regardless of source
+        const result = await getUserProblems(user.id, 50);
         if (result.success && result.data) {
           setSavedProblems(result.data);
-          
-          // In a real app, you would calculate these stats from actual user data
-          // For now, we're using placeholder stats that would be calculated from user data
-          setProblemStats({
-            problemsSolved: result.data.length + 42, // Example: saved problems + solved problems
-            popularSubjects: ['Pre-Algebra', 'Algebra I'],
-            favoriteTopics: ['One-Step Equations', 'Order of Operations'],
-            totalPracticeTime: 120,
-            accuracyRate: 85,
-          });
         } else {
           setError('Failed to load your saved problems');
         }
@@ -404,59 +520,101 @@ const ProblemLabDashboard = () => {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Problem Lab</h1>
-        <p className="text-gray-600">Generate custom math problems tailored to your skill level and learning goals. Practice with step-by-step solutions.</p>
+        <h1 className="text-2xl font-bold text-gray-900">Saved Problems</h1>
+        <p className="text-gray-600">Access your saved math problems for review and practice.</p>
       </div>
       
       {/* Stats Section */}
       <div className="mb-8">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Your Progress</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <StatCard title="Problems Solved" value={problemStats.problemsSolved} />
-          <StatCard title="Practice Time" value={`${problemStats.totalPracticeTime} min`} />
-          <StatCard title="Accuracy Rate" value={`${problemStats.accuracyRate}%`} />
-          <StatCard title="Saved Problems" value={savedProblems.length} />
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-medium text-gray-900">Your Saved Problems</h2>
+          <Link href="/problem-lab">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Book className="h-4 w-4" /> Find New Problems
+            </Button>
+          </Link>
         </div>
       </div>
       
-      {/* Problem Modes Section */}
-      <div className="mb-8">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Problem Modes</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <GameModeCard
-            title="Problem Lab"
-            description="Generate custom problems based on topic and difficulty"
-            icon={FlaskConical}
-            linkText="Open Lab"
-            linkHref="/problem-lab"
-          />
-          <GameModeCard
-            title="Snapshot & Solve"
-            description="Take a photo of a math problem and get step-by-step solutions"
-            icon={Eye}
-            linkText="Try Snapshot"
-            linkHref="/problem-lab/snapshot"
-          />
-          <GameModeCard
-            title="Daily Challenge"
-            description="Tackle a new set of curated problems each day"
-            icon={Zap}
-            linkText="Start Challenge"
-            linkHref="/problem-lab/daily"
-          />
-        </div>
-      </div>
-      
-      {/* Tips & Tricks Section */}
-      <div className="mb-8 rounded-lg bg-indigo-50 p-6">
-        <h3 className="mb-3 text-lg font-medium text-indigo-800">Tips & Tricks</h3>
-        <ul className="space-y-2 text-indigo-700">
-          <li className="flex items-start">• Start with topics you're comfortable with before tackling challenging ones</li>
-          <li className="flex items-start">• Review the step-by-step solutions to understand problem-solving approaches</li>
-          <li className="flex items-start">• Practice regularly to build and maintain your skills</li>
-          <li className="flex items-start">• Try different difficulty levels to gradually improve</li>
-          <li className="flex items-start">• Use the performance insights to focus on areas that need improvement</li>
-        </ul>
+      {/* Saved Problems Section */}
+      <div>
+
+        {isLoading ? (
+          <div className="flex justify-center p-8">
+            <p>Loading your saved problems...</p>
+          </div>
+        ) : error ? (
+          <div className="rounded-lg bg-red-50 p-4 text-red-700">
+            <div className="flex">
+              <AlertCircle className="mr-2 h-5 w-5" />
+              <p>{error}</p>
+            </div>
+          </div>
+        ) : savedProblems.length === 0 ? (
+          <div className="rounded-lg bg-gray-50 p-6 text-center">
+            <h3 className="mb-2 text-lg font-medium">No saved problems yet</h3>
+            <p className="text-gray-600 mb-4">Save problems from the Problem Lab to access them later</p>
+            <Link href="/problem-lab">
+              <Button>Go to Problem Lab</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {savedProblems.map((problem) => (
+              <Card key={problem.id} className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between">
+                    <div>
+                      <CardTitle className="text-md">{problem.subject} - {problem.topic}</CardTitle>
+                      <CardDescription>{problem.difficulty} Difficulty</CardDescription>
+                    </div>
+                    <div>
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedProblem(selectedProblem?.id === problem.id ? null : problem)}>
+                        {selectedProblem?.id === problem.id ? 'Hide Solution' : 'Show Solution'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose max-w-none">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                    >
+                      {problem.question}
+                    </ReactMarkdown>
+                  </div>
+                  
+                  {selectedProblem?.id === problem.id && (
+                    <div className="mt-4 border-t pt-4">
+                      <h4 className="font-medium mb-2">Solution:</h4>
+                      <div className="prose max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {problem.solution}
+                        </ReactMarkdown>
+                      </div>
+                      
+                      {problem.answer && (
+                        <div className="mt-4 p-2 bg-green-50 rounded">
+                          <strong>Answer:</strong> 
+                          <ReactMarkdown
+                            remarkPlugins={[remarkMath]}
+                            rehypePlugins={[rehypeKatex]}
+                          >
+                            {problem.answer}
+                          </ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
@@ -561,7 +719,7 @@ const ProblemLabDashboard = () => {
                   <div className="mt-6">
                     <Link href="/problem-lab">
                       <Button className="w-full">
-                        <FlaskConical className="mr-2 h-4 w-4" />
+                        <Book className="mr-2 h-4 w-4" />
                         Practice in Problem Lab
                       </Button>
                     </Link>
