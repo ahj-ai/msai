@@ -2,7 +2,7 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase, getUserProblems } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
@@ -242,7 +242,58 @@ const NavItem = ({ icon: Icon, label, active, onClick }: NavItemProps) => (
   </button>
 );
 
+// Weekly Goal interface
+interface WeeklyGoal {
+  current: number;
+  target: number;
+  message: string;
+  unit?: string;
+}
+
+// Weekly Goal Card component
+const WeeklyGoalCard = ({ goal }: { goal: WeeklyGoal }) => {
+  const percentComplete = Math.round((goal.current / goal.target) * 100);
+  
+  return (
+    <div className="rounded-xl overflow-hidden mb-8">
+      <div className="bg-gradient-to-r from-indigo-800/90 to-purple-600/90 p-6 text-white relative overflow-hidden">
+        {/* Target icon */}
+        <div className="absolute top-6 right-6 opacity-20">
+          <svg className="w-32 h-32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.5" fill="none" />
+            <circle cx="12" cy="12" r="6" stroke="white" strokeWidth="1.5" fill="none" />
+            <circle cx="12" cy="12" r="2" fill="white" />
+          </svg>
+        </div>
+        
+        <h2 className="text-2xl font-bold mb-2">Weekly Goal Progress</h2>
+        <p className="mb-4 text-white/90">{goal.message}</p>
+        
+        <div className="mb-2 flex justify-between">
+          <span>{goal.current} of {goal.target} {goal.unit || 'minutes'}</span>
+          <span className="font-bold">{percentComplete}%</span>
+        </div>
+        
+        <div className="h-3 w-full bg-white/30 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-green-300" 
+            style={{ width: `${percentComplete}%` }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const MainDashboard = ({ stats }: { stats: UserStats }) => {
+  // Weekly goal data - this would typically come from an API or database
+  const weeklyGoal: WeeklyGoal = {
+    current: stats.problemsSolved % 50,  // Reset counter every 50 problems
+    target: 50,
+    message: "Complete 50 problems this week to reach your goal.",
+    unit: "problems"
+  };
+
   // Functions to determine color based on value
   const getAccuracyColor = (value: number) => {
     if (value >= 80) return "text-green-500 bg-green-50";
@@ -319,19 +370,29 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
               )}
             </div>
             
-            {/* Problems Solved with Progress Bar */}
+            {/* Practice Time with Clock Icon */}
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-gray-500">Problems Solved</p>
-              <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.problemsSolved}</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Practice Time</p>
+                  <p className="mt-1 text-3xl font-semibold text-gray-900">
+                    {stats.totalTimePlayed ? `${Math.round(stats.totalTimePlayed / 60)}` : "0"}
+                  </p>
+                  <p className="text-sm text-gray-500">minutes</p>
+                </div>
+                <div className="rounded-full p-3 bg-blue-100">
+                  <Clock className="h-8 w-8 text-blue-600" />
+                </div>
+              </div>
               <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
                 <div 
                   className="h-2 rounded-full bg-blue-500" 
-                  style={{ width: problemsWidth }}
+                  style={{ width: stats.totalTimePlayed ? `${Math.min(100, (stats.totalTimePlayed / 60) / 3)}%` : "0%" }}
                 ></div>
               </div>
-              {stats.problemsSolved >= 50 && (
+              {stats.totalTimePlayed && stats.totalTimePlayed > 1800 && (
                 <div className="mt-3 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
-                  🌟 {stats.problemsSolved >= 100 ? "Problem Master" : "50+ Problems"}
+                  ⏱️ {stats.totalTimePlayed > 3600 ? "Time Master" : "30+ Minutes"}
                 </div>
               )}
             </div>
@@ -351,6 +412,9 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
             </div>
           </div>
         </div>
+        
+        {/* Weekly Goal Progress Card */}
+        <WeeklyGoalCard goal={weeklyGoal} />
 
         {/* Topic Progress */}
         <div className="mb-8">
@@ -485,12 +549,30 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
 
 
 
+// Stats counter card component for SavedProblemsDashboard
+const ProblemStatsCard = ({ value, label, color }: { value: number; label: string; color: string }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4 text-center">
+      <p className={`text-4xl font-bold ${color}`}>{value}</p>
+      <p className="text-gray-500 text-sm mt-1">{label}</p>
+    </div>
+  );
+};
+
 const SavedProblemsDashboard = () => {
   const { user } = useAuth();
   const [savedProblems, setSavedProblems] = useState<SavedProblem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProblem, setSelectedProblem] = useState<SavedProblem | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Calculate problem stats
+  const problemStats = {
+    total: savedProblems.length,
+    regular: savedProblems.filter(p => p.difficulty === 'Easy' || p.difficulty === 'Medium').length,
+    advanced: savedProblems.filter(p => p.difficulty === 'Hard' || p.difficulty === 'Advanced').length,
+    subjects: Array.from(new Set(savedProblems.map(p => p.subject))).length
+  };
 
   // Fetch user's saved problems from Supabase
   useEffect(() => {
@@ -524,8 +606,18 @@ const SavedProblemsDashboard = () => {
         <p className="text-gray-600">Access your saved math problems for review and practice.</p>
       </div>
       
-      {/* Stats Section */}
+      {/* Problem Stats Section */}
       <div className="mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <ProblemStatsCard value={problemStats.total} label="Total Problems" color="text-purple-600" />
+          <ProblemStatsCard value={problemStats.regular} label="Regular" color="text-orange-500" />
+          <ProblemStatsCard value={problemStats.advanced} label="Advanced" color="text-red-600" />
+          <ProblemStatsCard value={problemStats.subjects} label="Subjects" color="text-green-600" />
+        </div>
+      </div>
+
+      {/* Header with action button */}
+      <div className="mb-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-medium text-gray-900">Your Saved Problems</h2>
           <Link href="/problem-lab">
@@ -536,90 +628,8 @@ const SavedProblemsDashboard = () => {
         </div>
       </div>
       
-      {/* Saved Problems Section */}
+      {/* Saved Problems Content */}
       <div>
-
-        {isLoading ? (
-          <div className="flex justify-center p-8">
-            <p>Loading your saved problems...</p>
-          </div>
-        ) : error ? (
-          <div className="rounded-lg bg-red-50 p-4 text-red-700">
-            <div className="flex">
-              <AlertCircle className="mr-2 h-5 w-5" />
-              <p>{error}</p>
-            </div>
-          </div>
-        ) : savedProblems.length === 0 ? (
-          <div className="rounded-lg bg-gray-50 p-6 text-center">
-            <h3 className="mb-2 text-lg font-medium">No saved problems yet</h3>
-            <p className="text-gray-600 mb-4">Save problems from the Problem Lab to access them later</p>
-            <Link href="/problem-lab">
-              <Button>Go to Problem Lab</Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {savedProblems.map((problem) => (
-              <Card key={problem.id} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between">
-                    <div>
-                      <CardTitle className="text-md">{problem.subject} - {problem.topic}</CardTitle>
-                      <CardDescription>{problem.difficulty} Difficulty</CardDescription>
-                    </div>
-                    <div>
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedProblem(selectedProblem?.id === problem.id ? null : problem)}>
-                        {selectedProblem?.id === problem.id ? 'Hide Solution' : 'Show Solution'}
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose max-w-none">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkMath]}
-                      rehypePlugins={[rehypeKatex]}
-                    >
-                      {problem.question}
-                    </ReactMarkdown>
-                  </div>
-                  
-                  {selectedProblem?.id === problem.id && (
-                    <div className="mt-4 border-t pt-4">
-                      <h4 className="font-medium mb-2">Solution:</h4>
-                      <div className="prose max-w-none">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {problem.solution}
-                        </ReactMarkdown>
-                      </div>
-                      
-                      {problem.answer && (
-                        <div className="mt-4 p-2 bg-green-50 rounded">
-                          <strong>Answer:</strong> 
-                          <ReactMarkdown
-                            remarkPlugins={[remarkMath]}
-                            rehypePlugins={[rehypeKatex]}
-                          >
-                            {problem.answer}
-                          </ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <h2 className="mb-4 text-lg font-medium text-gray-900">Your Saved Problems</h2>
-        
         {isLoading ? (
           <div className="flex justify-center items-center p-12">
             <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
