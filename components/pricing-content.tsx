@@ -1,207 +1,208 @@
-"use client";
+"use client"
+
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check } from "lucide-react"
+import { Badge } from "./ui/badge"
+import { Check, Star, Zap } from "lucide-react"
 import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { SectionTitle } from "@/components/SectionTitle"
 import { PageLayout } from "@/components/PageLayout";
 
 export const PricingContent = () => {
-  const features = [
-    { name: "Mental Math Game", description: "Sharpen your mental math skills with our adaptive game." },
-    { name: "Custom Problem Sets", description: "Generate tailored problem sets to focus on specific areas." },
-    { name: "Personalized Insights", description: "Get detailed analytics on your performance and progress." },
-    { name: "Leaderboards & Badges", description: "Compete with others and earn badges for your achievements." },
-    { name: "AI-Generated Features", description: "Experience cutting-edge AI-powered learning tools." },
+  const stackUsage = [
+    { action: "Generate a Practice Problem Set", cost: "Free" },
+    { action: "Ask a new Text Question", cost: "3 Stacks" },
+    { action: "Ask a new Image Problem", cost: "5 Stacks" },
+    { action: "Ask a follow-up question (Text)", cost: "1 Stack" },
+    { action: "Ask a follow-up question (Image)", cost: "2 Stacks" },
+  ]
+
+  const whyMathStackAI = [
+    "AI-powered problem generation tailored to your learning level",
+    "Step-by-step solutions with detailed explanations",
+    "Support for text and image-based math problems",
+    "Adaptive learning that grows with your skills",
+    "24/7 availability for instant math help",
   ]
 
   const faqs = [
     {
-      question: "What payment methods do you accept?",
-      answer: "We accept all major credit cards, PayPal, and bank transfers for annual subscriptions.",
+      question: "Do my monthly Stacks roll over?",
+      answer:
+        "No, monthly Stacks reset at the beginning of each billing cycle. However, any Stacks you purchase separately (Stack Packs) never expire and will carry over indefinitely.",
     },
     {
-      question: "Can I cancel my subscription at any time?",
+      question: "Do Stacks I purchase expire?",
       answer:
-        "Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period.",
+        "Stack Packs never expire! Once you purchase additional Stacks, they remain in your account until you use them, regardless of your subscription status.",
     },
     {
-      question: "Is there a student discount available?",
+      question: "Can I change my plan anytime?",
       answer:
-        "Yes, we offer a 20% discount for students with a valid .edu email address. Contact our support team to apply for the discount.",
+        "Yes! You can upgrade, downgrade, or cancel your subscription at any time. Changes take effect at your next billing cycle.",
     },
     {
-      question: "Do you offer a money-back guarantee?",
+      question: "What happens if I run out of Stacks?",
       answer:
-        "Yes, we offer a 30-day money-back guarantee. If you're not satisfied with our service, you can request a full refund within the first 30 days of your subscription.",
+        "You can always purchase additional Stack Packs to continue using premium features, or wait until your next billing cycle if you're on the MathStackAI Pro plan.",
     },
   ];
 
   return (
     <PageLayout showNavFooter={true}>
-      <div className="bg-gradient-to-b from-white to-[#F8F9FB] min-h-screen">
-        <div className="container mx-auto px-4 py-20 max-w-6xl">
-          <div className="text-center mb-20">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
-              Pricing Plans
-            </h1>
-            <div className="max-w-3xl mx-auto">
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Choose the plan that best fits your learning journey
-              </p>
-            </div>
-          </div>
+      <div className="min-h-screen bg-off-white">
+        <div className="container mx-auto px-4 py-16">
+          {/* Header Section */}
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-deep-sapphire">Choose Your Stack. Power Your Progress.</h1>
+            <p className="text-xl text-cool-gray max-w-2xl mx-auto">
+              Start for free, subscribe for deep learning, or add to your Stack anytime you need.
+            </p>
+          </motion.div>
 
-        {/* --- New Pricing Comparison Table --- */}
-        <motion.div
-          className="max-w-7xl mx-auto mb-20"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <div className="bg-white rounded-2xl shadow-sm border-2 border-indigo-50 overflow-hidden hover:shadow-lg transition-all relative">
-              <div className="bg-indigo-50 text-indigo-800 text-center py-2 text-xs font-semibold tracking-wider">
-                PERFECT FOR TRYING OUT
-              </div>
-              <div className="pt-8 pb-6 px-6 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-1">$0<span className="text-lg font-normal text-gray-600">/forever</span></div>
-                <p className="text-gray-600 mb-6">No credit card required</p>
-                <a href="/signup" className="block mb-6">
-                  <button className="w-full py-3 px-6 bg-white border-2 border-indigo-100 hover:bg-indigo-50 text-indigo-700 font-medium rounded-lg transition-all hover:shadow-sm">
-                    Get Started Free
-                  </button>
-                </a>
-              </div>
-              <div className="border-t border-gray-100 px-6 pb-8 pt-6">
-                <ul className="space-y-4">
-                  <li className="flex items-start">
-                    <Check className="w-5 h-5 text-indigo-400 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Basic Mental Math Game</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="w-5 h-5 text-indigo-400 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Limited Problem Sets</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="w-5 h-5 text-indigo-400 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Basic Progress Tracking</span>
-                  </li>
-                  <li className="flex items-start text-gray-400">
-                    <span className="w-5 h-5 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </span>
-                    <span className="line-through">Personalized Insights</span>
-                  </li>
-                  <li className="flex items-start text-gray-400">
-                    <span className="w-5 h-5 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </span>
-                    <span className="line-through">AI-Generated Features</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-20">
+          {/* Free Plan */}
+          <motion.div
+            className="h-full flex flex-col"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="bg-white border border-gray-200 shadow-sm h-full flex flex-col">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold text-gray-800">Free</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-gray-800">$0</span>
+                  <span className="text-gray-500 ml-2">/ month</span>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center">
+                    <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
+                    <span className="text-gray-800">Unlimited Practice Problem Sets</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
+                    <span className="text-gray-800">50 Stacks per month</span>
+                  </div>
+                </div>
+                <div className="mt-auto">
+                  <Link href="/signup" className="block">
+                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2">
+                      Start Learning for Free
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-            {/* Monthly Plan */}
-            <div className="bg-white rounded-2xl shadow-md border-2 border-indigo-500 overflow-hidden hover:shadow-lg transition-all relative">
-              <div className="bg-indigo-600 text-white text-center py-2 text-xs font-semibold tracking-wider">
-                MOST POPULAR
-              </div>
-              <div className="pt-8 pb-6 px-6 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-1">$11.99<span className="text-lg font-normal text-gray-600">/month</span></div>
-                <p className="text-gray-600 mb-6">Billed monthly</p>
-                <a href="/signup" className="block mb-6">
-                  <button className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg">
-                    Choose Monthly
-                  </button>
-                </a>
-              </div>
-              <div className="border-t border-gray-100 px-6 pb-8 pt-6">
-                <ul className="space-y-4">
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Full Mental Math Game</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Unlimited Problem Sets</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Advanced Progress Tracking</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Personalized Insights</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>AI-Generated Features</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+          {/* Pro Plan */}
+          <motion.div
+            className="h-full flex flex-col"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="bg-white border-2 border-pink-500 shadow-lg h-full flex flex-col relative">
+              <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-pink-500 text-white px-4 py-1">
+                Best Value
+              </Badge>
+              <CardHeader className="text-center pb-4 pt-8">
+                <CardTitle className="text-2xl font-bold text-gray-800">MathStackAI Pro</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-gray-800">$14.99</span>
+                  <span className="text-gray-500 ml-2">/ month</span>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center">
+                    <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
+                    <span className="text-gray-800">1,000 Stacks per month</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
+                    <span className="text-gray-800">Everything in Free</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
+                    <span className="text-gray-800">Discounted follow-ups</span>
+                  </div>
+                </div>
+                <div className="mt-auto">
+                  <Link href="/signup" className="block">
+                    <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2">
+                      Get MathStackAI Pro
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-            {/* Annual Plan */}
-            <div className="bg-white rounded-2xl shadow-sm border-2 border-indigo-100 overflow-hidden hover:shadow-lg transition-all relative">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-2 text-xs font-semibold tracking-wider">
-                SAVE 16%
-              </div>
-              <div className="pt-8 pb-6 px-6 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Annual</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-1">$120<span className="text-lg font-normal text-gray-600">/year</span></div>
-                <p className="text-gray-600 mb-6">Billed annually</p>
-                <a href="/signup" className="block mb-6">
-                  <button className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg">
-                    Choose Annual
-                  </button>
-                </a>
-              </div>
-              <div className="border-t border-gray-100 px-6 pb-8 pt-6">
-                <ul className="space-y-4">
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Full Mental Math Game</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Unlimited Problem Sets</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Advanced Progress Tracking</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Personalized Insights</span>
-                  </li>
-                  <li className="flex items-start text-gray-700">
-                    <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>AI-Generated Features</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="w-5 h-5 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
-                      <svg className="w-3 h-3 text-indigo-500" fill="currentColor" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3" />
-                      </svg>
-                    </span>
-                    <span className="font-medium text-indigo-700">Beta Test New Features</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+          {/* Stack Packs */}
+          <motion.div
+            className="h-full flex flex-col"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="bg-white border border-gray-200 shadow-sm h-full flex flex-col">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold text-gray-800">Stack Packs</CardTitle>
+                <CardDescription className="text-gray-500 mt-2">
+                  One-time purchases available for users on any plan
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="space-y-4 mb-6">
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="text-gray-800 font-medium">Small Stack Pack</div>
+                          <div className="text-sm text-gray-600">250 Stack Pack</div>
+                        </div>
+                        <span className="text-2xl font-bold text-gray-800">$4.99</span>
+                      </div>
+                      <div className="text-xs text-gray-500">One-Time Purchase</div>
+                      <div className="text-xs text-gray-500">USA: $4.99 USD (Regional pricing available)</div>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="text-gray-800 font-medium">Large Stack Pack</div>
+                          <div className="text-sm text-gray-600">1,200 Stack Pack</div>
+                        </div>
+                        <span className="text-2xl font-bold text-gray-800">$19.99</span>
+                      </div>
+                      <div className="text-xs text-gray-500">One-Time Purchase</div>
+                      <div className="text-xs text-gray-500">USA: $19.99 USD (Regional pricing available)</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-auto">
+                  <Link href="/signup" className="block">
+                    <Button className="w-full bg-green-500 hover:bg-green-600 text-white py-2">
+                      Get More Stacks
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Trust Signals Section */}
         <div className="max-w-4xl mx-auto mb-20 px-6 py-8 bg-white rounded-2xl shadow-sm border border-gray-100">

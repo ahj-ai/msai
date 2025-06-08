@@ -757,40 +757,40 @@ export function ProblemLab() {
                           String(props.children[0]) : '';
                         return content === 'Problem' ? null : <h3 {...props} />
                       },
-                      // Only show content until the next '### Solution' heading
+                      // Only show content until the next '### Step-By-Step Solution' heading
                       p: ({node, ...props}) => {
                         const content = props.children ? String(props.children) : '';
-                        if (content.includes('### Solution')) {
+                        if (content.includes('### Step-By-Step Solution')) {
                           return null;
                         }
                         return <p {...props} />;
                       }
                     }}
                   >
-                    {typeof answer === 'string' ? answer.split('### Solution')[0] : ''}
+                    {typeof answer === 'string' ? answer.split('### Step-By-Step Solution')[0] : ''}
                   </ReactMarkdown>
                 </div>
               </div>
               
               {/* Solution Section */}
               <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Solution</h3>
+                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Step-By-Step Solution</h3>
                 <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
                   <ReactMarkdown
                     remarkPlugins={[remarkMath]}
                     rehypePlugins={[rehypeKatex]}
                     components={{
                       h3: ({node, ...props}) => {
-                        // Hide the original '### Solution' heading
+                        // Hide the original '### Step-By-Step Solution' heading
                         const content = Array.isArray(props.children) && props.children.length > 0 ? 
                           String(props.children[0]) : '';
-                        return content === 'Solution' ? null : <h3 {...props} />
+                        return content === 'Step-By-Step Solution' ? null : <h3 {...props} />
                       }
                     }}
                   >
                     {typeof answer === 'string' ? 
-                      answer.includes('### Solution') ? 
-                        answer.split('### Solution')[1]?.split('### Answer')[0] || '' : 
+                      answer.includes('### Step-By-Step Solution') ? 
+                        answer.split('### Step-By-Step Solution')[1]?.split('### Answer')[0] || '' : 
                         '' : 
                       ''}
                   </ReactMarkdown>
@@ -889,40 +889,40 @@ export function ProblemLab() {
                           String(props.children[0]) : '';
                         return content === 'Problem' ? null : <h3 {...props} />
                       },
-                      // Only show content until the next '### Solution' heading
+                      // Only show content until the next '### Step-By-Step Solution' heading
                       p: ({node, ...props}) => {
                         const content = props.children ? String(props.children) : '';
-                        if (content.includes('### Solution')) {
+                        if (content.includes('### Step-By-Step Solution')) {
                           return null;
                         }
                         return <p {...props} />;
                       }
                     }}
                   >
-                    {typeof solution === 'string' ? solution.split('### Solution')[0] : ''}
+                    {typeof solution === 'string' ? solution.split('### Step-By-Step Solution')[0] : ''}
                   </ReactMarkdown>
                 </div>
               </div>
               
               {/* Solution Section */}
               <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Solution</h3>
+                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Step-By-Step Solution</h3>
                 <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
                   <ReactMarkdown
                     remarkPlugins={[remarkMath]}
                     rehypePlugins={[rehypeKatex]}
                     components={{
                       h3: ({node, ...props}) => {
-                        // Hide the original '### Solution' heading
+                        // Hide the original '### Step-By-Step Solution' heading
                         const content = Array.isArray(props.children) && props.children.length > 0 ? 
                           String(props.children[0]) : '';
-                        return content === 'Solution' ? null : <h3 {...props} />
+                        return content === 'Step-By-Step Solution' ? null : <h3 {...props} />
                       }
                     }}
                   >
                     {typeof solution === 'string' ? 
-                      solution.includes('### Solution') ? 
-                        solution.split('### Solution')[1]?.split('### Answer')[0] || '' : 
+                      solution.includes('### Step-By-Step Solution') ? 
+                        solution.split('### Step-By-Step Solution')[1]?.split('### Answer')[0] || '' : 
                         '' : 
                       ''}
                   </ReactMarkdown>

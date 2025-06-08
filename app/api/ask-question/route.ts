@@ -45,7 +45,7 @@ You must format the entire response in Markdown. Follow this precise structure u
 - Identify the type of problem (e.g., "Differentiation of a Polynomial," "Solving a System of Linear Equations").
 - List the key concepts or formulas that will be necessary for the solution (e.g., "The Power Rule," "The Quadratic Formula").
 
-### Solution
+### Step-By-Step Solution
 Present the main solution using numbered steps (1., 2., etc.).
 For each step, you must:
 - State the action being taken (e.g., "Differentiate the first term").

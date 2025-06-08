@@ -97,6 +97,8 @@ export async function saveUserProgress(userId: string, gameStats: GameStats) {
       difficulty
     } = gameStats;
     
+    let result;
+    
     // If user has existing data, update it; otherwise create a new entry
     if (existingData) {
       // Update existing progress
@@ -137,7 +139,7 @@ export async function saveUserProgress(userId: string, gameStats: GameStats) {
       }
       
       console.log('User progress updated successfully:', data);
-      return { success: true, data };
+      result = { success: true, data };
     } else {
       // Create new progress entry
       const { data, error } = await supabase
@@ -179,10 +181,333 @@ export async function saveUserProgress(userId: string, gameStats: GameStats) {
       }
       
       console.log('User progress created successfully:', data);
-      return { success: true, data };
+      result = { success: true, data };
     }
+    
+    // Update weekly goals after saving progress
+    try {
+      // Get active weekly goals
+      const { data: weeklyGoals, success: goalsSuccess } = await getUserWeeklyGoals(userId);
+      
+      if (goalsSuccess && weeklyGoals && weeklyGoals.length > 0) {
+        console.log('Updating weekly goals after game completion');
+        
+        // Process each goal type
+        for (const goal of weeklyGoals) {
+          let updatedProgress = goal.current;
+          
+          // Update based on goal type
+          switch(goal.goal_type) {
+            case 'games_played':
+              updatedProgress += 1; // Increment games played
+              break;
+            case 'problems_solved':
+              updatedProgress += correctAnswers; // Add correct answers from this game
+              break;
+            case 'practice_time':
+              updatedProgress += Math.ceil(totalTime / 60); // Add practice time in minutes
+              break;
+          }
+          
+          // Update goal if progress has changed
+          if (updatedProgress > goal.current) {
+            await updateGoalProgress(userId, goal.id, updatedProgress);
+          }
+        }
+      } else {
+        // If no weekly goals found, consider generating them
+        console.log('No active weekly goals found after game completion');
+      }
+    } catch (goalError) {
+      // Don't fail the whole function if goal update fails
+      console.error('Error updating weekly goals:', goalError);
+    }
+    
+    return result;
   } catch (error) {
     console.error('Failed to save user progress:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Interface for user goals
+ */
+export interface UserGoal {
+  id?: string;
+  user_id: string;
+  goal_type: string;
+  target: number;
+  current: number;
+  start_date: string;
+  end_date: string;
+  completed: boolean;
+  message?: string;
+  unit?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Get active weekly goals for a user
+ * @param userId The Clerk user ID
+ * @returns Object containing success status and data/error
+ */
+export async function getUserWeeklyGoals(userId: string) {
+  console.log('Fetching weekly goals for user:', userId);
+  
+  try {
+    // Get the current date
+    const now = new Date();
+    
+    // Query for active goals (where current date is between start_date and end_date)
+    const { data, error } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('user_id', userId)
+      .lte('start_date', now.toISOString())
+      .gte('end_date', now.toISOString())
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error('Error fetching user goals:', error);
+      return { success: false, error };
+    }
+    
+    console.log('User goals fetched successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to fetch user goals:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Create a new weekly goal for a user
+ * @param userId The Clerk user ID
+ * @param goal Goal data
+ * @returns Object containing success status and data/error
+ */
+export async function createUserGoal(userId: string, goal: Omit<UserGoal, 'user_id' | 'id'>) {
+  console.log('Creating new goal for user:', userId);
+  
+  try {
+    // Set start and end dates if not provided
+    if (!goal.start_date || !goal.end_date) {
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday of current week
+      startOfWeek.setHours(0, 0, 0, 0);
+      
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday of current week
+      endOfWeek.setHours(23, 59, 59, 999);
+      
+      goal.start_date = goal.start_date || startOfWeek.toISOString();
+      goal.end_date = goal.end_date || endOfWeek.toISOString();
+    }
+    
+    const { data, error } = await supabase
+      .from('user_goals')
+      .insert([
+        {
+          user_id: userId,
+          ...goal,
+          current: goal.current || 0,
+          completed: goal.completed || false
+        }
+      ])
+      .select();
+      
+    if (error) {
+      console.error('Error creating user goal:', error);
+      return { success: false, error };
+    }
+    
+    console.log('User goal created successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to create user goal:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Update a user's progress towards a goal
+ * @param userId The Clerk user ID
+ * @param goalId The goal ID
+ * @param progress The new progress value
+ * @returns Object containing success status and data/error
+ */
+export async function updateGoalProgress(userId: string, goalId: string, progress: number) {
+  console.log('Updating goal progress for user:', userId, 'goal:', goalId);
+  
+  try {
+    // First get the goal to check if it's completed
+    const { data: goalData, error: fetchError } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('id', goalId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (fetchError) {
+      console.error('Error fetching goal for update:', fetchError);
+      return { success: false, error: fetchError };
+    }
+    
+    // Check if goal is completed
+    const completed = progress >= goalData.target;
+    
+    // Update the goal
+    const { data, error } = await supabase
+      .from('user_goals')
+      .update({
+        current: progress,
+        completed,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', goalId)
+      .eq('user_id', userId)
+      .select();
+      
+    if (error) {
+      console.error('Error updating goal progress:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Goal progress updated successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to update goal progress:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Delete a user goal
+ * @param userId The Clerk user ID
+ * @param goalId The goal ID
+ * @returns Object containing success status and data/error
+ */
+export async function deleteUserGoal(userId: string, goalId: string) {
+  console.log('Deleting goal for user:', userId, 'goal:', goalId);
+  
+  try {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .delete()
+      .eq('id', goalId)
+      .eq('user_id', userId);
+      
+    if (error) {
+      console.error('Error deleting user goal:', error);
+      return { success: false, error };
+    }
+    
+    console.log('User goal deleted successfully');
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to delete user goal:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Generate default weekly goals for a user based on their activity level
+ * @param userId The Clerk user ID
+ * @returns Object containing success status and data/error
+ */
+export async function generateDefaultWeeklyGoals(userId: string) {
+  console.log('Generating default weekly goals for user:', userId);
+  
+  try {
+    // Get user's activity level from progress data
+    const { data: progressData, error: progressError } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+      
+    if (progressError && progressError.code !== 'PGRST116') {
+      console.error('Error fetching user progress:', progressError);
+      return { success: false, error: progressError };
+    }
+    
+    // Set default goals based on activity level
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday of current week
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday of current week
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    // Determine activity level and set appropriate goals
+    const gamesPlayed = progressData?.games_played || 0;
+    const problemsSolved = progressData?.problems_solved || 0;
+    
+    // Create goals based on user's history
+    const goals = [
+      {
+        goal_type: 'problems_solved',
+        target: Math.max(5, Math.ceil(problemsSolved * 0.2)), // At least 5, or 20% of total problems solved
+        current: 0,
+        start_date: startOfWeek.toISOString(),
+        end_date: endOfWeek.toISOString(),
+        message: 'Solve math problems this week',
+        unit: 'problems',
+        completed: false
+      },
+      {
+        goal_type: 'games_played',
+        target: Math.max(3, Math.ceil(gamesPlayed * 0.15)), // At least 3, or 15% of total games played
+        current: 0,
+        start_date: startOfWeek.toISOString(),
+        end_date: endOfWeek.toISOString(),
+        message: 'Play Brainiac games this week',
+        unit: 'games',
+        completed: false
+      },
+      {
+        goal_type: 'practice_time',
+        target: 30, // 30 minutes of practice time
+        current: 0,
+        start_date: startOfWeek.toISOString(),
+        end_date: endOfWeek.toISOString(),
+        message: 'Practice math this week',
+        unit: 'minutes',
+        completed: false
+      }
+    ];
+    
+    // First, delete any existing goals for this week
+    await supabase
+      .from('user_goals')
+      .delete()
+      .eq('user_id', userId)
+      .gte('start_date', startOfWeek.toISOString())
+      .lte('end_date', endOfWeek.toISOString());
+    
+    // Insert all goals
+    const { data, error } = await supabase
+      .from('user_goals')
+      .insert(goals.map(goal => ({
+        user_id: userId,
+        ...goal
+      })))
+      .select();
+      
+    if (error) {
+      console.error('Error creating default goals:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Default goals created successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to generate default goals:', error);
     return { success: false, error };
   }
 }
@@ -270,6 +595,92 @@ export async function getUserProblems(userId: string, limit: number = 50, source
     return { success: true, data };
   } catch (error) {
     console.error('Failed to fetch user problems:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Get topic progress statistics for a user
+ * @param userId The Clerk user ID
+ * @returns Object with topic stats and recent activity
+ */
+export async function getUserTopicProgress(userId: string) {
+  console.log(`Getting topic progress for user: ${userId}`);
+  
+  try {
+    // Get all user problems to analyze
+    const { data: userProblems, error } = await supabase
+      .from('user_problems')
+      .select('subject, topic, difficulty, created_at, metadata')
+      .eq('user_id', userId);
+    
+    if (error) {
+      console.error('Error fetching user topic data:', error);
+      return { success: false, error };
+    }
+    
+    if (!userProblems || userProblems.length === 0) {
+      return { 
+        success: true, 
+        data: { 
+          topicStats: [],
+          recentTopics: [],
+          subjectDistribution: {},
+          totalProblems: 0
+        } 
+      };
+    }
+    
+    // Process the data to extract topic statistics
+    const topicCounts: Record<string, { count: number, correct: number, lastAttempted: string }> = {};
+    const subjectCounts: Record<string, number> = {};
+    
+    userProblems.forEach(problem => {
+      const topic = problem.topic;
+      const subject = problem.subject;
+      const isCorrect = problem.metadata?.isCorrect || false;
+      const createdAt = problem.created_at || new Date().toISOString();
+      
+      // Update topic stats
+      if (!topicCounts[topic]) {
+        topicCounts[topic] = { count: 0, correct: 0, lastAttempted: createdAt };
+      }
+      topicCounts[topic].count += 1;
+      if (isCorrect) topicCounts[topic].correct += 1;
+      if (new Date(createdAt) > new Date(topicCounts[topic].lastAttempted)) {
+        topicCounts[topic].lastAttempted = createdAt;
+      }
+      
+      // Update subject counts
+      if (!subjectCounts[subject]) subjectCounts[subject] = 0;
+      subjectCounts[subject] += 1;
+    });
+    
+    // Convert to array and sort by count
+    const topicStats = Object.entries(topicCounts).map(([topic, stats]) => ({
+      topic,
+      count: stats.count,
+      correct: stats.correct,
+      accuracy: stats.count > 0 ? Math.round((stats.correct / stats.count) * 100) : 0,
+      lastAttempted: stats.lastAttempted
+    })).sort((a, b) => b.count - a.count);
+    
+    // Get recently worked on topics (by last attempt date)
+    const recentTopics = [...topicStats]
+      .sort((a, b) => new Date(b.lastAttempted).getTime() - new Date(a.lastAttempted).getTime())
+      .slice(0, 5);
+    
+    return { 
+      success: true, 
+      data: {
+        topicStats,
+        recentTopics,
+        subjectDistribution: subjectCounts,
+        totalProblems: userProblems.length
+      }
+    };
+  } catch (error) {
+    console.error('Failed to process user topic progress:', error);
     return { success: false, error };
   }
 }

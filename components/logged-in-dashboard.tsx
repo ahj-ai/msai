@@ -2,9 +2,9 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { supabase, getUserProblems } from "@/lib/supabase";
+import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals, getUserTopicProgress } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -45,6 +45,21 @@ interface UserStats {
   totalTimePlayed?: number;
   bestStreak?: number;
   accuracy?: number;
+}
+
+interface TopicStat {
+  topic: string;
+  count: number;
+  correct: number;
+  accuracy: number;
+  lastAttempted: string;
+}
+
+interface TopicProgressData {
+  topicStats: TopicStat[];
+  recentTopics: TopicStat[];
+  subjectDistribution: Record<string, number>;
+  totalProblems: number;
 }
 
 interface SavedProblem {
@@ -242,56 +257,228 @@ const NavItem = ({ icon: Icon, label, active, onClick }: NavItemProps) => (
   </button>
 );
 
-// Weekly Goal interface
 interface WeeklyGoal {
+  id: string;
+  goal_type: string;
   current: number;
   target: number;
   message: string;
   unit?: string;
+  completed: boolean;
 }
 
-// Weekly Goal Card component
-const WeeklyGoalCard = ({ goal }: { goal: WeeklyGoal }) => {
-  const percentComplete = Math.round((goal.current / goal.target) * 100);
+const WeeklyGoalCard = ({ goal, onUpdate }: { goal: WeeklyGoal; onUpdate?: (goalId: string, progress: number) => void }) => {
+  const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
+  
+  // Define gradient colors based on progress and completion
+  let gradientClass = "from-indigo-500 to-blue-600";
+  let progressBarClass = "bg-blue-300";
+  let iconColor = "text-blue-200";
+  
+  if (progress >= 100) {
+    gradientClass = "from-emerald-500 to-green-600";
+    progressBarClass = "bg-green-300";
+    iconColor = "text-green-200";
+  } else if (progress >= 66) {
+    gradientClass = "from-blue-500 to-indigo-600";
+    progressBarClass = "bg-blue-300";
+    iconColor = "text-blue-200";
+  } else if (progress >= 33) {
+    gradientClass = "from-violet-500 to-purple-600";
+    progressBarClass = "bg-violet-300";
+    iconColor = "text-violet-200";
+  } else {
+    gradientClass = "from-indigo-500 to-blue-600";
+    progressBarClass = "bg-indigo-300";
+    iconColor = "text-indigo-200";
+  }
+  
+  // Handle manual progress update
+  const handleIncrement = () => {
+    if (onUpdate && !goal.completed) {
+      onUpdate(goal.id, goal.current + 1);
+    }
+  };
+  
+  // Goal type to icon mapping
+  const goalTypeIcons = {
+    'games_played': (
+      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17 10H19C21 10 22 9 22 7V5C22 3 21 2 19 2H17C15 2 14 3 14 5V7C14 9 15 10 17 10Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M5 22H7C9 22 10 21 10 19V17C10 15 9 14 7 14H5C3 14 2 15 2 17V19C2 21 3 22 5 22Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M6 10C8.20914 10 10 8.20914 10 6C10 3.79086 8.20914 2 6 2C3.79086 2 2 3.79086 2 6C2 8.20914 3.79086 10 6 10Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M18 22C20.2091 22 22 20.2091 22 18C22 15.7909 20.2091 14 18 14C15.7909 14 14 15.7909 14 18C14 20.2091 15.7909 22 18 22Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'problems_solved': (
+      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M7.5 12L10.5 15L16.5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'practice_time': (
+      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M15.7099 15.18L12.6099 13.33C12.0699 13.01 11.6299 12.24 11.6299 11.61V7.51001" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'default': (
+      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 16V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    )
+  };
+  
+  // Get appropriate icon for goal type
+  const goalIcon = goalTypeIcons[goal.goal_type as keyof typeof goalTypeIcons] || goalTypeIcons.default;
   
   return (
-    <div className="rounded-xl overflow-hidden mb-8">
-      <div className="bg-gradient-to-r from-indigo-800/90 to-purple-600/90 p-6 text-white relative overflow-hidden">
-        {/* Target icon */}
-        <div className="absolute top-6 right-6 opacity-20">
-          <svg className="w-32 h-32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.5" fill="none" />
-            <circle cx="12" cy="12" r="6" stroke="white" strokeWidth="1.5" fill="none" />
-            <circle cx="12" cy="12" r="2" fill="white" />
-          </svg>
+    <Card className="overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+      <div className={`bg-gradient-to-br ${gradientClass} h-2.5`}></div>
+      <CardContent className="p-5">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center">
+            <div className={`mr-3 rounded-lg p-1.5 bg-opacity-10 ${goal.completed ? 'bg-green-100' : 'bg-blue-100'}`}>
+              {goalIcon}
+            </div>
+            <h3 className="font-semibold text-gray-800">{goal.message}</h3>
+          </div>
+          {goal.completed && (
+            <span className="bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded-full font-medium">
+              Completed!
+            </span>
+          )}
         </div>
         
-        <h2 className="text-2xl font-bold mb-2">Weekly Goal Progress</h2>
-        <p className="mb-4 text-white/90">{goal.message}</p>
-        
-        <div className="mb-2 flex justify-between">
-          <span>{goal.current} of {goal.target} {goal.unit || 'minutes'}</span>
-          <span className="font-bold">{percentComplete}%</span>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-gray-600 font-medium">
+            {goal.current} / {goal.target} {goal.unit || ''}
+          </span>
+          <span className={`text-sm font-semibold ${progress >= 100 ? 'text-green-600' : 'text-blue-600'}`}>
+            {progress}%
+          </span>
         </div>
         
-        <div className="h-3 w-full bg-white/30 rounded-full overflow-hidden">
+        <div className="w-full bg-gray-100 rounded-full h-2.5 mb-4">
           <div 
-            className="h-full bg-green-300" 
-            style={{ width: `${percentComplete}%` }}
+            className={`h-2.5 rounded-full ${progressBarClass}`}
+            style={{ width: `${progress}%`, transition: 'width 0.5s ease-in-out' }}
           ></div>
         </div>
-      </div>
-    </div>
+        
+        {onUpdate && !goal.completed && (
+          <Button 
+            onClick={handleIncrement}
+            variant="outline" 
+            size="sm" 
+            className="w-full mt-1 border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-colors font-medium"
+          >
+            <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 8V16M8 12H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+            </svg>
+            Add Progress
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
 const MainDashboard = ({ stats }: { stats: UserStats }) => {
-  // Weekly goal data - this would typically come from an API or database
-  const weeklyGoal: WeeklyGoal = {
-    current: stats.problemsSolved % 50,  // Reset counter every 50 problems
-    target: 50,
-    message: "Complete 50 problems this week to reach your goal.",
-    unit: "problems"
+  const { user } = useAuth();
+  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([]);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
+  const [goalError, setGoalError] = useState<string | null>(null);
+  const [topicProgress, setTopicProgress] = useState<TopicProgressData | null>(null);
+  const [isLoadingTopics, setIsLoadingTopics] = useState(false);
+  const [topicError, setTopicError] = useState<string | null>(null);
+  
+  // Fetch weekly goals from Supabase
+  useEffect(() => {
+    const fetchWeeklyGoals = async () => {
+      if (!user?.id) return;
+      
+      setIsLoadingGoals(true);
+      try {
+        const { data, error, success } = await getUserWeeklyGoals(user.id);
+        
+        if (success && data) {
+          setWeeklyGoals(data);
+        } else if (error) {
+          console.error('Error fetching weekly goals:', error);
+          setGoalError('Failed to load weekly goals');
+        }
+        
+        // If no goals found, generate default goals
+        if (success && (!data || data.length === 0)) {
+          console.log('No weekly goals found, generating defaults');
+          const result = await generateDefaultWeeklyGoals(user.id);
+          
+          if (result.success && result.data) {
+            setWeeklyGoals(result.data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch weekly goals:', err);
+        setGoalError('Failed to load weekly goals');
+      } finally {
+        setIsLoadingGoals(false);
+      }
+    };
+    
+    fetchWeeklyGoals();
+  }, [user]);
+  
+  // Helper function to fetch topic progress
+  const fetchTopicProgress = async (userId: string) => {
+    setIsLoadingTopics(true);
+    setTopicError(null);
+    
+    try {
+      const result = await getUserTopicProgress(userId);
+      if (result.success && result.data) {
+        setTopicProgress(result.data);
+      } else {
+        setTopicError('Could not load your topic progress');
+      }
+    } catch (err) {
+      console.error('Error fetching topic progress:', err);
+      setTopicError('Failed to fetch topic statistics');
+    } finally {
+      setIsLoadingTopics(false);
+    }
+  };
+  
+  // Fetch topic progress from Supabase
+  useEffect(() => {
+    if (user?.id) {
+      fetchTopicProgress(user.id);
+    }
+  }, [user]);
+  
+  // Handle goal progress update
+  const handleGoalUpdate = async (goalId: string, progress: number) => {
+    if (!user?.id) return;
+    
+    try {
+      const { success, data, error } = await updateGoalProgress(user.id, goalId, progress);
+      
+      if (success && data) {
+        // Update the goals in state
+        setWeeklyGoals(prevGoals => 
+          prevGoals.map(goal => 
+            goal.id === goalId ? { ...goal, current: progress, completed: progress >= goal.target } : goal
+          )
+        );
+      } else if (error) {
+        console.error('Error updating goal progress:', error);
+      }
+    } catch (err) {
+      console.error('Failed to update goal progress:', err);
+    }
   };
 
   // Functions to determine color based on value
@@ -413,10 +600,265 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
           </div>
         </div>
         
-        {/* Weekly Goal Progress Card */}
-        <WeeklyGoalCard goal={weeklyGoal} />
-
-        {/* Topic Progress */}
+        {/* Weekly Goals Section */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium text-gray-900">Weekly Goals</h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={async () => {
+                if (user?.id) {
+                  setIsLoadingGoals(true);
+                  try {
+                    const result = await generateDefaultWeeklyGoals(user.id);
+                    if (result.success && result.data) {
+                      setWeeklyGoals(result.data);
+                    }
+                  } catch (err) {
+                    console.error('Failed to refresh goals:', err);
+                  } finally {
+                    setIsLoadingGoals(false);
+                  }
+                }
+              }}
+            >
+              <RefreshCw className="h-4 w-4 mr-1" /> Refresh Goals
+            </Button>
+          </div>
+          
+          {isLoadingGoals ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="animate-pulse flex flex-col">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                      <div className="flex justify-between mb-2">
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : goalError ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
+              <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
+              <p className="text-sm text-red-700">{goalError}</p>
+            </div>
+          ) : weeklyGoals.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
+              <Target className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500 mb-4">No weekly goals set</p>
+              <Button 
+                onClick={async () => {
+                  if (user?.id) {
+                    setIsLoadingGoals(true);
+                    try {
+                      const result = await generateDefaultWeeklyGoals(user.id);
+                      if (result.success && result.data) {
+                        setWeeklyGoals(result.data);
+                      }
+                    } catch (err) {
+                      console.error('Failed to generate goals:', err);
+                    } finally {
+                      setIsLoadingGoals(false);
+                    }
+                  }
+                }}
+              >
+                Generate Goals
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {weeklyGoals.map((goal) => (
+                <WeeklyGoalCard 
+                  key={goal.id} 
+                  goal={goal} 
+                  onUpdate={handleGoalUpdate}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {/* Topic Progress Section */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium text-gray-900">Topic Progress</h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                if (user?.id) {
+                  setIsLoadingTopics(true);
+                  fetchTopicProgress(user.id);
+                }
+              }}
+            >
+              <RefreshCw className="h-4 w-4 mr-1" /> Refresh Topics
+            </Button>
+          </div>
+          
+          {isLoadingTopics ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="animate-pulse flex flex-col">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                      <div className="flex justify-between mb-2">
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : topicError ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
+              <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
+              <p className="text-sm text-red-700">{topicError}</p>
+            </div>
+          ) : !topicProgress || topicProgress.topicStats.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
+              <Book className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+              <h3 className="mb-1 text-sm font-medium text-gray-900">No topic data yet</h3>
+              <p className="text-sm text-gray-500 mb-4">Start solving problems in the Problem Lab to see your progress</p>
+              <Link href="/problem-lab" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 inline-block transition-colors text-sm">
+                Go to Problem Lab
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Topic stats summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <h3 className="text-sm font-medium text-gray-500">Topics Explored</h3>
+                    <div className="text-2xl font-bold text-gray-900 mt-2">{topicProgress.topicStats.length}</div>
+                    <p className="text-xs text-gray-500 mt-1">Across {Object.keys(topicProgress.subjectDistribution).length} subjects</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <h3 className="text-sm font-medium text-gray-500">Total Problems</h3>
+                    <div className="text-2xl font-bold text-gray-900 mt-2">{topicProgress.totalProblems}</div>
+                    <p className="text-xs text-gray-500 mt-1">From Problem Lab activities</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <h3 className="text-sm font-medium text-gray-500">Top Subject</h3>
+                    <div className="text-xl font-bold text-gray-900 mt-2 truncate">
+                      {Object.entries(topicProgress.subjectDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None'}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Most practiced area</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <h3 className="text-sm font-medium text-gray-500">Average Accuracy</h3>
+                    <div className="text-2xl font-bold text-gray-900 mt-2">
+                      {Math.round(topicProgress.topicStats.reduce((acc, topic) => acc + topic.accuracy, 0) / 
+                        (topicProgress.topicStats.length || 1))}%
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Across all topics</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Recent topics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Recently Practiced Topics</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problems</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accuracy</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Practiced</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {topicProgress.recentTopics.map((topic, index) => (
+                          <tr key={index} className={index !== topicProgress.recentTopics.length - 1 ? 'border-b border-gray-100' : ''}>
+                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{topic.topic}</td>
+                            <td className="px-4 py-3 text-sm text-gray-500">{topic.count}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <span 
+                                className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                                  topic.accuracy >= 80 ? 'bg-green-100 text-green-800' : 
+                                  topic.accuracy >= 60 ? 'bg-yellow-100 text-yellow-800' : 
+                                  'bg-red-100 text-red-800'}`}
+                              >
+                                {topic.accuracy}%
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-500">
+                              {new Date(topic.lastAttempted).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Subject distribution */}
+              {Object.keys(topicProgress.subjectDistribution).length > 1 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-medium">Subject Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {Object.entries(topicProgress.subjectDistribution)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([subject, count], index) => {
+                        const percentage = Math.round((count / topicProgress.totalProblems) * 100);
+                        let barColor = 'bg-blue-500';
+                        if (index === 0) barColor = 'bg-indigo-500';
+                        if (index === 1) barColor = 'bg-violet-500';
+                        if (index === 2) barColor = 'bg-purple-500';
+                        
+                        return (
+                          <div key={subject}>
+                            <div className="flex justify-between mb-1 text-sm">
+                              <span>{subject}</span>
+                              <span>{percentage}%</span>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-gray-200">
+                              <div 
+                                className={`h-2 rounded-full ${barColor} transition-all duration-500`}
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    }
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+        
+        {/* Learning Journey Stats */}
         <div className="mb-8">
           <h2 className="mb-4 text-xl font-semibold text-gray-800">Your Learning Journey</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
