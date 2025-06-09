@@ -52,6 +52,11 @@ export function Footer() {
                 Privacy Policy
               </Link>
             </li>
+            <li>
+              <Link href="/refund" className="hover:text-purple-300 transition-colors">
+                Refund Policy
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -77,18 +82,28 @@ export function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center gap-x-8">
-            <Link 
-              href="/terms" 
-              className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
-            >
-              Terms of Service
-            </Link>
-            <Link 
-              href="/privacy" 
-              className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
-            >
-              Privacy Policy
-            </Link>
+            <div className="flex items-center gap-x-8">
+              <Link 
+                href="/terms" 
+                className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
+              >
+                Terms of Service
+              </Link>
+              <span className="text-gray-400">•</span>
+              <Link 
+                href="/privacy" 
+                className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
+              >
+                Privacy Policy
+              </Link>
+              <span className="text-gray-400">•</span>
+              <Link 
+                href="/refund" 
+                className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"
+              >
+                Refund Policy
+              </Link>
+            </div>
             <a 
               href="mailto:support@mathstackai.com" 
               className="text-gray-600 hover:text-gray-900 text-sm transition-colors duration-300"

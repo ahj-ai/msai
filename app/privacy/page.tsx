@@ -7,134 +7,167 @@ export default function PrivacyPolicy() {
   return (
     <main className={`flex min-h-screen flex-col items-center ${inter.className}`}>
       <div className="container mx-auto px-6 py-10 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
-        <p className="text-sm mb-6 text-gray-500">Last Updated: May 30, 2025</p>
+        <h1 className="text-3xl font-bold mb-8 pb-1">MathStackAI Privacy Policy</h1>
+        <p className="text-sm mb-6 text-gray-500">Effective Date: June 8, 2025</p>
+        
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Summary</h2>
+          <p className="mb-4">
+            MathStackAI values your privacy. We collect only the data necessary to provide and improve your experience using our learning tools. We never sell your data. This Privacy Policy explains what we collect, how we use it, and your rights — including those under the General Data Protection Regulation (GDPR).
+          </p>
+        </section>
         
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-4">1. Introduction</h2>
           <p className="mb-4">
-            MathStackAI ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application, website, and services (collectively, the "Service").
+            Welcome to MathStackAI ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, applications, and related services (collectively, the "Service").
           </p>
           <p className="mb-4">
-            Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Service.
+            By using the Service, you agree to the collection and use of information in accordance with this Privacy Policy.
           </p>
         </section>
         
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-4">2. Information We Collect</h2>
-          <h3 className="text-lg font-medium mb-3">Personal Information</h3>
           <p className="mb-4">
-            We may collect personal information that you voluntarily provide to us when you register for the Service, express interest in obtaining information about us or our products and services, or otherwise contact us. This information may include:
+            We collect both information that you provide directly and information that is automatically collected when you use the Service.
           </p>
+          
+          <h3 className="text-lg font-medium mb-3">Information You Provide:</h3>
           <ul className="list-disc pl-8 mb-4 space-y-2">
-            <li>Name</li>
-            <li>Email address</li>
-            <li>Login credentials</li>
-            <li>Profile information</li>
-            <li>Educational information and progress</li>
+            <li><strong>Account Information:</strong> When you register for an account, we collect your name and email address. This is managed by our authentication provider, Clerk.</li>
+            <li><strong>User Content:</strong> We collect content you submit, such as math problems, questions, and uploaded images.</li>
+            <li><strong>Payment Information:</strong> Payment data is collected and processed by our merchant of record, Paddle. We do not store your full payment information.</li>
+            <li><strong>Communications:</strong> If you contact us, we store your support communications.</li>
           </ul>
           
-          <h3 className="text-lg font-medium mb-3">Usage Data</h3>
-          <p className="mb-4">
-            We may automatically collect certain information when you use the Service, including:
-          </p>
+          <h3 className="text-lg font-medium mb-3">Information We Collect Automatically:</h3>
           <ul className="list-disc pl-8 mb-4 space-y-2">
-            <li>Device information (such as your IP address, browser type, and operating system)</li>
-            <li>Usage patterns (such as pages visited, time spent on pages, and navigation paths)</li>
-            <li>Performance data and error reports</li>
-            <li>Math topics explored and problem-solving activities</li>
+            <li><strong>Usage Data:</strong> We automatically collect IP address, device information, browser type, usage activity, and timestamps.</li>
+            <li><strong>Cookies and Tracking:</strong> We use cookies and similar tracking technologies to enhance your experience. You can control cookie settings through your browser or opt-out where available.</li>
           </ul>
         </section>
         
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">3. How We Use Your Information</h2>
+          <h2 className="text-xl font-semibold mb-4">3. Legal Basis for Processing (GDPR)</h2>
           <p className="mb-4">
-            We may use the information we collect for various purposes, including to:
+            We process your personal data under one or more of the following legal bases:
           </p>
           <ul className="list-disc pl-8 mb-4 space-y-2">
-            <li>Provide, maintain, and improve our Service</li>
-            <li>Create and manage your account</li>
-            <li>Process transactions and send related information</li>
-            <li>Respond to your comments, questions, and requests</li>
-            <li>Personalize your experience and provide content and features tailored to your interests</li>
-            <li>Analyze usage patterns and optimize the Service</li>
-            <li>Send you technical notices, updates, security alerts, and administrative messages</li>
-            <li>Protect against, identify, and prevent fraud and other illegal activities</li>
+            <li><strong>Consent</strong> – When you voluntarily provide information or agree to optional features.</li>
+            <li><strong>Contract</strong> – To fulfill our obligations under the Terms of Service, such as account creation or processing transactions.</li>
+            <li><strong>Legitimate Interests</strong> – To improve our services, protect users, and detect fraud, provided such interests are not overridden by your rights.</li>
+            <li><strong>Legal Obligation</strong> – To comply with legal requirements, such as tax or consumer protection laws.</li>
           </ul>
         </section>
         
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">4. How We Share Your Information</h2>
+          <h2 className="text-xl font-semibold mb-4">4. How We Use Your Information</h2>
           <p className="mb-4">
-            We may share your information in the following circumstances:
+            We use the information we collect to:
           </p>
           <ul className="list-disc pl-8 mb-4 space-y-2">
-            <li><strong>Service Providers:</strong> We may share your information with third-party vendors, service providers, and other third parties who perform services on our behalf.</li>
-            <li><strong>Legal Requirements:</strong> We may disclose your information if required to do so by law or in response to valid requests by public authorities.</li>
-            <li><strong>Business Transfers:</strong> We may share or transfer your information in connection with, or during negotiations of, any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company.</li>
-            <li><strong>With Your Consent:</strong> We may share your information for any other purpose with your consent.</li>
+            <li>Operate and improve our Service.</li>
+            <li>Authenticate and manage user accounts.</li>
+            <li>Provide personalized learning experiences.</li>
+            <li>Process payments and manage subscriptions.</li>
+            <li>Analyze usage and monitor platform performance.</li>
+            <li>Respond to inquiries and offer support.</li>
+            <li>Comply with legal obligations and protect against abuse.</li>
           </ul>
-          <p className="mb-4">
-            We do not sell, rent, or otherwise disclose your personal information to third parties for their marketing purposes without your explicit consent.
-          </p>
         </section>
         
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">5. Data Security</h2>
+          <h2 className="text-xl font-semibold mb-4">5. How We Share Your Information</h2>
           <p className="mb-4">
-            We have implemented appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, please also remember that we cannot guarantee that the internet itself is 100% secure. Although we will do our best to protect your personal information, transmission of personal information to and from our Service is at your own risk.
-          </p>
-        </section>
-        
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">6. Data Retention</h2>
-          <p className="mb-4">
-            We will retain your personal information only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use your information to the extent necessary to comply with our legal obligations, resolve disputes, and enforce our policies.
-          </p>
-        </section>
-        
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">7. Children's Privacy</h2>
-          <p className="mb-4">
-            Our Service is not intended for use by children under the age of 13 without parental consent. If we learn that we have collected personal information from a child under 13 without verification of parental consent, we will take steps to remove that information from our servers.
-          </p>
-        </section>
-        
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">8. Your Rights</h2>
-          <p className="mb-4">
-            Depending on your location, you may have certain rights regarding your personal information, including:
+            We do not sell your personal information. We may share data with trusted third parties who help us deliver the Service:
           </p>
           <ul className="list-disc pl-8 mb-4 space-y-2">
-            <li>The right to access personal information we hold about you</li>
-            <li>The right to request correction of inaccurate personal information</li>
-            <li>The right to request deletion of your personal information</li>
-            <li>The right to object to processing of your personal information</li>
-            <li>The right to data portability</li>
-            <li>The right to withdraw consent</li>
+            <li><strong>Paddle:</strong> For payment processing and tax compliance.</li>
+            <li><strong>Clerk:</strong> For secure user authentication and account management.</li>
+            <li><strong>Google Generative AI:</strong> For generating math solutions. The content of user-submitted problems is sent to Google's API.</li>
+            <li><strong>Supabase:</strong> For backend infrastructure and database hosting.</li>
           </ul>
           <p className="mb-4">
-            To exercise these rights, please contact us using the information provided in the "Contact Us" section below.
+            We may also disclose personal data when legally required (e.g., to comply with a court order).
           </p>
         </section>
         
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">9. Changes to This Privacy Policy</h2>
+          <h2 className="text-xl font-semibold mb-4">6. Cookies and Tracking Technologies</h2>
           <p className="mb-4">
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date at the top of this Privacy Policy.
+            We use cookies to:
           </p>
+          <ul className="list-disc pl-8 mb-4 space-y-2">
+            <li>Authenticate sessions and remember login state.</li>
+            <li>Analyze how users interact with the Service (analytics).</li>
+            <li>Customize and improve the user experience.</li>
+          </ul>
           <p className="mb-4">
-            You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
+            By using the Service, you consent to our use of cookies. You may disable or delete cookies in your browser settings. Some features may not work properly without cookies.
+          </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">7. Data Retention</h2>
+          <p className="mb-4">
+            We retain your personal data for as long as necessary to provide the Service and fulfill the purposes described in this policy, unless a longer retention period is required by law. When your data is no longer needed, we delete or anonymize it.
           </p>
         </section>
         
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">10. Contact Us</h2>
+          <h2 className="text-xl font-semibold mb-4">8. Your Rights (GDPR and Others)</h2>
           <p className="mb-4">
-            If you have any questions about this Privacy Policy, please contact us at:
+            Depending on your location, you may have rights regarding your personal data:
+          </p>
+          <ul className="list-disc pl-8 mb-4 space-y-2">
+            <li><strong>Access</strong> – Request a copy of your personal data.</li>
+            <li><strong>Correction</strong> – Update inaccurate or incomplete data.</li>
+            <li><strong>Deletion</strong> – Request we delete your personal data ("right to be forgotten").</li>
+            <li><strong>Restriction</strong> – Ask us to limit how we use your data.</li>
+            <li><strong>Objection</strong> – Object to processing based on legitimate interests.</li>
+            <li><strong>Data Portability</strong> – Receive your data in a portable format.</li>
+          </ul>
+          <p className="mb-4">
+            To exercise these rights, contact us at: support@mathstackai.com
+          </p>
+        </section>
+        
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">9. Children's Privacy</h2>
+          <p className="mb-4">
+            Our Service is not intended for children under the age of 13. We do not knowingly collect personal data from children without verified parental consent. If you believe a child has provided us with personal information, contact us and we will take appropriate action.
+          </p>
+        </section>
+        
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">10. International Data Transfers</h2>
+          <p className="mb-4">
+            Your data may be stored and processed outside of your country, including in the United States, where data protection laws may differ from yours. We take steps to ensure your data is protected, including through contractual safeguards where applicable.
+          </p>
+        </section>
+        
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">11. Data Security</h2>
+          <p className="mb-4">
+            We implement reasonable safeguards to protect your information, including encryption, access controls, and secure storage. However, no method of transmission or storage is 100% secure.
+          </p>
+        </section>
+        
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">12. Changes to This Privacy Policy</h2>
+          <p className="mb-4">
+            We may update this Privacy Policy to reflect changes in our practices or legal obligations. When we do, we will update the "Effective Date" and notify users of any material changes.
+          </p>
+        </section>
+        
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">13. Contact Us</h2>
+          <p className="mb-4">
+            If you have questions about this Privacy Policy or your personal data, contact us at:
           </p>
           <p className="mb-4">
-            Email: privacy@mathstackai.com
+            📧 support@mathstackai.com
           </p>
         </section>
       </div>

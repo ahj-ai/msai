@@ -63,7 +63,7 @@ export const PricingContent = () => {
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="text-gray-900">Choose Your Stack.</span>
               <br className="md:hidden" />
-              <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent inline-block">Power Your Progress.</span>
+              <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent inline-block pb-1">Power Your Progress.</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Start for free, subscribe for deep learning, or add to your Stack anytime you need.
@@ -246,6 +246,7 @@ export const PricingContent = () => {
               </div>
             </div>
             <p className="text-green-600 font-medium">30-day money-back guarantee • Cancel anytime</p>
+            <p className="text-sm text-gray-600 mt-2">All purchases are subject to our <Link href="/refund" className="text-indigo-600 hover:underline">Refund Policy</Link></p>
           </div>
         </div>
 

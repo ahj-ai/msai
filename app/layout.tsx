@@ -63,6 +63,10 @@ export default function RootLayout({
   return (
     <ClerkProvider
       appearance={{
+        // Logo placement and image configuration
+        layout: {
+          logoPlacement: 'inside',
+        },
         variables: {
           colorPrimary: '#6C63FF',
           colorTextOnPrimaryBackground: '#FFFFFF',
@@ -72,7 +76,8 @@ export default function RootLayout({
         },
         elements: {
           formButtonPrimary: 'bg-[#6C63FF] hover:bg-[#5E60CE] transition-colors',
-          card: 'shadow-lg border border-gray-100',
+          card: 'shadow-lg border border-gray-100 p-6 pt-8', // Reduced top padding
+          header: 'pb-4', // Reduced bottom padding in header area
           headerTitle: 'text-gray-900',
           headerSubtitle: 'text-gray-600',
           socialButtonsBlockButton: 'border-gray-200 hover:bg-gray-50',
@@ -84,6 +89,9 @@ export default function RootLayout({
           formFieldLabel: 'text-gray-700',
           dividerLine: 'bg-gray-200',
           dividerText: 'text-gray-500',
+          // Make the logo larger and center it properly
+          logoBox: 'w-40 h-40 mx-auto flex items-center justify-center', // Much larger size and centered
+          logoImage: 'w-full h-full object-contain', // Make logo fill the container
         },
       }}
     >
@@ -130,21 +138,22 @@ export default function RootLayout({
               <Toaster />
               
               <footer className="bg-white border-t border-gray-100 py-8 mt-12">
-              <div className="container mx-auto px-4 sm:px-6">
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                  <div className="mb-4 md:mb-0">
-                    <span className="text-xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
-                      MathStackAI
-                    </span>
-                    <p className="text-gray-500 text-sm mt-1"> {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
-                  </div>
-                  <div className="flex space-x-6">
-                    <Link href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</Link>
-                    <Link href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</Link>
+                <div className="container mx-auto px-4 sm:px-6">
+                  <div className="flex flex-col md:flex-row justify-between items-center">
+                    <div className="mb-4 md:mb-0">
+                      <span className="text-xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+                        MathStackAI
+                      </span>
+                      <p className="text-gray-500 text-sm mt-1"> {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
+                    </div>
+                    <div className="flex items-center space-x-6">
+                      <Link href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</Link>
+                      <span className="text-gray-300">•</span>
+                      <Link href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </footer>
+              </footer>
           </div>
           </AuthProvider>
         </body>
