@@ -104,11 +104,29 @@ export default function Home() {
         <section className="section">
           <div className="container">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                Master math with <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">AI-powered learning</span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 pb-2">
+                Your <span className="animate-gradient-x bg-gradient-to-r from-[#6C63FF] via-[#8A6FFD] to-[#5E60CE] bg-clip-text text-transparent">AI-Powered Math Tutor</span>
               </h1>
+              
+              <style jsx>{`
+                @keyframes gradient-x {
+                  0% {
+                    background-position: 0% 50%;
+                  }
+                  50% {
+                    background-position: 100% 50%;
+                  }
+                  100% {
+                    background-position: 0% 50%;
+                  }
+                }
+                .animate-gradient-x {
+                  background-size: 200% 200%;
+                  animation: gradient-x 8s ease infinite;
+                }
+              `}</style>
               <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Transform your math skills with personalized AI tutoring, interactive lessons, and unlimited practice problems designed to help you succeed.
+                <span className="font-medium">Transform your math skills.</span> Get instant, step-by-step solutions for any problem, sharpen your speed with the <span className="font-semibold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">Brainiac</span> math game, and build mastery with unlimited practice problems from the <span className="font-semibold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">Problem Lab</span>.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <SignUpButton mode="modal">

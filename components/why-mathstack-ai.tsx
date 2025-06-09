@@ -112,10 +112,10 @@ export function WhyMathStackAI() {
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">How does the AI work?</h2>
             <div className="space-y-6 text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
               <p>
-                Think of it like having a super-smart tutor who's always there to help. Our AI constantly analyzes how you're doing and adjusts the lessons and problems to match your needs.
+                Think of it like having an expert math tutor available 24/7. When you're stuck on a tricky problem, our AI is there to provide instant, detailed help. Just type in your question or upload a photo of the problem.
               </p>
               <p>
-                It's like having a personalized learning plan designed just for you, adapting in real-time to your strengths and areas that need more practice.
+                Instead of just giving you the answer, MathStackAI breaks down the solution into clear, step-by-step explanations. It's designed to help you understand the underlying concepts, so you're not just solving one problem—you're building the skills to tackle any problem.
               </p>
             </div>
           </div>
