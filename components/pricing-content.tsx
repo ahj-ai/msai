@@ -55,13 +55,17 @@ export const PricingContent = () => {
         <div className="container mx-auto px-4 py-16">
           {/* Header Section */}
           <motion.div
-            className="text-center mb-16"
+            className="text-center mt-6 mb-12"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-deep-sapphire">Choose Your Stack. Power Your Progress.</h1>
-            <p className="text-xl text-cool-gray max-w-2xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="text-gray-900">Choose Your Stack.</span>
+              <br className="md:hidden" />
+              <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent inline-block">Power Your Progress.</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Start for free, subscribe for deep learning, or add to your Stack anytime you need.
             </p>
           </motion.div>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
-import BrandLogo from './BrandLogo';
+import MathStackLogo from './MathStackLogo';
 
 interface NavBarProps {
   children?: React.ReactNode;
@@ -20,7 +20,7 @@ export default function NavBar({ children }: NavBarProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <BrandLogo className="h-12 w-auto" />
+              <MathStackLogo />
             </Link>
           </div>
 

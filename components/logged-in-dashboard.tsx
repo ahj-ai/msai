@@ -4,7 +4,7 @@ import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals, getUserTopicProgress } from "@/lib/supabase";
+import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -47,20 +47,7 @@ interface UserStats {
   accuracy?: number;
 }
 
-interface TopicStat {
-  topic: string;
-  count: number;
-  correct: number;
-  accuracy: number;
-  lastAttempted: string;
-}
 
-interface TopicProgressData {
-  topicStats: TopicStat[];
-  recentTopics: TopicStat[];
-  subjectDistribution: Record<string, number>;
-  totalProblems: number;
-}
 
 interface SavedProblem {
   id?: string;
@@ -223,10 +210,6 @@ const LoggedInDashboard = () => {
           </button>
           <div className="flex-1 md:flex md:justify-end">
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Zap className="mr-2 h-4 w-4" />
-                Upgrade to Premium
-              </Button>
               <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center md:hidden">
                 <span className="text-sm font-medium text-indigo-700">
                   {user?.name?.charAt(0) || 'U'}
@@ -392,9 +375,7 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([]);
   const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   const [goalError, setGoalError] = useState<string | null>(null);
-  const [topicProgress, setTopicProgress] = useState<TopicProgressData | null>(null);
-  const [isLoadingTopics, setIsLoadingTopics] = useState(false);
-  const [topicError, setTopicError] = useState<string | null>(null);
+
   
   // Fetch weekly goals from Supabase
   useEffect(() => {
@@ -432,32 +413,7 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
     fetchWeeklyGoals();
   }, [user]);
   
-  // Helper function to fetch topic progress
-  const fetchTopicProgress = async (userId: string) => {
-    setIsLoadingTopics(true);
-    setTopicError(null);
-    
-    try {
-      const result = await getUserTopicProgress(userId);
-      if (result.success && result.data) {
-        setTopicProgress(result.data);
-      } else {
-        setTopicError('Could not load your topic progress');
-      }
-    } catch (err) {
-      console.error('Error fetching topic progress:', err);
-      setTopicError('Failed to fetch topic statistics');
-    } finally {
-      setIsLoadingTopics(false);
-    }
-  };
-  
-  // Fetch topic progress from Supabase
-  useEffect(() => {
-    if (user?.id) {
-      fetchTopicProgress(user.id);
-    }
-  }, [user]);
+
   
   // Handle goal progress update
   const handleGoalUpdate = async (goalId: string, progress: number) => {
@@ -686,177 +642,7 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
           )}
         </div>
         
-        {/* Topic Progress Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Topic Progress</h2>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                if (user?.id) {
-                  setIsLoadingTopics(true);
-                  fetchTopicProgress(user.id);
-                }
-              }}
-            >
-              <RefreshCw className="h-4 w-4 mr-1" /> Refresh Topics
-            </Button>
-          </div>
-          
-          {isLoadingTopics ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="animate-pulse flex flex-col">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                      <div className="flex justify-between mb-2">
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                      </div>
-                      <div className="h-2 bg-gray-200 rounded w-full"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : topicError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-              <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
-              <p className="text-sm text-red-700">{topicError}</p>
-            </div>
-          ) : !topicProgress || topicProgress.topicStats.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
-              <Book className="mx-auto h-10 w-10 text-gray-400 mb-2" />
-              <h3 className="mb-1 text-sm font-medium text-gray-900">No topic data yet</h3>
-              <p className="text-sm text-gray-500 mb-4">Start solving problems in the Problem Lab to see your progress</p>
-              <Link href="/problem-lab" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 inline-block transition-colors text-sm">
-                Go to Problem Lab
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Topic stats summary */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card>
-                  <CardContent className="p-4">
-                    <h3 className="text-sm font-medium text-gray-500">Topics Explored</h3>
-                    <div className="text-2xl font-bold text-gray-900 mt-2">{topicProgress.topicStats.length}</div>
-                    <p className="text-xs text-gray-500 mt-1">Across {Object.keys(topicProgress.subjectDistribution).length} subjects</p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-4">
-                    <h3 className="text-sm font-medium text-gray-500">Total Problems</h3>
-                    <div className="text-2xl font-bold text-gray-900 mt-2">{topicProgress.totalProblems}</div>
-                    <p className="text-xs text-gray-500 mt-1">From Problem Lab activities</p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-4">
-                    <h3 className="text-sm font-medium text-gray-500">Top Subject</h3>
-                    <div className="text-xl font-bold text-gray-900 mt-2 truncate">
-                      {Object.entries(topicProgress.subjectDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None'}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Most practiced area</p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-4">
-                    <h3 className="text-sm font-medium text-gray-500">Average Accuracy</h3>
-                    <div className="text-2xl font-bold text-gray-900 mt-2">
-                      {Math.round(topicProgress.topicStats.reduce((acc, topic) => acc + topic.accuracy, 0) / 
-                        (topicProgress.topicStats.length || 1))}%
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Across all topics</p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Recent topics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">Recently Practiced Topics</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problems</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accuracy</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Practiced</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topicProgress.recentTopics.map((topic, index) => (
-                          <tr key={index} className={index !== topicProgress.recentTopics.length - 1 ? 'border-b border-gray-100' : ''}>
-                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{topic.topic}</td>
-                            <td className="px-4 py-3 text-sm text-gray-500">{topic.count}</td>
-                            <td className="px-4 py-3 text-sm">
-                              <span 
-                                className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                                  topic.accuracy >= 80 ? 'bg-green-100 text-green-800' : 
-                                  topic.accuracy >= 60 ? 'bg-yellow-100 text-yellow-800' : 
-                                  'bg-red-100 text-red-800'}`}
-                              >
-                                {topic.accuracy}%
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-500">
-                              {new Date(topic.lastAttempted).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Subject distribution */}
-              {Object.keys(topicProgress.subjectDistribution).length > 1 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg font-medium">Subject Distribution</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {Object.entries(topicProgress.subjectDistribution)
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([subject, count], index) => {
-                        const percentage = Math.round((count / topicProgress.totalProblems) * 100);
-                        let barColor = 'bg-blue-500';
-                        if (index === 0) barColor = 'bg-indigo-500';
-                        if (index === 1) barColor = 'bg-violet-500';
-                        if (index === 2) barColor = 'bg-purple-500';
-                        
-                        return (
-                          <div key={subject}>
-                            <div className="flex justify-between mb-1 text-sm">
-                              <span>{subject}</span>
-                              <span>{percentage}%</span>
-                            </div>
-                            <div className="h-2 w-full rounded-full bg-gray-200">
-                              <div 
-                                className={`h-2 rounded-full ${barColor} transition-all duration-500`}
-                                style={{ width: `${percentage}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    }
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </div>
+
         
         {/* Learning Journey Stats */}
         <div className="mb-8">
