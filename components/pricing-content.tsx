@@ -8,8 +8,11 @@ import { Check, Star, Zap } from "lucide-react"
 import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { PageLayout } from "@/components/PageLayout";
+import { StripeCheckoutButton } from "@/components/stripe-checkout-button";
+import { useAuth } from "@clerk/nextjs";
 
 export const PricingContent = () => {
+  const { isSignedIn } = useAuth();
   const stackUsage = [
     { action: "Generate a Practice Problem Set", cost: "Free" },
     { action: "Ask a new Text Question", cost: "3 Stacks" },
@@ -143,11 +146,30 @@ export const PricingContent = () => {
                   </div>
                 </div>
                 <div className="mt-auto">
-                  <Link href="/signup" className="block">
-                    <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2">
-                      Get MathStackAI Pro
-                    </Button>
-                  </Link>
+                  {isSignedIn ? (
+                    <div className="space-y-3">
+                      <StripeCheckoutButton
+                        priceId="price_1RXaBt04B8TSHNkkkCdWzDr9"
+                        mode="subscription"
+                        buttonText="Get MathStack AI Pro ($14.99/mo)"
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2"
+                      />
+                      {/* Commenting out yearly option until it's available in Stripe
+                      <StripeCheckoutButton
+                        priceId="price_yearly_pro"
+                        mode="subscription"
+                        buttonText="Get Yearly Pro ($149.99/yr)"
+                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2"
+                      />
+                      */}
+                    </div>
+                  ) : (
+                    <Link href="/sign-in?redirect=/pricing" className="block">
+                      <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2">
+                        Sign In to Subscribe
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -197,11 +219,28 @@ export const PricingContent = () => {
                   </div>
                 </div>
                 <div className="mt-auto">
-                  <Link href="/signup" className="block">
-                    <Button className="w-full bg-green-500 hover:bg-green-600 text-white py-2">
-                      Get More Stacks
-                    </Button>
-                  </Link>
+                  {isSignedIn ? (
+                    <div className="space-y-3">
+                      <StripeCheckoutButton
+                        priceId="price_1RY9hP04B8TSHNkkEsK9Fx4O"
+                        mode="payment"
+                        buttonText="Get Small Stack Pack ($4.99)"
+                        className="w-full bg-green-500 hover:bg-green-600 text-white py-2"
+                      />
+                      <StripeCheckoutButton
+                        priceId="price_1RY9ht04B8TSHNkkhPf35GdM"
+                        mode="payment"
+                        buttonText="Get Large Stack Pack ($19.99)"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2"
+                      />
+                    </div>
+                  ) : (
+                    <Link href="/sign-in?redirect=/pricing" className="block">
+                      <Button className="w-full bg-green-500 hover:bg-green-600 text-white py-2">
+                        Sign In to Purchase
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </CardContent>
             </Card>

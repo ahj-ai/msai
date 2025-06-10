@@ -8,7 +8,7 @@ interface User {
   id: string
   name: string
   email: string
-  isPremium: boolean
+  // isPremium field removed
 }
 
 interface AuthContextType {
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: clerkUser.id,
         name: clerkUser.firstName || clerkUser.username || clerkUser.emailAddresses[0]?.emailAddress.split('@')[0] || 'User',
         email: clerkUser.emailAddresses[0]?.emailAddress || '',
-        isPremium: false, // Set based on your premium logic
+        // Premium status removed
       })
     } else if (clerkIsLoaded && !clerkUser) {
       // User is not authenticated
