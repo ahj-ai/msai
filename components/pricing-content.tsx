@@ -134,7 +134,7 @@ export const PricingContent = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center">
                     <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
-                    <span className="text-gray-800">1,000 Stacks per month</span>
+                    <span className="text-gray-800">300 Stacks / Month</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
@@ -151,7 +151,7 @@ export const PricingContent = () => {
                       <StripeCheckoutButton
                         priceId="price_1RXaBt04B8TSHNkkkCdWzDr9"
                         mode="subscription"
-                        buttonText="Get MathStack AI Pro ($14.99/mo)"
+                        buttonText="Get MathStack AI Pro"
                         className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2"
                       />
                       {/* Commenting out yearly option until it's available in Stripe
@@ -196,25 +196,11 @@ export const PricingContent = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <div className="text-gray-800 font-medium">Small Stack Pack</div>
-                          <div className="text-sm text-gray-600">250 Stack Pack</div>
+                          <div className="text-sm text-gray-600">75 Stack Pack</div>
                         </div>
                         <span className="text-2xl font-bold text-gray-800">$4.99</span>
                       </div>
                       <div className="text-xs text-gray-500">One-Time Purchase</div>
-                      <div className="text-xs text-gray-500">USA: $4.99 USD (Regional pricing available)</div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <div className="text-gray-800 font-medium">Large Stack Pack</div>
-                          <div className="text-sm text-gray-600">1,200 Stack Pack</div>
-                        </div>
-                        <span className="text-2xl font-bold text-gray-800">$19.99</span>
-                      </div>
-                      <div className="text-xs text-gray-500">One-Time Purchase</div>
-                      <div className="text-xs text-gray-500">USA: $19.99 USD (Regional pricing available)</div>
                     </div>
                   </div>
                 </div>
@@ -224,14 +210,8 @@ export const PricingContent = () => {
                       <StripeCheckoutButton
                         priceId="price_1RY9hP04B8TSHNkkEsK9Fx4O"
                         mode="payment"
-                        buttonText="Get Small Stack Pack ($4.99)"
+                        buttonText="Get Small Stack Pack"
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2"
-                      />
-                      <StripeCheckoutButton
-                        priceId="price_1RY9ht04B8TSHNkkhPf35GdM"
-                        mode="payment"
-                        buttonText="Get Large Stack Pack ($19.99)"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2"
                       />
                     </div>
                   ) : (
