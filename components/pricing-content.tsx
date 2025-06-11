@@ -8,7 +8,7 @@ import { Check, Star, Zap } from "lucide-react"
 import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { PageLayout } from "@/components/PageLayout";
-import { StripeCheckoutButton } from "@/components/stripe-checkout-button";
+
 import { useAuth } from "@clerk/nextjs";
 
 export const PricingContent = () => {
@@ -148,20 +148,12 @@ export const PricingContent = () => {
                 <div className="mt-auto">
                   {isSignedIn ? (
                     <div className="space-y-3">
-                      <StripeCheckoutButton
-                        priceId="price_1RXaBt04B8TSHNkkkCdWzDr9"
-                        mode="subscription"
-                        buttonText="Get MathStack AI Pro ($14.99/mo)"
+                      <Button 
                         className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2"
-                      />
-                      {/* Commenting out yearly option until it's available in Stripe
-                      <StripeCheckoutButton
-                        priceId="price_yearly_pro"
-                        mode="subscription"
-                        buttonText="Get Yearly Pro ($149.99/yr)"
-                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2"
-                      />
-                      */}
+                        onClick={() => alert('Subscription functionality is currently unavailable.')}
+                      >
+                        Get MathStack AI Pro ($14.99/mo)
+                      </Button>
                     </div>
                   ) : (
                     <Link href="/sign-in?redirect=/pricing" className="block">
@@ -221,18 +213,18 @@ export const PricingContent = () => {
                 <div className="mt-auto">
                   {isSignedIn ? (
                     <div className="space-y-3">
-                      <StripeCheckoutButton
-                        priceId="price_1RY9hP04B8TSHNkkEsK9Fx4O"
-                        mode="payment"
-                        buttonText="Get Small Stack Pack ($4.99)"
+                      <Button 
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2"
-                      />
-                      <StripeCheckoutButton
-                        priceId="price_1RY9ht04B8TSHNkkhPf35GdM"
-                        mode="payment"
-                        buttonText="Get Large Stack Pack ($19.99)"
+                        onClick={() => alert('Stack pack purchases are currently unavailable.')}
+                      >
+                        Get Small Stack Pack ($4.99)
+                      </Button>
+                      <Button 
                         className="w-full bg-green-600 hover:bg-green-700 text-white py-2"
-                      />
+                        onClick={() => alert('Stack pack purchases are currently unavailable.')}
+                      >
+                        Get Large Stack Pack ($19.99)
+                      </Button>
                     </div>
                   ) : (
                     <Link href="/sign-in?redirect=/pricing" className="block">

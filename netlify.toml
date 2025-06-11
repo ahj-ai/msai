@@ -7,17 +7,23 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  NETLIFY_NEXT_PLUGIN_SKIP = "false"
   NETLIFY_NEXT_PLUGIN_FORCE_BUILD = "true"
 
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@clerk/nextjs"]
+  included_files = ["**/*.node"]
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    # No additional inputs needed for the latest version
+  # No additional inputs needed for the latest version
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"

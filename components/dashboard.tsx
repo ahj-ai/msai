@@ -52,10 +52,10 @@ export function Dashboard() {
         <QuickAccessCard
           title="Problem Lab"
           icon={Flask}
-          description={user.isPremium ? "Explore AI-generated problems" : "Solve curated problem sets"}
+          description="Solve curated problem sets"
           linkHref="/problem-lab"
           linkText="Enter Lab"
-          isPremiumLocked={!user.isPremium}
+          isPremiumLocked={false}
         />
         <StatisticsCard userStats={userStats} />
       </div>
@@ -65,7 +65,7 @@ export function Dashboard() {
         <Achievements userStats={userStats} />
       </div>
 
-      {!user.isPremium && <PremiumUpsell />}
+      {/* Premium upsell removed */}
     </div>
   )
 }
