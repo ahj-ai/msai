@@ -36,6 +36,180 @@ export const supabase = new Proxy({} as SupabaseClient, {
   }
 });
 
+// Subscription types
+export type SubscriptionType = 'free' | 'pro';
+
+// Constants for stack allocation
+const STACK_CREDITS = {
+  NEW_USER: 20,
+  FREE_MONTHLY: 50,
+  PRO_ADDITIONAL: 300
+};
+
+/**
+ * Initialize or update a user's subscription in Supabase.
+ * Creates entry for new users with default credits, or updates existing subscriptions.
+ */
+export async function manageUserSubscription({
+  userId, 
+  subscriptionType = 'free', 
+  subscriptionId = null,
+  isNewUser = false
+}: {
+  userId: string;
+  subscriptionType?: SubscriptionType;
+  subscriptionId?: string | null;
+  isNewUser?: boolean;
+}) {
+  console.log(`Managing subscription for user ${userId}:`, { subscriptionType, isNewUser });
+  
+  try {
+    // First check if user already has a subscription entry
+    const { data: existingData, error: fetchError } = await supabase
+      .from('user_subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    const now = new Date().toISOString();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    
+    if (fetchError && fetchError.code !== 'PGRST116') { // Not found error is expected for new users
+      console.error('Error fetching user subscription:', fetchError);
+      return { success: false, error: fetchError };
+    }
+    
+    // Calculate monthly allowance based on subscription type
+    let monthlyAllowance = STACK_CREDITS.FREE_MONTHLY;
+    if (subscriptionType === 'pro') {
+      monthlyAllowance += STACK_CREDITS.PRO_ADDITIONAL;
+    }
+    
+    // For new users, we want to give them starting credits
+    const newUserBonus = isNewUser ? STACK_CREDITS.NEW_USER : 0;
+    
+    if (!existingData) {
+      // Create new subscription entry for user
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .insert([
+          {
+            user_id: userId,
+            subscription_type: subscriptionType,
+            subscription_id: subscriptionId,
+            monthly_allowance: monthlyAllowance,
+            monthly_usage: 0,
+            status: 'active',
+            created_at: now,
+            updated_at: now,
+            usage_period_ends_at: thirtyDaysFromNow.toISOString()
+          }
+        ])
+        .select();
+        
+      if (error) {
+        console.error('Error creating user subscription:', error);
+        return { success: false, error };
+      }
+      
+      // If this is a new user, add their starting credits
+      if (isNewUser && newUserBonus > 0) {
+        console.log(`Adding ${newUserBonus} starting credits for new user ${userId}`);
+        // Check if user_profiles entry exists
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('purchased_stacks')
+          .eq('user_id', userId)
+          .single();
+        let newBalance = newUserBonus;
+        if (profile) {
+          newBalance = (profile.purchased_stacks || 0) + newUserBonus;
+          const { error: updateError } = await supabase
+            .from('user_profiles')
+            .update({ purchased_stacks: newBalance, updated_at: now })
+            .eq('user_id', userId);
+          if (updateError) {
+            console.error('Error updating user profile with new user bonus:', updateError);
+          }
+        } else {
+          // Create profile if not exists
+          const { error: createError } = await supabase
+            .from('user_profiles')
+            .insert({ user_id: userId, purchased_stacks: newUserBonus, created_at: now, updated_at: now });
+          if (createError) {
+            console.error('Error creating user profile with new user bonus:', createError);
+          }
+        }
+        // Log the transaction
+        const { error: txError } = await supabase
+          .from('stack_transactions')
+          .insert({
+            user_id: userId,
+            amount: newUserBonus,
+            type: 'bonus',
+            description: `New user signup bonus: ${newUserBonus} stacks`,
+            created_at: now
+          });
+        if (txError) {
+          console.error('Error logging new user bonus transaction:', txError);
+        }
+      }
+      
+      return { 
+        success: true, 
+        data: data?.[0], 
+        isNew: true, 
+        monthlyAllowance 
+      };
+    } else {
+      // Update existing subscription
+      const updates: any = {
+        subscription_type: subscriptionType,
+        updated_at: now,
+      };
+      
+      // Only update subscription ID if provided
+      if (subscriptionId) {
+        updates.subscription_id = subscriptionId;
+      }
+      
+      // If upgrading to pro, adjust the allowance
+      if (subscriptionType === 'pro' && existingData.subscription_type === 'free') {
+        // Add pro additional credits to existing allowance
+        updates.monthly_allowance = monthlyAllowance;
+        console.log(`Upgrading user ${userId} from free to pro. New allowance: ${monthlyAllowance}`);
+      } else if (subscriptionType === 'free' && existingData.subscription_type === 'pro') {
+        // Downgrading to free tier - adjust allowance but don't remove existing credits
+        updates.monthly_allowance = STACK_CREDITS.FREE_MONTHLY;
+        console.log(`Downgrading user ${userId} from pro to free. New allowance: ${STACK_CREDITS.FREE_MONTHLY}`);
+      }
+      
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .update(updates)
+        .eq('user_id', userId)
+        .select();
+        
+      if (error) {
+        console.error('Error updating user subscription:', error);
+        return { success: false, error };
+      }
+      
+      return { 
+        success: true, 
+        data: data?.[0], 
+        isNew: false, 
+        wasUpgraded: subscriptionType === 'pro' && existingData.subscription_type === 'free',
+        wasDowngraded: subscriptionType === 'free' && existingData.subscription_type === 'pro'
+      };
+    }
+  } catch (error) {
+    console.error('Failed to manage user subscription:', error);
+    return { success: false, error };
+  }
+}
+
 // Function to record user login
 export async function recordUserLogin(userId: string, userEmail?: string, metadata: any = {}) {
   console.log('Recording user login for:', { userId, userEmail });

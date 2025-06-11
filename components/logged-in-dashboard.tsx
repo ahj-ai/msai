@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, ReactNode, useEffect } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import Link from "next/link";
-import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target, Coins, AlertTriangle } from "lucide-react";
+import { useStackBalance } from "@/contexts/StackBalanceContext";
 import { useAuth } from "@/lib/auth";
+import { useUser } from "@clerk/nextjs";
 import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -372,6 +374,8 @@ const WeeklyGoalCard = ({ goal, onUpdate }: { goal: WeeklyGoal; onUpdate?: (goal
 
 const MainDashboard = ({ stats }: { stats: UserStats }) => {
   const { user } = useAuth();
+  const { user: clerkUser, isSignedIn, isLoaded: clerkIsLoaded } = useUser();
+  const { stackData, refreshBalance } = useStackBalance();
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([]);
   const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   const [goalError, setGoalError] = useState<string | null>(null);
@@ -380,11 +384,11 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
   // Fetch weekly goals from Supabase
   useEffect(() => {
     const fetchWeeklyGoals = async () => {
-      if (!user?.id) return;
+      if (!clerkUser?.id || !isSignedIn) return;
       
       setIsLoadingGoals(true);
       try {
-        const { data, error, success } = await getUserWeeklyGoals(user.id);
+        const { data, error, success } = await getUserWeeklyGoals(clerkUser.id);
         
         if (success && data) {
           setWeeklyGoals(data);
@@ -396,7 +400,7 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
         // If no goals found, generate default goals
         if (success && (!data || data.length === 0)) {
           console.log('No weekly goals found, generating defaults');
-          const result = await generateDefaultWeeklyGoals(user.id);
+          const result = await generateDefaultWeeklyGoals(clerkUser.id);
           
           if (result.success && result.data) {
             setWeeklyGoals(result.data);
@@ -417,10 +421,10 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
   
   // Handle goal progress update
   const handleGoalUpdate = async (goalId: string, progress: number) => {
-    if (!user?.id) return;
+    if (!clerkUser?.id || !isSignedIn) return;
     
     try {
-      const { success, data, error } = await updateGoalProgress(user.id, goalId, progress);
+      const { success, data, error } = await updateGoalProgress(clerkUser.id, goalId, progress);
       
       if (success && data) {
         // Update the goals in state
@@ -455,10 +459,123 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
   const problemsWidth = stats.problemsSolved > 100 ? "100%" : `${stats.problemsSolved}%`;
   const timeWidth = stats.averageResponseTime ? `${Math.min(100, stats.averageResponseTime * 10)}%` : "0%";
   
+  // Effect to refresh stack balance when the component mounts
+  // Using a ref to prevent multiple refreshes
+  const initialBalanceRefreshDone = useRef(false);
+  useEffect(() => {
+    if (!initialBalanceRefreshDone.current) {
+      initialBalanceRefreshDone.current = true;
+      refreshBalance().catch(err => console.error('Failed to refresh balance:', err));
+    }
+  }, []);
+
+  const getStackPercentage = () => {
+    if (!stackData.subscription || !stackData.allowance || stackData.allowance <= 0) return 0;
+    const used = stackData.used || 0;
+    return Math.min(100, Math.round((used / stackData.allowance) * 100));
+  };
+
+  // Calculate stack percentage used
+  const stackPercentage = getStackPercentage();
+  
   return (
     <div className="space-y-8">
       <div>
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Welcome back!</h1>
+        
+        {/* Stack Usage Card - only show if user is authenticated with Clerk and stack data exists */}
+        {isSignedIn && clerkIsLoaded && !stackData.error && (
+          <div className="mb-8">
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">AI Stack Usage</h2>
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md hover:shadow-lg transition-all duration-300">
+              {stackData.isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <span className="ml-2 text-sm text-gray-600">Loading stack data...</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Coins className="h-5 w-5 text-indigo-600" />
+                        <h3 className="text-lg font-semibold text-gray-800">AI Stacks</h3>
+                        {stackData.subscription === 'pro' && (
+                          <span className="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-1 rounded-full font-medium">
+                            Pro Plan
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-gray-600">
+                        {stackData.subscription === 'pro' ? 
+                          'Your Pro subscription includes 350 stacks per month.' : 
+                          'Free tier includes 50 stacks per month.'}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-2xl font-bold text-indigo-600">{stackData.balance}</span>
+                        <span className="text-xs text-gray-500">balance</span>
+                      </div>
+                      <div className="text-gray-300">/</div>
+                      <div className="flex flex-col">
+                        <span className="text-2xl font-bold text-gray-700">{stackData.allowance}</span>
+                        <span className="text-xs text-gray-500">monthly</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Stack usage progress bar */}
+                  <div className="mt-5">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-medium text-gray-700">Usage</span>
+                      <span className="text-xs font-medium text-gray-700">{stackData.used || 0} of {stackData.allowance}</span>
+                    </div>
+                    <div className="w-full h-2.5 bg-gray-200 rounded-full">
+                      <div 
+                        className={`h-2.5 rounded-full ${stackPercentage > 80 ? 'bg-red-500' : stackPercentage > 60 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                        style={{ width: `${stackPercentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {/* Feature costs */}
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-md">
+                      <Coins className="h-3 w-3 text-gray-500" />
+                      <span className="text-xs text-gray-600">Ask Lab: 3 stacks</span>
+                    </div>
+                    <div className="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-md">
+                      <Coins className="h-3 w-3 text-gray-500" />
+                      <span className="text-xs text-gray-600">Snap & Solve: 5 stacks</span>
+                    </div>
+                    {stackData.subscription !== 'pro' && (
+                      <div className="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-md">
+                        <Link href="/pricing" className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Upgrade to Pro
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Show error state if there's an issue with stack balance */}
+        {stackData.error && (
+          <div className="mb-8">
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
+              <div className="flex items-center">
+                <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
+                <p className="text-sm text-yellow-700">{stackData.error}</p>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Performance Overview Section */}
         <div className="mb-8">

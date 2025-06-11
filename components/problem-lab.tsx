@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Problem, Difficulty } from '@/types/math'
-import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book } from 'lucide-react'
+import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book, Coins } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
+import { useStackBalance } from '@/contexts/StackBalanceContext'
 import Link from 'next/link'
 import { getFilteredProblems, getAllTopics, getAllSubjects } from '@/lib/problems'
 import { saveUserProblems, getUserProblems } from '@/lib/supabase'
@@ -264,6 +265,9 @@ export function ProblemLab() {
   // Active tab state
   const [activeTab, setActiveTab] = useState<ProblemLabTab>('main');
   
+  // Stack balance state
+  const { stackData, refreshBalance, debitStacks } = useStackBalance();
+  
   // Setup states
   const [subject, setSubject] = useState<keyof typeof subjects>("pre-algebra");
   const [topic, setTopic] = useState("");
@@ -286,6 +290,7 @@ export function ProblemLab() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
   const questionTextareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Snap & Solve states
@@ -360,10 +365,19 @@ export function ProblemLab() {
       const result = await response.json();
 
       if (!response.ok) {
+        if (response.status === 402) {
+          // Insufficient stacks error
+          throw new Error('You don\'t have enough Stacks to perform this action. Please upgrade your plan or wait for your next monthly allocation.');
+        }
         throw new Error(result.error || `HTTP error! status: ${response.status}`);
       }
 
       setSolution(result.solution);
+      // Update stack balance if the response includes it
+      if (result.newBalance !== undefined) {
+        // Refresh balance from the server
+        await refreshBalance();
+      }
     } catch (error) {
       console.error("Snap & Solve error:", error);
       if (error instanceof Error) {
@@ -636,6 +650,7 @@ export function ProblemLab() {
     
     setIsAskingQuestion(true);
     setAnswer(null);
+    setAskError(null);
     
     try {
       // Call the Gemini API endpoint
@@ -649,13 +664,21 @@ export function ProblemLab() {
       
       if (response.ok) {
         setAnswer(data.answer);
+        // Update stack balance if the response includes it
+        if (data.newBalance !== undefined) {
+          // Update local context with new balance
+          await refreshBalance();
+        }
+      } else if (response.status === 402) {
+        // Insufficient stacks error
+        setAskError('You don\'t have enough Stacks to perform this action. Please upgrade your plan or wait for your next monthly allocation.');
       } else {
         console.error('Error from API:', data.error);
-        setAnswer(`Sorry, there was an error processing your question: ${data.error}`);
+        setAskError(`Sorry, there was an error processing your question: ${data.error}`);
       }
     } catch (error) {
       console.error('Error asking question:', error);
-      setAnswer('Sorry, there was an error processing your question. Please try again.');
+      setAskError('Sorry, there was an error processing your question. Please try again.');
     } finally {
       setIsAskingQuestion(false);
     }
@@ -684,17 +707,37 @@ export function ProblemLab() {
                   className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
                   placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
                 />
-                <Button 
-                  className="absolute bottom-3 right-3 w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
-                  onClick={handleAskQuestion}
-                  disabled={isAskingQuestion || !question.trim()}
-                >
-                  {isAskingQuestion ? (
-                    <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  ) : (
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  )}
-                </Button>
+                <div className="absolute bottom-3 right-3 flex items-center">
+                  <div className="mr-2 bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full flex items-center">
+                    <Coins className="w-3 h-3 mr-1" />
+                    <span>3 stacks</span>
+                  </div>
+                  <Button 
+                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
+                    onClick={handleAskQuestion}
+                    disabled={isAskingQuestion || !question.trim()}
+                  >
+                    {isAskingQuestion ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    ) : (
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Error message for ask question */}
+              {askError && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded-md flex items-center gap-2 text-red-600">
+                  <AlertCircle className="w-4 h-4" />
+                  <p className="text-sm">{askError}</p>
+                </div>
+              )}
+              
+              {/* Stack balance indicator */}
+              <div className="mt-4 p-2 bg-indigo-50 border border-indigo-100 rounded-md flex items-center gap-2">
+                <Coins className="w-4 h-4 text-indigo-600" />
+                <p className="text-sm">Your balance: <span className="font-medium">{stackData.isLoading ? '...' : stackData.balance}</span> stacks</p>
               </div>
               
               {/* Label and hint for LaTeX keyboard */}
@@ -852,22 +895,28 @@ export function ProblemLab() {
             </div>
           )}
 
-          <Button
-            onClick={handleSnapSolve}
-            disabled={!selectedImage || isLoadingSnap}
-            className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {isLoadingSnap ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Solving...
-              </>
-            ) : (
-              <>
-                Solve with Gemini <Send className="w-4 h-4" />
-              </>
-            )}
-          </Button>
+          <div className="space-y-2">
+            <Button
+              onClick={handleSnapSolve}
+              disabled={!selectedImage || isLoadingSnap}
+              className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {isLoadingSnap ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Solving...
+                </>
+              ) : (
+                <>
+                  Solve with Gemini <Send className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+            <div className="flex items-center justify-center gap-2 text-gray-500">
+              <Coins className="w-4 h-4" />
+              <span className="text-sm">Uses 5 stacks</span>
+            </div>
+          </div>
 
           {solution && !isLoadingSnap && (
             <motion.div

@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { supabase } from '@/lib/supabase';
 
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20"; // Using the latest Gemini 2.5 model
 const API_KEY = process.env.GEMINI_API_KEY || "";
@@ -21,11 +23,35 @@ async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffe
 }
 
 export async function POST(req: Request) {
+  // Get user ID from request headers (set by Clerk middleware)
+  const headersList = headers();
+  const userId = headersList.get('x-clerk-user-id');
+  
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   if (!API_KEY) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 });
   }
 
   try {
+    // Set the cost for solve-image feature (higher than ask-question)
+    const stackCost = 5;
+    
+    // Debit stacks from the user's account
+    const { data: newBalance, error: debitError } = await supabase.rpc('debit_user_stacks', {
+      p_user_id: userId,
+      p_cost: stackCost
+    });
+
+    if (debitError) {
+      console.error("Error debiting stacks:", debitError);
+      return NextResponse.json({ error: "Error processing your request" }, { status: 500 });
+    }
+
+    if (newBalance === -1) {
+      return NextResponse.json({ error: "Insufficient Stacks" }, { status: 402 });
+    }
     const formData = await req.formData();
     const imageFile = formData.get("image") as File | null;
 
@@ -118,7 +144,7 @@ These rules must be followed at all times:
     });
 
     const responseText = result.response.text();
-    return NextResponse.json({ solution: responseText });
+    return NextResponse.json({ solution: responseText, newBalance: newBalance });
 
   } catch (error) {
     console.error("Error processing image with Gemini API:", error);

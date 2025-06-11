@@ -1,8 +1,22 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { recordUserLogin } from '@/lib/supabase';
+import { recordUserLogin, manageUserSubscription } from '@/lib/supabase';
 import { initializeUserProgress } from '../../../../lib/user-progress';
+
+// Extend WebhookEvent type to include subscription events
+type ExtendedWebhookEvent = WebhookEvent | {
+  data: {
+    id: string;
+    object: string;
+    user_id: string;
+    status: string;
+    plan_id?: string;
+    [key: string]: any;
+  };
+  object: string;
+  type: 'subscription.created' | 'subscription.updated' | 'subscription.canceled' | 'subscription.paused';
+};
 
 export async function POST(req: Request) {
   // Get the webhook signature from the headers
@@ -32,7 +46,7 @@ export async function POST(req: Request) {
 
   // Create a Svix instance with your secret
   const webhook = new Webhook(secret);
-  let event: WebhookEvent;
+  let event: ExtendedWebhookEvent;
 
   // Verify the payload with the headers
   try {
@@ -40,7 +54,7 @@ export async function POST(req: Request) {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
-    }) as WebhookEvent;
+    }) as ExtendedWebhookEvent;
   } catch (error) {
     console.error('Error verifying webhook:', error);
     return new Response('Error: Invalid webhook signature', {
@@ -116,27 +130,48 @@ export async function POST(req: Request) {
     
     if (userId) {
       try {
-        // Record the user creation in Supabase
-        const result = await recordUserLogin(
-          userId, 
-          userEmail,
-          { 
-            eventType, 
-            timestamp: new Date().toISOString(),
-            rawEvent: JSON.stringify(event.data)
-          }
-        );
-        console.log('User creation recorded result:', result);
-        
-        // Initialize user progress tracking for the new user
-        const progressResult = await initializeUserProgress(userId);
-        console.log('User progress initialized:', progressResult ? 'Success' : 'Failed');
+        await recordUserLogin(userId, userEmail, { eventType, timestamp: new Date().toISOString(), rawEvent: JSON.stringify(event.data) });
+        await initializeUserProgress(userId);
+        // Initialize user subscription with 50 free credits
+        await manageUserSubscription({ userId, subscriptionType: 'free', isNewUser: true });
       } catch (error) {
-        console.error('Error recording user creation in Supabase:', error);
+        console.error('Error handling user creation in Supabase:', error);
       }
     }
   }
 
+  // Handle subscription events
+  if (eventType === 'subscription.created' || eventType === 'subscription.updated') {
+    const userId = event.data.user_id;
+    const subscriptionId = event.data.id;
+    const status = event.data.status;
+    const planId = event.data.plan_id || '';
+    
+    console.log(`Subscription ${eventType} for user ${userId}:`, { status, planId });
+    
+    // Only process active subscriptions
+    if (userId && status === 'active') {
+      try {
+        const isPro = planId.toLowerCase().includes('pro');
+        const subscriptionType = isPro ? 'pro' : 'free';
+        await manageUserSubscription({ userId, subscriptionType, subscriptionId });
+      } catch (error) {
+        console.error(`Error processing subscription ${eventType}:`, error);
+      }
+    }
+  } else if (eventType === 'subscription.canceled' || eventType === 'subscription.paused') {
+    const userId = event.data.user_id;
+    
+    if (userId) {
+      try {
+        // Downgrade user to free tier
+        await manageUserSubscription({ userId, subscriptionType: 'free', subscriptionId: null });
+      } catch (error) {
+        console.error(`Error processing subscription ${eventType}:`, error);
+      }
+    }
+  }
+  
   return new Response('Webhook processed successfully', { status: 200 });
 }
 

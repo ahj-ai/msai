@@ -13,6 +13,7 @@ import NavBar from '@/components/nav-bar'
 import { Toaster } from '@/components/ui/toaster'
 import { AuthProvider } from '@/lib/auth'
 import Link from 'next/link'
+import { StackBalanceProvider } from '@/contexts/StackBalanceContext'
 
 const geistSans = GeistSans
 const geistMono = GeistMono
@@ -99,8 +100,9 @@ export default function RootLayout({
         <body className={`${geistSans.className} ${geistMono.className} antialiased bg-gray-50`}>
           {/* Wrap the entire app with AuthProvider */}
           <AuthProvider>
-            <div className="min-h-screen flex flex-col">
-              <NavBar>
+            <StackBalanceProvider>
+              <div className="min-h-screen flex flex-col">
+                <NavBar>
                 <div className="flex items-center space-x-3">
                   <SignedOut>
                     <SignInButton mode="modal">
@@ -154,7 +156,8 @@ export default function RootLayout({
                   </div>
                 </div>
               </footer>
-          </div>
+              </div>
+            </StackBalanceProvider>
           </AuthProvider>
         </body>
       </html>
