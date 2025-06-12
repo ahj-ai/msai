@@ -685,3 +685,31 @@ export async function getUserTopicProgress(userId: string) {
   }
 }
 
+/**
+ * Create a user profile in user_profiles table
+ * @param userId Clerk user ID (string)
+ * @param initialStacks number of stacks to start with (default 0)
+ * @returns Promise<{ success: boolean, data?: any, error?: any }>
+ */
+export async function createUserProfile(userId: string, initialStacks: number = 0) {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .insert([
+        {
+          user_id: userId,
+          purchased_stacks: initialStacks,
+        }
+      ])
+      .select();
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error('Exception creating user profile:', error);
+    return { success: false, error };
+  }
+}
+

@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { recordUserLogin } from '@/lib/supabase';
+import { recordUserLogin, createUserProfile } from '@/lib/supabase';
 import { initializeUserProgress } from '../../../../lib/user-progress';
 
 export async function POST(req: Request) {
@@ -131,6 +131,10 @@ export async function POST(req: Request) {
         // Initialize user progress tracking for the new user
         const progressResult = await initializeUserProgress(userId);
         console.log('User progress initialized:', progressResult ? 'Success' : 'Failed');
+
+        // Create user profile in user_profiles table
+        const profileResult = await createUserProfile(userId);
+        console.log('User profile creation result:', profileResult);
       } catch (error) {
         console.error('Error recording user creation in Supabase:', error);
       }

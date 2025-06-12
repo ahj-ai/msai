@@ -90,15 +90,15 @@ const LoggedInDashboard = () => {
       const fetchStackBalance = async () => {
         try {
           const { data, error } = await supabase
-            .from('users')
-            .select('stacks')
-            .eq('clerk_id', user.id)
+            .from('user_profiles')
+            .select('purchased_stacks')
+            .eq('user_id', user.id)
             .single();
           console.log('Stack balance fetch result:', { data, error, userId: user.id });
           if (error) {
             setStackBalance(null);
           } else {
-            setStackBalance(data?.stacks ?? 0);
+            setStackBalance(data?.purchased_stacks ?? 0);
           }
         } catch (err) {
           console.log('Stack balance fetch exception:', err);
