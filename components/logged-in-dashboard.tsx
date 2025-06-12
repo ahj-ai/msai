@@ -2,7 +2,7 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals } from "@/lib/supabase";
 import ReactMarkdown from 'react-markdown';
@@ -11,6 +11,9 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { useRouter } from "next/navigation";
+import MathStackLogo from "./MathStackLogo";
+import { motion } from "framer-motion";
 
 interface NavItemProps {
   icon: LucideIcon;
@@ -47,8 +50,6 @@ interface UserStats {
   accuracy?: number;
 }
 
-
-
 interface SavedProblem {
   id?: string;
   user_id?: string;
@@ -76,9 +77,16 @@ const LoggedInDashboard = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [stackBalance, setStackBalance] = useState<number | null>(null);
+  const [usage, setUsage] = useState<{
+    monthlyAllowance: number;
+    monthlyUsage: number;
+    purchasedStacks: number;
+    currentPeriodEnd: string | null;
+  } | null>(null);
   
   // Get actual user data from auth context
   const { user } = useAuth();
+  const router = useRouter();
 
   // Fetch user progress data from Supabase
   useEffect(() => {
@@ -86,26 +94,34 @@ const LoggedInDashboard = () => {
       setIsLoading(true);
       setError(null);
       
-      // Fetch stack balance
-      const fetchStackBalance = async () => {
+      // Fetch stack usage and subscription info
+      const fetchUsage = async () => {
         try {
-          const { data, error } = await supabase
+          // Fetch purchased stacks
+          const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select('purchased_stacks')
             .eq('user_id', user.id)
             .single();
-          console.log('Stack balance fetch result:', { data, error, userId: user.id });
-          if (error) {
-            setStackBalance(null);
-          } else {
-            setStackBalance(data?.purchased_stacks ?? 0);
-          }
+          // Fetch subscription info
+          const { data: sub, error: subError } = await supabase
+            .from('user_subscriptions')
+            .select('monthly_allowance, monthly_usage, current_period_end')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          setUsage({
+            monthlyAllowance: sub?.monthly_allowance ?? 0,
+            monthlyUsage: sub?.monthly_usage ?? 0,
+            purchasedStacks: profile?.purchased_stacks ?? 0,
+            currentPeriodEnd: sub?.current_period_end ?? null,
+          });
         } catch (err) {
-          console.log('Stack balance fetch exception:', err);
-          setStackBalance(null);
+          setUsage(null);
         }
       };
-      fetchStackBalance();
+      fetchUsage();
 
       const fetchUserProgress = async () => {
         try {
@@ -240,22 +256,12 @@ const LoggedInDashboard = () => {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          {stackBalance !== null ? (
-            <div className="mb-6 flex items-center justify-center">
-              <div className="bg-indigo-100 text-indigo-800 px-6 py-3 rounded-xl shadow text-lg font-semibold flex items-center gap-2">
-                <Zap className="h-5 w-5 text-indigo-500 mr-2" />
-                Stacks: <span className="ml-1 font-bold">{stackBalance}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-6 flex items-center justify-center">
-              <div className="bg-red-100 text-red-800 px-6 py-3 rounded-xl shadow text-lg font-semibold flex items-center gap-2">
-                <Zap className="h-5 w-5 text-red-500 mr-2" />
-                Could not load stack balance
-              </div>
-            </div>
-          )}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Stack Counter (UsageCard) at the top */}
+          <div className="w-full max-w-2xl mx-auto mb-10">
+            <UsageCard usage={usage} />
+          </div>
+          {/* Main Dashboard Content */}
           {renderContent()}
         </main>
       </div>
@@ -501,12 +507,18 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
         <div className="mb-8">
           <h2 className="mb-4 text-xl font-semibold text-gray-800">Performance Overview</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {/* Circular Progress for Accuracy */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm text-center">
-              <div className="relative inline-flex items-center justify-center">
-                <svg className="w-24 h-24">
+            {/* Accuracy Card */}
+            <motion.div
+              className="rounded-2xl bg-white/30 backdrop-blur-lg border border-indigo-200/40 shadow-xl p-6 text-center relative overflow-hidden"
+              whileHover={{ scale: 1.03, boxShadow: "0 8px 32px #8A63FD33" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+            >
+              <div className="relative inline-flex items-center justify-center mb-2">
+                <svg className="w-24 h-24" viewBox="0 0 96 96">
                   <circle 
-                    className="text-gray-200" 
+                    className="text-indigo-200" 
                     strokeWidth="8" 
                     stroke="currentColor" 
                     fill="transparent" 
@@ -514,8 +526,8 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
                     cx="48" 
                     cy="48"
                   />
-                  <circle 
-                    className={stats.accuracy ? (stats.accuracy >= 80 ? "text-green-500" : stats.accuracy >= 60 ? "text-yellow-500" : "text-red-500") : "text-gray-300"}
+                  <motion.circle
+                    className={stats.accuracy ? (stats.accuracy >= 80 ? "text-green-400" : stats.accuracy >= 60 ? "text-yellow-400" : "text-pink-400") : "text-gray-300"}
                     strokeWidth="8" 
                     strokeDasharray={`${stats.accuracy ? stats.accuracy * 2.51 : 0} 251`} 
                     strokeLinecap="round" 
@@ -525,71 +537,52 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
                     cx="48" 
                     cy="48"
                     transform="rotate(-90 48 48)"
+                    animate={{
+                      strokeDasharray: [`0 251`, `${stats.accuracy ? stats.accuracy * 2.51 : 0} 251`],
+                    }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
                   />
                 </svg>
-                <span className="absolute text-xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
+                <span className="absolute text-3xl font-extrabold text-indigo-900 drop-shadow-lg">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
               </div>
-              <p className="mt-2 text-sm font-medium text-gray-500">Accuracy</p>
-            </div>
-            
-            {/* High Score with Badge */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">High Score</p>
-                  <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.highScore}</p>
-                </div>
-                <div className={`rounded-full p-3 ${stats.highScore > 500 ? "bg-indigo-100" : "bg-gray-100"}`}>
-                  <Trophy className={`h-8 w-8 ${stats.highScore > 500 ? "text-indigo-600" : "text-gray-400"}`} />
-                </div>
-              </div>
-              {stats.highScore > 500 && (
-                <div className="mt-3 inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-800">
-                  🏆 Elite Score
-                </div>
-              )}
-            </div>
-            
-            {/* Practice Time with Clock Icon */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Practice Time</p>
-                  <p className="mt-1 text-3xl font-semibold text-gray-900">
-                    {stats.totalTimePlayed ? `${Math.round(stats.totalTimePlayed / 60)}` : "0"}
-                  </p>
-                  <p className="text-sm text-gray-500">minutes</p>
-                </div>
-                <div className="rounded-full p-3 bg-blue-100">
-                  <Clock className="h-8 w-8 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
-                <div 
-                  className="h-2 rounded-full bg-blue-500" 
-                  style={{ width: stats.totalTimePlayed ? `${Math.min(100, (stats.totalTimePlayed / 60) / 3)}%` : "0%" }}
-                ></div>
-              </div>
-              {stats.totalTimePlayed && stats.totalTimePlayed > 1800 && (
-                <div className="mt-3 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
-                  ⏱️ {stats.totalTimePlayed > 3600 ? "Time Master" : "30+ Minutes"}
-                </div>
-              )}
-            </div>
-            
-            {/* Streak with Status */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-gray-500">Current Streak</p>
-              <div className="flex items-baseline">
-                <p className="text-3xl font-semibold text-gray-900">{stats.bestStreak || 0}</p>
-                <p className="ml-2 text-sm text-gray-500">days</p>
-              </div>
-              {stats.bestStreak && stats.bestStreak > 0 && (
-                <div className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStreakColor(stats.bestStreak)}`}>
-                  {stats.bestStreak >= 10 ? "🔥 On Fire!" : stats.bestStreak >= 5 ? "👍 Good Streak" : "🌱 Just Started"}
-                </div>
-              )}
-            </div>
+              <p className="mt-2 text-sm font-medium text-indigo-700">Accuracy</p>
+            </motion.div>
+            {/* High Score Card */}
+            <motion.div
+              className="rounded-2xl bg-white/30 backdrop-blur-lg border border-yellow-200/40 shadow-xl p-6 text-center relative overflow-hidden"
+              whileHover={{ scale: 1.03, boxShadow: "0 8px 32px #FFD60033" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            >
+              <Trophy className="mx-auto mb-2 h-8 w-8 text-yellow-400 drop-shadow" />
+              <div className="text-3xl font-extrabold text-yellow-700 mb-1">{stats.highScore}</div>
+              <p className="text-sm font-medium text-yellow-700">High Score</p>
+            </motion.div>
+            {/* Games Played Card */}
+            <motion.div
+              className="rounded-2xl bg-white/30 backdrop-blur-lg border border-blue-200/40 shadow-xl p-6 text-center relative overflow-hidden"
+              whileHover={{ scale: 1.03, boxShadow: "0 8px 32px #4CC9F033" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+            >
+              <Star className="mx-auto mb-2 h-8 w-8 text-blue-400 drop-shadow" />
+              <div className="text-3xl font-extrabold text-blue-700 mb-1">{stats.gamesPlayed}</div>
+              <p className="text-sm font-medium text-blue-700">Games Played</p>
+            </motion.div>
+            {/* Problems Solved Card */}
+            <motion.div
+              className="rounded-2xl bg-white/30 backdrop-blur-lg border border-green-200/40 shadow-xl p-6 text-center relative overflow-hidden"
+              whileHover={{ scale: 1.03, boxShadow: "0 8px 32px #22C55E33" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.4 }}
+            >
+              <Zap className="mx-auto mb-2 h-8 w-8 text-green-400 drop-shadow" />
+              <div className="text-3xl font-extrabold text-green-700 mb-1">{stats.problemsSolved}</div>
+              <p className="text-sm font-medium text-green-700">Problems Solved</p>
+            </motion.div>
           </div>
         </div>
         
@@ -787,25 +780,6 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Quick Tips Section */}
-        <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-6">
-          <h2 className="mb-4 text-lg font-medium text-indigo-800">Quick Tips</h2>
-          <ul className="space-y-2 text-indigo-700">
-            <li className="flex items-start">
-              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-              <span>Practice for at least 10 minutes daily for best results</span>
-            </li>
-            <li className="flex items-start">
-              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-              <span>Challenge yourself with higher difficulty levels to improve faster</span>
-            </li>
-            <li className="flex items-start">
-              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-              <span>Check your progress regularly to identify areas for improvement</span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
@@ -1091,5 +1065,36 @@ const StatCard = ({ title, value }: StatCardProps) => (
     <p className="mt-1 text-3xl font-semibold text-gray-900">{value}</p>
   </div>
 );
+
+// Update UsageBar to be more skinny, slender, and horizontal
+function UsageCard({ usage }: { usage: {
+  monthlyAllowance: number;
+  monthlyUsage: number;
+  purchasedStacks: number;
+  currentPeriodEnd: string | null;
+} | null }) {
+  if (!usage) return null;
+  const proStacksRemaining = Math.max(usage.monthlyAllowance - usage.monthlyUsage, 0);
+  const totalStacks = proStacksRemaining + usage.purchasedStacks;
+  return (
+    <div className="w-full flex items-center justify-between h-8 rounded-full bg-white border border-gray-200 px-3 shadow-sm max-w-2xl mx-auto text-xs">
+      <div className="flex items-center gap-2">
+        <span className="font-bold text-indigo-700 tabular-nums text-sm">{totalStacks}</span>
+        <span className="text-gray-500">Stacks</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-[10px] text-indigo-700 font-semibold">Pro</span>
+        <span className="font-bold text-indigo-900">{proStacksRemaining} / {usage.monthlyAllowance}</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-[10px] text-green-700 font-semibold">Purchased</span>
+        <span className="font-bold text-green-900">{usage.purchasedStacks}</span>
+      </div>
+      <Link href="/pricing">
+        <button className="ml-2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-xs shadow hover:from-purple-600 hover:to-pink-700 transition">
+          Buy More
+        </button>
+      </Link>
+    </div>
+  );
+}
 
 export default LoggedInDashboard;
