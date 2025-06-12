@@ -75,6 +75,7 @@ const LoggedInDashboard = () => {
     problemsSolved: 0,
   });
   const [error, setError] = useState<string | null>(null);
+  const [stackBalance, setStackBalance] = useState<number | null>(null);
   
   // Get actual user data from auth context
   const { user } = useAuth();
@@ -85,6 +86,27 @@ const LoggedInDashboard = () => {
       setIsLoading(true);
       setError(null);
       
+      // Fetch stack balance
+      const fetchStackBalance = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('stacks')
+            .eq('clerk_id', user.id)
+            .single();
+          console.log('Stack balance fetch result:', { data, error, userId: user.id });
+          if (error) {
+            setStackBalance(null);
+          } else {
+            setStackBalance(data?.stacks ?? 0);
+          }
+        } catch (err) {
+          console.log('Stack balance fetch exception:', err);
+          setStackBalance(null);
+        }
+      };
+      fetchStackBalance();
+
       const fetchUserProgress = async () => {
         try {
           const { data, error } = await supabase
@@ -219,6 +241,21 @@ const LoggedInDashboard = () => {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          {stackBalance !== null ? (
+            <div className="mb-6 flex items-center justify-center">
+              <div className="bg-indigo-100 text-indigo-800 px-6 py-3 rounded-xl shadow text-lg font-semibold flex items-center gap-2">
+                <Zap className="h-5 w-5 text-indigo-500 mr-2" />
+                Stacks: <span className="ml-1 font-bold">{stackBalance}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 flex items-center justify-center">
+              <div className="bg-red-100 text-red-800 px-6 py-3 rounded-xl shadow text-lg font-semibold flex items-center gap-2">
+                <Zap className="h-5 w-5 text-red-500 mr-2" />
+                Could not load stack balance
+              </div>
+            </div>
+          )}
           {renderContent()}
         </main>
       </div>
