@@ -465,9 +465,9 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
           <h2 className="mb-4 text-xl font-semibold text-gray-800">Performance Overview</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {/* Circular Progress for Accuracy */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm text-center">
+            <div className={`rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg ${stats.accuracy && stats.accuracy >= 80 ? "hover:shadow-green-200/50" : stats.accuracy && stats.accuracy >= 60 ? "hover:shadow-yellow-200/50" : "hover:shadow-red-200/50"} hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group`}>
               <div className="relative inline-flex items-center justify-center">
-                <svg className="w-24 h-24">
+                <svg className="w-24 h-24 transition-transform duration-300 group-hover:scale-110">
                   <circle 
                     className="text-gray-200" 
                     strokeWidth="8" 
@@ -490,68 +490,40 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
                     transform="rotate(-90 48 48)"
                   />
                 </svg>
-                <span className="absolute text-xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
+                <span className="absolute text-2xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
               </div>
               <p className="mt-2 text-sm font-medium text-gray-500">Accuracy</p>
             </div>
             
-            {/* High Score with Badge */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">High Score</p>
-                  <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.highScore}</p>
-                </div>
-                <div className={`rounded-full p-3 ${stats.highScore > 500 ? "bg-indigo-100" : "bg-gray-100"}`}>
-                  <Trophy className={`h-8 w-8 ${stats.highScore > 500 ? "text-indigo-600" : "text-gray-400"}`} />
-                </div>
+            {/* High Score */}
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-yellow-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
+              <div className="mb-3">
+                <Trophy className="h-10 w-10 mx-auto text-yellow-500 transition-transform duration-300 group-hover:scale-110" />
               </div>
-              {stats.highScore > 500 && (
-                <div className="mt-3 inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-800">
-                  🏆 Elite Score
-                </div>
-              )}
+              <p className="text-4xl font-bold text-yellow-700">{stats.highScore}</p>
+              <p className="mt-2 text-sm font-medium text-gray-500">High Score</p>
             </div>
             
-            {/* Practice Time with Clock Icon */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Practice Time</p>
-                  <p className="mt-1 text-3xl font-semibold text-gray-900">
-                    {stats.totalTimePlayed ? `${Math.round(stats.totalTimePlayed / 60)}` : "0"}
-                  </p>
-                  <p className="text-sm text-gray-500">minutes</p>
-                </div>
-                <div className="rounded-full p-3 bg-blue-100">
-                  <Clock className="h-8 w-8 text-blue-600" />
-                </div>
+            {/* Games Played */}
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
+              <div className="mb-3">
+                <svg className="h-10 w-10 mx-auto text-blue-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                </svg>
               </div>
-              <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
-                <div 
-                  className="h-2 rounded-full bg-blue-500" 
-                  style={{ width: stats.totalTimePlayed ? `${Math.min(100, (stats.totalTimePlayed / 60) / 3)}%` : "0%" }}
-                ></div>
-              </div>
-              {stats.totalTimePlayed && stats.totalTimePlayed > 1800 && (
-                <div className="mt-3 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
-                  ⏱️ {stats.totalTimePlayed > 3600 ? "Time Master" : "30+ Minutes"}
-                </div>
-              )}
+              <p className="text-4xl font-bold text-blue-700">{stats.gamesPlayed}</p>
+              <p className="mt-2 text-sm font-medium text-gray-500">Games Played</p>
             </div>
             
-            {/* Streak with Status */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-gray-500">Current Streak</p>
-              <div className="flex items-baseline">
-                <p className="text-3xl font-semibold text-gray-900">{stats.bestStreak || 0}</p>
-                <p className="ml-2 text-sm text-gray-500">days</p>
+            {/* Problems Solved */}
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
+              <div className="mb-3">
+                <svg className="h-10 w-10 mx-auto text-green-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 15H6L13 1V9H18L11 23V15Z" />
+                </svg>
               </div>
-              {stats.bestStreak && stats.bestStreak > 0 && (
-                <div className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStreakColor(stats.bestStreak)}`}>
-                  {stats.bestStreak >= 10 ? "🔥 On Fire!" : stats.bestStreak >= 5 ? "👍 Good Streak" : "🌱 Just Started"}
-                </div>
-              )}
+              <p className="text-4xl font-bold text-green-700">{stats.problemsSolved}</p>
+              <p className="mt-2 text-sm font-medium text-gray-500">Problems Solved</p>
             </div>
           </div>
         </div>
@@ -584,21 +556,19 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
           </div>
           
           {isLoadingGoals ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="animate-pulse flex flex-col">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                      <div className="flex justify-between mb-2">
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                      </div>
-                      <div className="h-2 bg-gray-200 rounded w-full"></div>
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between mb-1">
+                      <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/6"></div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div className="h-2 bg-gray-200 rounded w-full"></div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : goalError ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
@@ -630,14 +600,104 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {weeklyGoals.map((goal) => (
-                <WeeklyGoalCard 
-                  key={goal.id} 
-                  goal={goal} 
-                  onUpdate={handleGoalUpdate}
-                />
-              ))}
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/30 hover:from-white/95 hover:to-white/80">
+              <div className="flex items-center mb-4">
+                <Target className="h-5 w-5 text-indigo-600 mr-2" />
+                <h3 className="font-semibold text-gray-800">This Week's Goals</h3>
+                <div className="ml-auto flex gap-1">
+                  <span className="text-xs font-medium text-indigo-600 bg-indigo-50 rounded-full px-2 py-0.5">
+                    {weeklyGoals.filter(g => g.completed).length}/{weeklyGoals.length}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {weeklyGoals.map((goal) => {
+                  const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
+                  let progressColor = "bg-indigo-500";
+                  
+                  if (progress >= 100) {
+                    progressColor = "bg-emerald-500";
+                  } else if (progress >= 66) {
+                    progressColor = "bg-blue-500"; 
+                  } else if (progress >= 33) {
+                    progressColor = "bg-violet-500";
+                  }
+                  
+                  // Goal type to icon mapping
+                  const goalIcons = {
+                    'games_played': <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>,
+                    'problems_solved': <svg className="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="currentColor"><path d="M11 15H6L13 1V9H18L11 23V15Z" /></svg>,
+                    'practice_time': <Clock className="w-4 h-4 text-indigo-500" />,
+                    'default': <Target className="w-4 h-4 text-gray-500" />
+                  };
+                  
+                  const icon = goal.goal_type in goalIcons 
+                    ? goalIcons[goal.goal_type as keyof typeof goalIcons]
+                    : goalIcons.default;
+                  
+                  return (
+                    <div key={goal.id} className="pb-3 last:pb-0 group">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center">
+                          <span className="mr-2 flex-shrink-0 w-5 h-5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            {icon}
+                          </span>
+                          <span className="ml-1 text-sm font-medium text-gray-700">{goal.message}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs font-medium text-gray-500 mr-2">
+                            {goal.current}/{goal.target} {goal.unit || ''}
+                          </span>
+                          {goal.completed && (
+                            <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full text-center">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <div className="flex-1 mr-2">
+                          <div className="w-full bg-gray-100 rounded-full h-1.5">
+                            <div 
+                              className={`h-1.5 rounded-full ${progressColor} transition-all duration-500 ease-out`}
+                              style={{ width: `${progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        {!goal.completed && (
+                          <Button
+                            onClick={() => handleGoalUpdate(goal.id, goal.current + 1)}
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 rounded-full hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            <span className="sr-only">Add Progress</span>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {weeklyGoals.filter(g => g.completed).length === weeklyGoals.length && (
+                <div className="mt-4 pt-3 border-t border-indigo-100/50">
+                  <div className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-medium text-green-700">
+                      All goals completed! 🎉
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -750,25 +810,6 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Quick Tips Section */}
-        <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-6">
-          <h2 className="mb-4 text-lg font-medium text-indigo-800">Quick Tips</h2>
-          <ul className="space-y-2 text-indigo-700">
-            <li className="flex items-start">
-              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-              <span>Practice for at least 10 minutes daily for best results</span>
-            </li>
-            <li className="flex items-start">
-              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-              <span>Challenge yourself with higher difficulty levels to improve faster</span>
-            </li>
-            <li className="flex items-start">
-              <Zap className="mr-2 mt-0.5 h-4 w-4 text-indigo-600" />
-              <span>Check your progress regularly to identify areas for improvement</span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
