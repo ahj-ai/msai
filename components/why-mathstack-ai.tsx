@@ -8,8 +8,8 @@ export function WhyMathStackAI() {
   return (
     <PageLayout showNavFooter={true}>
       <div className="bg-gradient-to-b from-white to-[#F8F9FB] min-h-screen">
-        <div className="container mx-auto px-4 py-20 max-w-6xl">
-          <div className="text-center mb-20">
+        <div className="container mx-auto px-4 py-12 max-w-6xl">
+          <div className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
               Why choose <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">MathStack AI</span>?
             </h1>
@@ -24,7 +24,7 @@ export function WhyMathStackAI() {
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {/* Feature 1 */}
             <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               <div className="w-12 h-12 flex items-center justify-center bg-indigo-50 rounded-xl mb-6 mx-auto">
@@ -107,9 +107,9 @@ export function WhyMathStackAI() {
         </div>
 
         {/* How AI Works Section */}
-        <div className="max-w-4xl mx-auto px-4 text-center mb-24">
-          <div className="bg-white p-10 rounded-2xl shadow-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">How does the AI work?</h2>
+        <div className="max-w-4xl mx-auto px-4 text-center mb-16">
+          <div className="bg-white p-8 rounded-2xl shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-5 text-gray-900">How does the AI work?</h2>
             <div className="space-y-6 text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
               <p>
                 Think of it like having an expert math tutor available 24/7. When you're stuck on a tricky problem, our AI is there to provide instant, detailed help. Just type in your question or upload a photo of the problem.
@@ -122,11 +122,11 @@ export function WhyMathStackAI() {
         </div>
 
         {/* Why MathStack AI Stands Apart */}
-        <div className="max-w-4xl mx-auto px-4 text-center mb-24">
-          <div className="bg-white p-10 rounded-2xl shadow-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">Why MathStack AI Stands Apart</h2>
+        <div className="max-w-4xl mx-auto px-4 text-center mb-16">
+          <div className="bg-white p-8 rounded-2xl shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-5 text-gray-900">Why MathStack AI Stands Apart</h2>
             
-            <div className="space-y-10 text-left max-w-3xl mx-auto">
+            <div className="space-y-8 text-left max-w-3xl mx-auto">
               <div>
                 <h3 className="text-2xl font-semibold mb-3 flex items-center text-gray-900">
                   <span className="text-[#6C63FF] mr-2">🎯</span> Proactive Learning, Not Reactive Problem-Solving
@@ -167,7 +167,7 @@ export function WhyMathStackAI() {
         </div>
 
         {/* Enhanced Bottom Line Section */}
-        <div className="max-w-5xl mx-auto px-4 mb-24">
+        <div className="max-w-5xl mx-auto px-4 mb-16 pb-8">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-12 rounded-2xl shadow-xl text-center">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-10">The Bottom Line</h2>
             <div className="max-w-3xl mx-auto">

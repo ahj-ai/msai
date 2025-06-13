@@ -27,47 +27,8 @@ export async function POST(req: NextRequest) {
     
     // Cost for asking a question
     const stackCost = OPERATION_COSTS.ASK_QUESTION;
-    
-    // Debit stacks from the user account
-    try {
-      const token = await req.headers.get('authorization')?.split(' ')[1];
-      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          amount: stackCost,
-          operation: 'ASK_QUESTION'
-        })
-      });
-      
-      const spendData = await spendResponse.json();
-      
-      if (!spendResponse.ok) {
-        // If there's an insufficient stacks error, inform the user
-        if (spendData.code === 'INSUFFICIENT_STACKS') {
-          return NextResponse.json({
-            error: "Insufficient stacks to perform this operation",
-            code: "INSUFFICIENT_STACKS",
-            available: spendData.available,
-            required: stackCost
-          }, { status: 400 });
-        }
-        
-        // Handle other errors
-        return NextResponse.json({
-          error: spendData.error || "Failed to process stacks for this operation"
-        }, { status: spendResponse.status });
-      }
-      
-      console.log(`Successfully spent ${stackCost} stacks for ASK_QUESTION operation`);
-    } catch (stacksError) {
-      console.error("Error spending stacks:", stacksError);
-      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
-    }
 
+    // Call Gemini API first, only debit stacks if successful
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
@@ -133,13 +94,64 @@ These rules must be followed at all times:
       }
     ];
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts }],
-      generationConfig,
-      safetySettings,
-    });
+    let geminiResult;
+    try {
+      geminiResult = await model.generateContent({
+        contents: [{ role: "user", parts }],
+        generationConfig,
+        safetySettings,
+      });
+    } catch (error) {
+      console.error("Error processing question with Gemini API:", error);
+      let errorMessage = "Failed to process question.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
+    }
 
-    const responseText = result.response.text();
+    // Only debit stacks if Gemini succeeded
+    try {
+      const authHeader = req.headers.get('authorization');
+      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader || ''
+        },
+        body: JSON.stringify({
+          amount: stackCost,
+          operation: 'ASK_QUESTION',
+          description: `Ask the Lab question: "${question.substring(0, 50)}${question.length > 50 ? '...' : ''}"`
+        })
+      });
+      
+      const spendData = await spendResponse.json();
+      
+      if (!spendResponse.ok) {
+        // If there's an insufficient stacks error, inform the user
+        if (spendResponse.status === 402 || spendData.code === 'INSUFFICIENT_STACKS') {
+          return NextResponse.json({
+            error: "Insufficient stacks to perform this operation",
+            code: "INSUFFICIENT_STACKS",
+            available: spendData.available,
+            required: stackCost
+          }, { status: 402 });
+        }
+        
+        // Handle other errors
+        return NextResponse.json({
+          error: spendData.error || "Failed to process stacks for this operation"
+        }, { status: spendResponse.status });
+      }
+      
+      console.log(`Successfully spent ${stackCost} stacks for ASK_QUESTION operation. Remaining: ${spendData.remainingStacks}`);
+    } catch (stacksError) {
+      console.error("Error spending stacks:", stacksError);
+      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
+    }
+
+    const responseText = geminiResult.response.text();
     return NextResponse.json({ answer: responseText });
 
   } catch (error) {

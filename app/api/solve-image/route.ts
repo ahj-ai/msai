@@ -41,50 +41,11 @@ export async function POST(req: NextRequest) {
     if (!imageFile) {
       return NextResponse.json({ error: "No image file provided" }, { status: 400 });
     }
-    
-    // Cost for solving an image
-    const stackCost = OPERATION_COSTS.SOLVE_IMAGE;
-    
-    // Debit stacks from the user account
-    try {
-      const token = await req.headers.get('authorization')?.split(' ')[1];
-      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          amount: stackCost,
-          operation: 'SOLVE_IMAGE'
-        })
-      });
-      
-      const spendData = await spendResponse.json();
-      
-      if (!spendResponse.ok) {
-        // If there's an insufficient stacks error, inform the user
-        if (spendData.code === 'INSUFFICIENT_STACKS') {
-          return NextResponse.json({
-            error: "Insufficient stacks to perform this operation",
-            code: "INSUFFICIENT_STACKS",
-            available: spendData.available,
-            required: stackCost
-          }, { status: 400 });
-        }
-        
-        // Handle other errors
-        return NextResponse.json({
-          error: spendData.error || "Failed to process stacks for this operation"
-        }, { status: spendResponse.status });
-      }
-      
-      console.log(`Successfully spent ${stackCost} stacks for SOLVE_IMAGE operation`);
-    } catch (stacksError) {
-      console.error("Error spending stacks:", stacksError);
-      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
-    }
 
+    if (!API_KEY) {
+      return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
+    }
+    
     // Convert the image file to the format Gemini API expects (base64 string and mimeType)
     const imageBuffer = await streamToBuffer(imageFile.stream());
     const imageBase64 = imageBuffer.toString("base64");
@@ -163,17 +124,66 @@ These rules must be followed at all times:
       }
     ];
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts }],
-      generationConfig,
-      safetySettings,
-    });
+    let geminiResult;
+    try {
+      geminiResult = await model.generateContent({
+        contents: [{ role: "user", parts }],
+        generationConfig,
+        safetySettings,
+      });
+    } catch (error) {
+      console.error("Error processing image with Gemini API:", error);
+      let errorMessage = "Failed to process image.";
+      if (error instanceof Error) {
+          errorMessage = error.message;
+      }
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
+    }
 
-    const responseText = result.response.text();
+    // Only debit stacks if Gemini succeeded
+    try {
+      const authHeader = req.headers.get('authorization');
+      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader || ''
+        },
+        body: JSON.stringify({
+          amount: OPERATION_COSTS.SOLVE_IMAGE,
+          operation: 'SOLVE_IMAGE',
+          description: `Snap and Solve image: ${imageFile.name || 'untitled'}`
+        })
+      });
+      
+      const spendData = await spendResponse.json();
+      
+      if (!spendResponse.ok) {
+        // If there's an insufficient stacks error, inform the user
+        if (spendResponse.status === 402 || spendData.code === 'INSUFFICIENT_STACKS') {
+          return NextResponse.json({
+            error: "Insufficient stacks to perform this operation",
+            code: "INSUFFICIENT_STACKS",
+            available: spendData.available,
+            required: OPERATION_COSTS.SOLVE_IMAGE
+          }, { status: 402 });
+        }
+        // Handle other errors
+        return NextResponse.json({
+          error: spendData.error || "Failed to process stacks for this operation"
+        }, { status: spendResponse.status });
+      }
+      console.log(`Successfully spent ${OPERATION_COSTS.SOLVE_IMAGE} stacks for SOLVE_IMAGE operation. Remaining: ${spendData.remainingStacks}`);
+    } catch (stacksError) {
+      console.error("Error spending stacks:", stacksError);
+      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
+    }
+
+    const responseText = geminiResult.response.text();
     return NextResponse.json({ solution: responseText });
 
   } catch (error) {
-    console.error("Error processing image with Gemini API:", error);
+    console.error("Error in solve-image endpoint:", error);
     let errorMessage = "Failed to process image.";
     if (error instanceof Error) {
         errorMessage = error.message;
