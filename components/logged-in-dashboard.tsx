@@ -152,17 +152,13 @@ const LoggedInDashboard = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - now more minimal with just icons */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-16 transform bg-white shadow-md rounded-r-xl transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:relative md:translate-x-0`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <div className="flex items-center">
-            <Zap className="h-6 w-6 text-indigo-600" />
-            <span className="ml-2 text-xl font-bold text-gray-900">MathStack AI</span>
-          </div>
+        <div className="flex h-16 items-center justify-center">
           <button
             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 md:hidden"
             onClick={toggleSidebar}
@@ -170,56 +166,62 @@ const LoggedInDashboard = () => {
             <X className="h-6 w-6" />
           </button>
         </div>
-        <nav className="mt-4">
-          <NavItem
-            icon={Home}
-            label="Dashboard"
-            active={activeTab === "dashboard"}
+        <nav className="mt-6 flex flex-col items-center space-y-4">
+          <button
             onClick={() => setActiveTab("dashboard")}
-          />
-          <NavItem
-            icon={Book}
-            label="Saved Problems"
-            active={activeTab === "saved-problems"}
+            className={`flex items-center justify-center p-3 rounded-md w-10 h-10 transition-all ${
+              activeTab === "dashboard"
+                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+            title="Dashboard"
+          >
+            <Home className="h-5 w-5" />
+          </button>
+          <button
             onClick={() => setActiveTab("saved-problems")}
-          />
+            className={`flex items-center justify-center p-3 rounded-md w-10 h-10 transition-all ${
+              activeTab === "saved-problems"
+                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+            title="Saved Problems"
+          >
+            <Book className="h-5 w-5" />
+          </button>
         </nav>
-        <div className="absolute bottom-0 w-full border-t border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-              <span className="text-sm font-medium text-indigo-700">
-                {user?.name?.charAt(0) || 'U'}
-              </span>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">{user?.name || 'User'}</p>
-              <p className="text-xs text-gray-500">View profile</p>
-            </div>
+        <div className="absolute bottom-6 w-full flex justify-center">
+          <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center shadow-sm hover:shadow transition-shadow" title={user?.name || 'User'}>
+            <span className="text-sm font-medium text-indigo-700">
+              {user?.name?.charAt(0) || 'U'}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
-          <button
-            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 md:hidden"
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-          <div className="flex-1 md:flex md:justify-end">
-            <div className="flex items-center space-x-4">
-              <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center md:hidden">
-                <span className="text-sm font-medium text-indigo-700">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
+      <div className="flex flex-1 flex-col overflow-hidden bg-gray-50">
+        <header className="flex h-12 items-center justify-between bg-gray-50 px-4 md:px-6">
+          <div className="flex items-center">
+            <button
+              className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 md:hidden mr-2"
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center md:hidden">
+              <span className="text-sm font-medium text-indigo-700">
+                {user?.name?.charAt(0) || 'U'}
+              </span>
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          {renderContent()}
+        <main className="flex-1 overflow-y-auto p-0 md:p-2">
+          <div className="max-w-7xl mx-auto w-full">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </div>
@@ -456,130 +458,88 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
   const timeWidth = stats.averageResponseTime ? `${Math.min(100, stats.averageResponseTime * 10)}%` : "0%";
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">Welcome back!</h1>
+        <h1 className="mb-4 text-2xl font-bold text-gray-900">Welcome back!</h1>
         
         {/* Performance Overview Section */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold text-gray-800">Performance Overview</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6">
+          <h2 className="mb-3 text-xl font-semibold text-gray-800">Performance Overview</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Circular Progress for Accuracy */}
-            <div className={`rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg ${stats.accuracy && stats.accuracy >= 80 ? "hover:shadow-green-200/50" : stats.accuracy && stats.accuracy >= 60 ? "hover:shadow-yellow-200/50" : "hover:shadow-red-200/50"} hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group`}>
+            <div className={`rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg ${stats.accuracy && stats.accuracy >= 80 ? "hover:shadow-green-200/50" : stats.accuracy && stats.accuracy >= 60 ? "hover:shadow-yellow-200/50" : "hover:shadow-red-200/50"} hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group`}>
               <div className="relative inline-flex items-center justify-center">
-                <svg className="w-24 h-24 transition-transform duration-300 group-hover:scale-110">
+                <svg className="w-20 h-20 transition-transform duration-300 group-hover:scale-110">
                   <circle 
                     className="text-gray-200" 
                     strokeWidth="8" 
                     stroke="currentColor" 
                     fill="transparent" 
-                    r="40" 
-                    cx="48" 
-                    cy="48"
+                    r="32" 
+                    cx="40" 
+                    cy="40"
                   />
                   <circle 
                     className={stats.accuracy ? (stats.accuracy >= 80 ? "text-green-500" : stats.accuracy >= 60 ? "text-yellow-500" : "text-red-500") : "text-gray-300"}
                     strokeWidth="8" 
-                    strokeDasharray={`${stats.accuracy ? stats.accuracy * 2.51 : 0} 251`} 
+                    strokeDasharray={`${stats.accuracy ? stats.accuracy * 2.01 : 0} 201`} 
                     strokeLinecap="round" 
                     stroke="currentColor" 
                     fill="transparent" 
-                    r="40" 
-                    cx="48" 
-                    cy="48"
-                    transform="rotate(-90 48 48)"
+                    r="32" 
+                    cx="40" 
+                    cy="40"
+                    transform="rotate(-90 40 40)"
                   />
                 </svg>
-                <span className="absolute text-2xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
+                <span className="absolute text-xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
               </div>
               <p className="mt-2 text-sm font-medium text-gray-500">Accuracy</p>
             </div>
             
             {/* High Score */}
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-yellow-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
-              <div className="mb-3">
-                <Trophy className="h-10 w-10 mx-auto text-yellow-500 transition-transform duration-300 group-hover:scale-110" />
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-yellow-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
+              <div className="mb-2">
+                <Trophy className="h-8 w-8 mx-auto text-yellow-500 transition-transform duration-300 group-hover:scale-110" />
               </div>
-              <p className="text-4xl font-bold text-yellow-700">{stats.highScore}</p>
-              <p className="mt-2 text-sm font-medium text-gray-500">High Score</p>
+              <p className="text-3xl font-bold text-yellow-700">{stats.highScore}</p>
+              <p className="mt-1 text-sm font-medium text-gray-500">High Score</p>
             </div>
             
             {/* Games Played */}
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
-              <div className="mb-3">
-                <svg className="h-10 w-10 mx-auto text-blue-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
+              <div className="mb-2">
+                <svg className="h-8 w-8 mx-auto text-blue-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                 </svg>
               </div>
-              <p className="text-4xl font-bold text-blue-700">{stats.gamesPlayed}</p>
-              <p className="mt-2 text-sm font-medium text-gray-500">Games Played</p>
+              <p className="text-3xl font-bold text-blue-700">{stats.gamesPlayed}</p>
+              <p className="mt-1 text-sm font-medium text-gray-500">Games Played</p>
             </div>
             
             {/* Problems Solved */}
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
-              <div className="mb-3">
-                <svg className="h-10 w-10 mx-auto text-green-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
+              <div className="mb-2">
+                <svg className="h-8 w-8 mx-auto text-green-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11 15H6L13 1V9H18L11 23V15Z" />
                 </svg>
               </div>
-              <p className="text-4xl font-bold text-green-700">{stats.problemsSolved}</p>
-              <p className="mt-2 text-sm font-medium text-gray-500">Problems Solved</p>
+              <p className="text-3xl font-bold text-green-700">{stats.problemsSolved}</p>
+              <p className="mt-1 text-sm font-medium text-gray-500">Problems Solved</p>
             </div>
           </div>
         </div>
         
         {/* Weekly Goals Section */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Weekly Goals</h2>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={async () => {
-                if (user?.id) {
-                  setIsLoadingGoals(true);
-                  try {
-                    const result = await generateDefaultWeeklyGoals(user.id);
-                    if (result.success && result.data) {
-                      setWeeklyGoals(result.data);
-                    }
-                  } catch (err) {
-                    console.error('Failed to refresh goals:', err);
-                  } finally {
-                    setIsLoadingGoals(false);
-                  }
-                }
-              }}
-            >
-              <RefreshCw className="h-4 w-4 mr-1" /> Refresh Goals
-            </Button>
-          </div>
-          
-          {isLoadingGoals ? (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="flex justify-between mb-1">
-                      <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/6"></div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded w-full"></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : goalError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-              <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
-              <p className="text-sm text-red-700">{goalError}</p>
-            </div>
-          ) : weeklyGoals.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
-              <Target className="mx-auto h-10 w-10 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500 mb-4">No weekly goals set</p>
+          <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <span className="mr-2">🎯</span> This Week's Goals
+              </h2>
               <Button 
+                variant="outline" 
+                size="sm"
                 onClick={async () => {
                   if (user?.id) {
                     setIsLoadingGoals(true);
@@ -589,28 +549,62 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
                         setWeeklyGoals(result.data);
                       }
                     } catch (err) {
-                      console.error('Failed to generate goals:', err);
+                      console.error('Failed to refresh goals:', err);
                     } finally {
                       setIsLoadingGoals(false);
                     }
                   }
                 }}
               >
-                Generate Goals
+                <RefreshCw className="h-4 w-4 mr-1" /> Refresh Goals
               </Button>
             </div>
-          ) : (
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/30 hover:from-white/95 hover:to-white/80">
-              <div className="flex items-center mb-4">
-                <Target className="h-5 w-5 text-indigo-600 mr-2" />
-                <h3 className="font-semibold text-gray-800">This Week's Goals</h3>
-                <div className="ml-auto flex gap-1">
-                  <span className="text-xs font-medium text-indigo-600 bg-indigo-50 rounded-full px-2 py-0.5">
-                    {weeklyGoals.filter(g => g.completed).length}/{weeklyGoals.length}
-                  </span>
+            
+            {isLoadingGoals ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between mb-1">
+                        <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/6"></div>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              
+            ) : goalError ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
+                <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
+                <p className="text-sm text-red-700">{goalError}</p>
+              </div>
+            ) : weeklyGoals.length === 0 ? (
+              <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
+                <Target className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500 mb-4">No weekly goals set</p>
+                <Button 
+                  onClick={async () => {
+                    if (user?.id) {
+                      setIsLoadingGoals(true);
+                      try {
+                        const result = await generateDefaultWeeklyGoals(user.id);
+                        if (result.success && result.data) {
+                          setWeeklyGoals(result.data);
+                        }
+                      } catch (err) {
+                        console.error('Failed to generate goals:', err);
+                      } finally {
+                        setIsLoadingGoals(false);
+                      }
+                    }
+                  }}
+                >
+                  Generate Goals
+                </Button>
+              </div>
+            ) : (
               <div className="space-y-4">
                 {weeklyGoals.map((goal) => {
                   const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
@@ -685,21 +679,8 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
                   );
                 })}
               </div>
-              
-              {weeklyGoals.filter(g => g.completed).length === weeklyGoals.length && (
-                <div className="mt-4 pt-3 border-t border-indigo-100/50">
-                  <div className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm font-medium text-green-700">
-                      All goals completed! 🎉
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
 
