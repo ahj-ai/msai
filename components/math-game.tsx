@@ -37,6 +37,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
   const [totalResponseTime, setTotalResponseTime] = useState(0)
   const [gameMode, setGameMode] = useState<GameMode>("timed")
   const [problemsLeft, setProblemsLeft] = useState(100)
+  const [streakMilestone, setStreakMilestone] = useState(false)
+  const [streakBonus, setStreakBonus] = useState(0)
 
   const soundEffects = useSoundEffects()
 
@@ -49,6 +51,13 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
       setProblemsLeft((prev) => prev - 1)
     }
   }, [topic, difficulty, gameMode])
+
+  // Calculate streak bonus points
+  const calculateStreakBonus = (streakCount: number) => {
+    const milestoneLevel = Math.floor(streakCount / 5);
+    // Progressive bonus: 3 for first milestone (5), 6 for second (10), etc.
+    return milestoneLevel * 3;
+  };
 
   const checkAnswer = useCallback(() => {
     if (questionStartTime === null) return;
@@ -73,9 +82,29 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
       const newStreak = streak + 1
       setStreak(newStreak)
       setMaxStreak((prev) => Math.max(prev, newStreak))
-      if (newStreak > 0) {
-        points += Math.floor(newStreak / 5)
+      
+      // Calculate and apply streak bonus points
+      let bonusPoints = 0;
+      if (newStreak > 0 && newStreak % 5 === 0) {
+        // Calculate bonus points based on streak milestone
+        bonusPoints = calculateStreakBonus(newStreak);
+        setStreakBonus(bonusPoints);
+        
+        // Play special sound for streak milestones
+        soundEffects.playStreakMilestone();
+        setStreakMilestone(true);
+        
+        // Reset the streak milestone flag after some time
+        setTimeout(() => {
+          setStreakMilestone(false);
+          setStreakBonus(0);
+        }, 4000); // Extend display time to 4 seconds
+      } else {
+        // Regular streak points
+        bonusPoints = Math.floor(newStreak / 5);
       }
+      
+      points += bonusPoints;
 
       setScore((prevScore) => {
         const newScore = prevScore + points
@@ -96,6 +125,7 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
       soundEffects.playZap()
       setIsIncorrect(true)
       setStreak(0)
+      setStreakBonus(0)
       setIncorrectAnswers((prev) => prev + 1)
       setTimeout(() => {
         setIsIncorrect(false)
@@ -114,6 +144,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
     setIncorrectAnswers(0)
     setTotalTime(0)
     setTotalResponseTime(0)
+    setStreakMilestone(false)
+    setStreakBonus(0)
     if (gameMode === "timed") {
       setTimeLeft(timerSetting * 30)
     } else if (gameMode === "problems") {
@@ -228,6 +260,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
               isCorrect={isCorrect}
               isIncorrect={isIncorrect}
               gameMode={gameMode}
+              streakMilestone={streakMilestone}
+              streakBonus={streakBonus}
             />
           </motion.div>
         )}
