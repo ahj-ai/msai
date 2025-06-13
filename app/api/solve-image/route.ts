@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
+import { OPERATION_COSTS } from '../user/stacks/route';
 
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20"; // Using the latest Gemini 2.5 model
 const API_KEY = process.env.GEMINI_API_KEY || "";
@@ -20,17 +22,67 @@ async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffe
   return Buffer.concat(chunks);
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   if (!API_KEY) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 });
   }
 
   try {
+    // Authenticate the user using Clerk
+    const { userId } = getAuth(req);
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const formData = await req.formData();
     const imageFile = formData.get("image") as File | null;
 
     if (!imageFile) {
       return NextResponse.json({ error: "No image file provided" }, { status: 400 });
+    }
+    
+    // Cost for solving an image
+    const stackCost = OPERATION_COSTS.SOLVE_IMAGE;
+    
+    // Debit stacks from the user account
+    try {
+      const token = await req.headers.get('authorization')?.split(' ')[1];
+      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: stackCost,
+          operation: 'SOLVE_IMAGE'
+        })
+      });
+      
+      const spendData = await spendResponse.json();
+      
+      if (!spendResponse.ok) {
+        // If there's an insufficient stacks error, inform the user
+        if (spendData.code === 'INSUFFICIENT_STACKS') {
+          return NextResponse.json({
+            error: "Insufficient stacks to perform this operation",
+            code: "INSUFFICIENT_STACKS",
+            available: spendData.available,
+            required: stackCost
+          }, { status: 400 });
+        }
+        
+        // Handle other errors
+        return NextResponse.json({
+          error: spendData.error || "Failed to process stacks for this operation"
+        }, { status: spendResponse.status });
+      }
+      
+      console.log(`Successfully spent ${stackCost} stacks for SOLVE_IMAGE operation`);
+    } catch (stacksError) {
+      console.error("Error spending stacks:", stacksError);
+      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
     }
 
     // Convert the image file to the format Gemini API expects (base64 string and mimeType)

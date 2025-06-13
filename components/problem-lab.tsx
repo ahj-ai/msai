@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Problem, Difficulty } from '@/types/math'
-import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book } from 'lucide-react'
+import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book, Coins } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import { getFilteredProblems, getAllTopics, getAllSubjects } from '@/lib/problems'
@@ -272,7 +272,7 @@ export function ProblemLab() {
   const [problemCount, setProblemCount] = useState(1);
   
   // User authentication and saved problems states
-  const { isSignedIn, userId } = useAuth();
+  const { isSignedIn, userId, getToken } = useAuth();
   const [savedProblems, setSavedProblems] = useState<Problem[]>([]);
   const [showSavedProblems, setShowSavedProblems] = useState(false);
   const [isSavingProblems, setIsSavingProblems] = useState(false);
@@ -339,38 +339,47 @@ export function ProblemLab() {
 
   // Handle Snap & Solve submission
   const handleSnapSolve = async () => {
-    if (!selectedImage) {
-      setSnapError("Please select an image first.");
-      return;
-    }
-
+    if (!selectedImage) return;
+    
     setIsLoadingSnap(true);
-    setSnapError(null);
-    setSolution(null);
-
-    const formData = new FormData();
-    formData.append("image", selectedImage);
-
+    setSnapError('');
+    setSolution('');
+    
     try {
+      // Get the authentication token from Clerk
+      const token = await getToken();
+      
+      if (!token) {
+        setSnapError('You need to be signed in to use this feature.');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+      
       const response = await fetch('/api/solve-image', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSolution(data.solution);
+      } else {
+        if (data.code === 'INSUFFICIENT_STACKS') {
+          setSnapError(`You don't have enough credits to use this feature. Each image solution costs 5 credits. ${data.available ? `You currently have ${data.available} credits.` : ''} Visit the pricing page to get more credits.`);
+        } else {
+          setSnapError(data.error || 'Failed to process image');
+        }
+        console.error('Screenshot & Solve error:', data.error);
       }
-
-      setSolution(result.solution);
     } catch (error) {
       console.error("Snap & Solve error:", error);
-      if (error instanceof Error) {
-        setSnapError(error.message);
-      } else {
-        setSnapError("An unknown error occurred while solving the problem.");
-      }
+      setSnapError('An error occurred while processing your image');
     } finally {
       setIsLoadingSnap(false);
     }
@@ -638,10 +647,21 @@ export function ProblemLab() {
     setAnswer(null);
     
     try {
-      // Call the Gemini API endpoint
+      // Get the authentication token from Clerk
+      const token = await getToken();
+      
+      if (!token) {
+        setAnswer('You need to be signed in to ask questions.');
+        return;
+      }
+      
+      // Call the Gemini API endpoint with authentication
       const response = await fetch('/api/ask-question', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ question }),
       });
       
@@ -651,7 +671,11 @@ export function ProblemLab() {
         setAnswer(data.answer);
       } else {
         console.error('Error from API:', data.error);
-        setAnswer(`Sorry, there was an error processing your question: ${data.error}`);
+        if (data.code === 'INSUFFICIENT_STACKS') {
+          setAnswer(`You don't have enough credits to use this feature. Each question costs 3 credits. ${data.available ? `You currently have ${data.available} credits.` : ''} Visit the pricing page to get more credits.`);
+        } else {
+          setAnswer(`Sorry, there was an error processing your question: ${data.error}`);
+        }
       }
     } catch (error) {
       console.error('Error asking question:', error);
@@ -684,17 +708,24 @@ export function ProblemLab() {
                   className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
                   placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
                 />
-                <Button 
-                  className="absolute bottom-3 right-3 w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
-                  onClick={handleAskQuestion}
-                  disabled={isAskingQuestion || !question.trim()}
-                >
-                  {isAskingQuestion ? (
-                    <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  ) : (
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  )}
-                </Button>
+                <div className="absolute bottom-3 right-3 flex items-center">
+                  <div className="mr-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
+                    <Coins className="w-3 h-3 text-indigo-600" />
+                    <span className="text-xs font-medium text-indigo-600">3</span>
+                  </div>
+                  <Button 
+                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
+                    onClick={handleAskQuestion}
+                    disabled={isAskingQuestion || !question.trim()}
+                    title="Costs 3 credits"
+                  >
+                    {isAskingQuestion ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    ) : (
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    )}
+                  </Button>
+                </div>
               </div>
               
               {/* Label and hint for LaTeX keyboard */}
@@ -852,22 +883,29 @@ export function ProblemLab() {
             </div>
           )}
 
-          <Button
-            onClick={handleSnapSolve}
-            disabled={!selectedImage || isLoadingSnap}
-            className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {isLoadingSnap ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Solving...
-              </>
-            ) : (
-              <>
-                Solve with Gemini <Send className="w-4 h-4" />
-              </>
-            )}
-          </Button>
+          <div className="relative w-full">
+            <div className="absolute -top-6 right-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
+              <Coins className="w-3 h-3 text-indigo-600" />
+              <span className="text-xs font-medium text-indigo-600">5</span>
+            </div>
+            <Button
+              onClick={handleSnapSolve}
+              disabled={!selectedImage || isLoadingSnap}
+              className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+              title="Costs 5 credits"
+            >
+              {isLoadingSnap ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Solving...
+                </>
+              ) : (
+                <>
+                  Solve with Gemini <Send className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+          </div>
 
           {solution && !isLoadingSnap && (
             <motion.div

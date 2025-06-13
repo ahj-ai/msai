@@ -8,6 +8,12 @@ const serviceSupabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
+// Cost of different operations in stacks
+export const OPERATION_COSTS = {
+  ASK_QUESTION: 3,  // Ask the Lab costs 3 credits
+  SOLVE_IMAGE: 5    // Snap and Solve costs 5 credits
+};
+
 export async function GET(request: NextRequest) {
   try {
     // Use Clerk's getAuth helper to extract the user from the request
@@ -87,6 +93,101 @@ export async function GET(request: NextRequest) {
     console.error('Error in stacks API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Use Clerk's getAuth helper to extract the user from the request
+    const { userId } = getAuth(request);
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Parse the request body
+    const { amount, operation } = await request.json();
+
+    // Validate input
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid amount. Must be a positive number.' },
+        { status: 400 }
+      );
+    }
+
+    console.log(`Attempting to spend ${amount} stacks for user: ${userId} for operation: ${operation}`);
+
+    // First, fetch current stacks to check if user has enough
+    const { data: profile, error: fetchError } = await serviceSupabase
+      .from('user_profiles')
+      .select('stacks')
+      .eq('user_id', userId)
+      .maybeSingle();
+      
+    if (fetchError) {
+      console.error('Error fetching user profile:', fetchError);
+      return NextResponse.json(
+        { error: 'Failed to fetch user profile' },
+        { status: 500 }
+      );
+    }
+    
+    // Check if profile exists
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'User profile not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Check if user has enough stacks
+    if (profile.stacks < amount) {
+      return NextResponse.json(
+        { 
+          error: 'Insufficient stacks', 
+          code: 'INSUFFICIENT_STACKS',
+          available: profile.stacks,
+          required: amount 
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Update stacks with the amount spent
+    const { data: updatedProfile, error: updateError } = await serviceSupabase
+      .from('user_profiles')
+      .update({ stacks: profile.stacks - amount })
+      .eq('user_id', userId)
+      .select('stacks')
+      .single();
+      
+    if (updateError) {
+      console.error('Error updating stacks:', updateError);
+      return NextResponse.json(
+        { error: `Failed to spend stacks: ${updateError.message}` },
+        { status: 500 }
+      );
+    }
+
+    console.log(`Successfully spent ${amount} stacks, new balance:`, updatedProfile.stacks);
+    
+    return NextResponse.json({ 
+      success: true,
+      remainingStacks: updatedProfile.stacks,
+      spent: amount
+    });
+
+  } catch (error) {
+    console.error('Error in spend stacks API:', error);
+    let message = 'Internal server error';
+    if (error instanceof Error) {
+      message = error.message;
+    }
+    return NextResponse.json(
+      { error: message },
       { status: 500 }
     );
   }

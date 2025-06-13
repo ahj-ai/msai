@@ -1,19 +1,71 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
+import { OPERATION_COSTS } from '../user/stacks/route';
 
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20"; // Using the latest Gemini 2.5 model
 const API_KEY = process.env.GEMINI_API_KEY || "";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   if (!API_KEY) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 });
   }
 
   try {
+    // Authenticate the user using Clerk
+    const { userId } = getAuth(req);
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const { question } = await req.json();
 
     if (!question || typeof question !== 'string') {
       return NextResponse.json({ error: "No question provided or invalid format" }, { status: 400 });
+    }
+    
+    // Cost for asking a question
+    const stackCost = OPERATION_COSTS.ASK_QUESTION;
+    
+    // Debit stacks from the user account
+    try {
+      const token = await req.headers.get('authorization')?.split(' ')[1];
+      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: stackCost,
+          operation: 'ASK_QUESTION'
+        })
+      });
+      
+      const spendData = await spendResponse.json();
+      
+      if (!spendResponse.ok) {
+        // If there's an insufficient stacks error, inform the user
+        if (spendData.code === 'INSUFFICIENT_STACKS') {
+          return NextResponse.json({
+            error: "Insufficient stacks to perform this operation",
+            code: "INSUFFICIENT_STACKS",
+            available: spendData.available,
+            required: stackCost
+          }, { status: 400 });
+        }
+        
+        // Handle other errors
+        return NextResponse.json({
+          error: spendData.error || "Failed to process stacks for this operation"
+        }, { status: spendResponse.status });
+      }
+      
+      console.log(`Successfully spent ${stackCost} stacks for ASK_QUESTION operation`);
+    } catch (stacksError) {
+      console.error("Error spending stacks:", stacksError);
+      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(API_KEY);
