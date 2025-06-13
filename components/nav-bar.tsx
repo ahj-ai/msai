@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import MathStackLogo from './MathStackLogo';
+import { StacksDisplay } from '@/components/ui/stacks-display';
 
 interface NavBarProps {
   children?: React.ReactNode;
@@ -111,6 +112,7 @@ export default function NavBar({ children }: NavBarProps) {
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
             <SignedIn>
+              <StacksDisplay />
               <Link href="/pricing" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg">
                 Upgrade
               </Link>
