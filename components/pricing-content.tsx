@@ -9,7 +9,7 @@ import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { PageLayout } from "@/components/PageLayout";
 
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, SignUpButton } from "@clerk/nextjs";
 
 export const PricingContent = () => {
   const { isSignedIn } = useAuth();
@@ -152,11 +152,11 @@ export const PricingContent = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Link href="/sign-in?redirect=/pricing" className="block">
+                    <SignUpButton mode="modal">
                       <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2">
-                        Sign In to Subscribe
+                        Sign Up to Subscribe
                       </Button>
-                    </Link>
+                    </SignUpButton>
                   )}
                 </div>
               </CardContent>
@@ -203,11 +203,11 @@ export const PricingContent = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Link href="/sign-in?redirect=/pricing" className="block">
+                    <SignUpButton mode="modal">
                       <Button className="w-full bg-green-500 hover:bg-green-600 text-white py-2">
-                        Sign In to Purchase
+                        Sign Up to Purchase
                       </Button>
-                    </Link>
+                    </SignUpButton>
                   )}
                 </div>
               </CardContent>

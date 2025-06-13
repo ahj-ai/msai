@@ -698,7 +698,7 @@ export function ProblemLab() {
       <CardContent className="p-8 pt-6 bg-white">
         <div className="space-y-6">
           <div className="pb-4">
-            <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem can I help you with?</h3>
+            <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem do you need help with?</h3>
             <div className="space-y-2">
               <div className="relative">
                 <textarea 
@@ -897,11 +897,11 @@ export function ProblemLab() {
               {isLoadingSnap ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Solving...
+                  Getting solution...
                 </>
               ) : (
                 <>
-                  Solve with Gemini <Send className="w-4 h-4" />
+                  Get Solution <Send className="w-4 h-4" />
                 </>
               )}
             </Button>
