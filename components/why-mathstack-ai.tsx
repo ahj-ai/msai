@@ -121,80 +121,77 @@ export function WhyMathStackAI() {
           </div>
         </div>
 
-        {/* Testimonials */}
-        <div className="max-w-7xl mx-auto px-4 mb-24">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">What students and teachers say</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm">
-              <div className="flex items-center mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
+        {/* Why MathStack AI Stands Apart */}
+        <div className="max-w-4xl mx-auto px-4 text-center mb-24">
+          <div className="bg-white p-10 rounded-2xl shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">Why MathStack AI Stands Apart</h2>
+            
+            <div className="space-y-10 text-left max-w-3xl mx-auto">
+              <div>
+                <h3 className="text-2xl font-semibold mb-3 flex items-center text-gray-900">
+                  <span className="text-[#6C63FF] mr-2">🎯</span> Proactive Learning, Not Reactive Problem-Solving
+                </h3>
+                <p className="text-gray-600 text-lg">
+                  While other tools help you solve the problem in front of you, MathStack AI helps you master the concepts behind it. Our Problem Lab generates unlimited practice problems so you build lasting understanding.
+                </p>
               </div>
-              <p className="text-gray-600 mb-6">"MathStack AI turned math from my worst subject to my best. The personalized practice really works!"</p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-4"></div>
-                <div>
-                  <p className="font-medium text-gray-900">Emily R.</p>
-                  <p className="text-sm text-gray-500">High School Student</p>
-                </div>
+              
+              <div>
+                <h3 className="text-2xl font-semibold mb-3 flex items-center text-gray-900">
+                  <span className="text-[#6C63FF] mr-2">🧠</span> True Personalization
+                </h3>
+                <p className="text-gray-600 text-lg">
+                  Most apps offer one-size-fits-all solutions. MathStack AI learns your strengths and weaknesses, creating custom problem sets that target exactly what you need to improve.
+                </p>
               </div>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm">
-              <div className="flex items-center mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
+              
+              <div>
+                <h3 className="text-2xl font-semibold mb-3 flex items-center text-gray-900">
+                  <span className="text-[#6C63FF] mr-2">🎮</span> Learning That's Actually Engaging
+                </h3>
+                <p className="text-gray-600 text-lg">
+                  Math doesn't have to be boring. Our Brainiac game makes mental math practice fun and competitive, while detailed progress tracking keeps you motivated.
+                </p>
               </div>
-              <p className="text-gray-600 mb-6">"I've seen a remarkable improvement in my students' understanding and engagement since using MathStack AI."</p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-4"></div>
-                <div>
-                  <p className="font-medium text-gray-900">Mr. Johnson</p>
-                  <p className="text-sm text-gray-500">Math Teacher</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm">
-              <div className="flex items-center mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-600 mb-6">"My daughter's confidence in math has skyrocketed. MathStack AI has been a game-changer for our family."</p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-4"></div>
-                <div>
-                  <p className="font-medium text-gray-900">Sarah L.</p>
-                  <p className="text-sm text-gray-500">Parent</p>
-                </div>
+              
+              <div>
+                <h3 className="text-2xl font-semibold mb-3 flex items-center text-gray-900">
+                  <span className="text-[#6C63FF] mr-2">🤖</span> Next-Generation AI
+                </h3>
+                <p className="text-gray-600 text-lg">
+                  Powered by Google's most advanced AI model, MathStack AI doesn't just solve problems—it understands mathematical reasoning and explains concepts in ways that make sense to you.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="max-w-2xl mx-auto px-4 text-center mb-24">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-10 rounded-2xl shadow-lg">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to see the difference?</h2>
-            <p className="text-xl text-indigo-100 mb-8">Join thousands of students who have improved their math skills with MathStack AI</p>
-            <a href="/signup" className="inline-block bg-white text-indigo-600 hover:bg-gray-100 text-lg font-semibold px-8 py-4 rounded-full shadow-md transition-colors">
-              Try MathStack AI Free
-            </a>
-            <p className="text-indigo-100 text-sm mt-4">No credit card required • Cancel anytime</p>
+        {/* Enhanced Bottom Line Section */}
+        <div className="max-w-5xl mx-auto px-4 mb-24">
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-12 rounded-2xl shadow-xl text-center">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-10">The Bottom Line</h2>
+            <div className="max-w-3xl mx-auto">
+              <div className="flex flex-col md:flex-row items-center justify-center mb-8">
+                <p className="text-2xl md:text-3xl text-white font-medium md:mr-4 mb-4 md:mb-0">
+                  Other tools solve your homework.
+                </p>
+                <div className="bg-white py-3 px-5 rounded-lg shadow-md transform md:translate-y-0 hover:scale-105 transition-all">
+                  <p className="text-2xl md:text-3xl text-indigo-600 font-bold">
+                    MathStack AI builds your math confidence.
+                  </p>
+                </div>
+              </div>
+              <p className="text-xl text-white mb-10 max-w-2xl mx-auto">
+                Choose MathStack AI if you want to actually understand and master math, not just get through your assignments.
+              </p>
+              <a href="/signup" className="inline-block bg-white text-indigo-600 hover:bg-indigo-50 text-lg font-semibold px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                Get Started Today
+              </a>
+            </div>
           </div>
         </div>
+
+
       </div>
     </PageLayout>
   )
