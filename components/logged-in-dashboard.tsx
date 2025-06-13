@@ -98,11 +98,38 @@ const LoggedInDashboard = () => {
       const fetchUsage = async () => {
         try {
           // Fetch purchased stacks
+          let profileData = null;
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select('purchased_stacks')
             .eq('user_id', user.id)
             .single();
+            
+          // If profile doesn't exist, create one with 20 stacks
+          if (profileError && profileError.code === 'PGRST116') { // Record not found
+            console.log('No profile found for user, creating one with 20 stacks');
+            const { data: newProfile, error: createError } = await supabase
+              .from('user_profiles')
+              .insert([{
+                user_id: user.id,
+                purchased_stacks: 20,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }])
+              .select()
+              .single();
+              
+            if (createError) {
+              console.error('Error creating user profile:', createError);
+            } else {
+              console.log('Created profile with 20 stacks:', newProfile);
+              // Use the newly created profile
+              profileData = newProfile;
+            }
+          } else {
+            profileData = profile;
+          }
+          
           // Fetch subscription info
           const { data: sub, error: subError } = await supabase
             .from('user_subscriptions')
@@ -111,13 +138,15 @@ const LoggedInDashboard = () => {
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
-          setUsage({
-            monthlyAllowance: sub?.monthly_allowance ?? 0,
-            monthlyUsage: sub?.monthly_usage ?? 0,
-            purchasedStacks: profile?.purchased_stacks ?? 0,
-            currentPeriodEnd: sub?.current_period_end ?? null,
-          });
+            
+            setUsage({
+              monthlyAllowance: sub?.monthly_allowance ?? 0,
+              monthlyUsage: sub?.monthly_usage ?? 0,
+              purchasedStacks: profileData?.purchased_stacks ?? 0,
+              currentPeriodEnd: sub?.current_period_end ?? null,
+            });
         } catch (err) {
+          console.error('Error in fetchUsage:', err);
           setUsage(null);
         }
       };
@@ -125,6 +154,7 @@ const LoggedInDashboard = () => {
 
       const fetchUserProgress = async () => {
         try {
+          let progressData = null;
           const { data, error } = await supabase
             .from('user_progress')
             .select('*')
@@ -133,27 +163,59 @@ const LoggedInDashboard = () => {
           
           if (error) {
             if (error.code === 'PGRST116') { // Record not found
-              console.log('No progress data found for user');
-              // Keep the default values for userStats
+              console.log('No progress data found for user, creating initial progress');
+              
+              // Create initial progress record
+              const { data: newProgress, error: createError } = await supabase
+                .from('user_progress')
+                .insert([{
+                  user_id: user.id,
+                  high_score: 0,
+                  games_played: 0,
+                  problems_solved: 0,
+                  last_played_at: new Date().toISOString(),
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  additional_stats: {
+                    total_time_played: 0,
+                    total_correct_answers: 0,
+                    total_questions_attempted: 0,
+                    best_streak: 0
+                  }
+                }])
+                .select()
+                .single();
+                
+              if (createError) {
+                console.error('Error creating user progress:', createError);
+              } else {
+                console.log('Created initial progress record:', newProgress);
+                // Use the newly created progress data
+                progressData = newProgress;
+              }
             } else {
               console.error('Error fetching user progress:', error);
               setError('Failed to load your progress data');
             }
-          } else if (data) {
+          } else {
+            progressData = data;
+          }
+          
+          if (progressData) {
             // Calculate accuracy if data available
-            const totalAttempts = data.additional_stats?.total_questions_attempted || 0;
+            const totalAttempts = progressData.additional_stats?.total_questions_attempted || 0;
             const accuracy = totalAttempts > 0 
-              ? Math.round((data.additional_stats?.total_correct_answers || 0) / totalAttempts * 100) 
+              ? Math.round((progressData.additional_stats?.total_correct_answers || 0) / totalAttempts * 100) 
               : 0;
               
             setUserStats({
-              highScore: data.high_score || 0,
-              gamesPlayed: data.games_played || 0,
-              problemsSolved: data.problems_solved || 0,
-              lastPlayed: data.last_played_at,
-              averageResponseTime: data.additional_stats?.last_game?.averageResponseTime,
-              totalTimePlayed: data.additional_stats?.total_time_played,
-              bestStreak: data.additional_stats?.best_streak,
+              highScore: progressData.high_score || 0,
+              gamesPlayed: progressData.games_played || 0,
+              problemsSolved: progressData.problems_solved || 0,
+              lastPlayed: progressData.last_played_at,
+              averageResponseTime: progressData.additional_stats?.last_game?.averageResponseTime,
+              totalTimePlayed: progressData.additional_stats?.total_time_played,
+              bestStreak: progressData.additional_stats?.best_streak,
               accuracy
             });
           }

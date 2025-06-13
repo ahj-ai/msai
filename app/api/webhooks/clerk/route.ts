@@ -3,8 +3,33 @@ import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { recordUserLogin, createUserProfile } from '@/lib/supabase';
 import { initializeUserProgress } from '../../../../lib/user-progress';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 export async function POST(req: Request) {
+  // Clone the request so we can read the body twice
+  const clonedReq = req.clone();
+  const rawBody = await clonedReq.text();
+  
+  // Log all incoming webhooks for debugging
+  try {
+    const logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    const timestamp = new Date().toISOString().replace(/:/g, '-');
+    const logFile = path.join(logsDir, `clerk-webhook-${timestamp}.json`);
+    
+    fs.writeFileSync(logFile, JSON.stringify({
+      timestamp: new Date().toISOString(),
+      headers: Object.fromEntries(headers()),
+      body: rawBody
+    }, null, 2));
+  } catch (logError) {
+    console.error('Error logging webhook:', logError);
+  }
+
   // Get the webhook signature from the headers
   const headerPayload = headers();
   const svix_id = headerPayload.get('svix-id');
@@ -13,18 +38,16 @@ export async function POST(req: Request) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
+    console.error('Error: Missing webhook headers', { svix_id, svix_timestamp });
     return new Response('Error: Missing webhook headers', {
       status: 400,
     });
   }
 
-  // Get the body
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
-
   // Get the webhook secret from environment variable
   const secret = process.env.CLERK_WEBHOOK_SECRET;
   if (!secret) {
+    console.error('Error: Missing CLERK_WEBHOOK_SECRET');
     return new Response('Error: Missing CLERK_WEBHOOK_SECRET', {
       status: 500,
     });
@@ -36,7 +59,7 @@ export async function POST(req: Request) {
 
   // Verify the payload with the headers
   try {
-    event = webhook.verify(body, {
+    event = webhook.verify(rawBody, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
@@ -111,33 +134,133 @@ export async function POST(req: Request) {
     // Extract user information
     const userId = event.data.id;
     const userEmail = event.data.email_addresses?.[0]?.email_address;
+    let hasError = false;
+
+    console.log('User created webhook received:', { userId, userEmail, eventData: JSON.stringify(event.data) });
+
+    // Create a direct Supabase client with service role to ensure we bypass any issues
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
     
-    console.log('User created:', { userId, userEmail });
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase credentials in environment variables');
+      return new Response('Server configuration error', { status: 500 });
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     if (userId) {
+      // 1. Record the user creation in Supabase
       try {
-        // Record the user creation in Supabase
         const result = await recordUserLogin(
-          userId, 
+          userId,
           userEmail,
-          { 
-            eventType, 
+          {
+            eventType,
             timestamp: new Date().toISOString(),
             rawEvent: JSON.stringify(event.data)
           }
         );
-        console.log('User creation recorded result:', result);
-        
-        // Initialize user progress tracking for the new user
-        const progressResult = await initializeUserProgress(userId);
-        console.log('User progress initialized:', progressResult ? 'Success' : 'Failed');
-
-        // Create user profile in user_profiles table
-        const profileResult = await createUserProfile(userId);
-        console.log('User profile creation result:', profileResult);
+        if (!result.success) {
+          console.error('Failed to record user login:', result.error);
+          hasError = true;
+        } else {
+          console.log('User creation recorded result:', result);
+        }
       } catch (error) {
-        console.error('Error recording user creation in Supabase:', error);
+        console.error('Exception recording user login:', error);
+        hasError = true;
       }
+
+      // 2. Check if user profile already exists
+      try {
+        const { data: existingProfile } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .eq('user_id', userId)
+          .single();
+          
+        if (existingProfile) {
+          console.log(`User profile already exists for user ${userId}`, existingProfile);
+        } else {
+          // 3. Create user profile directly with service role client
+          console.log(`Creating profile for user ${userId} with 20 stacks`);
+          
+          const { data: profileData, error: profileError } = await supabase
+            .from('user_profiles')
+            .insert([{
+              user_id: userId,
+              purchased_stacks: 20,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }])
+            .select();
+            
+          if (profileError) {
+            console.error('Failed to create user profile:', profileError);
+            hasError = true;
+          } else {
+            console.log('User profile created successfully:', profileData);
+          }
+        }
+      } catch (profileError) {
+        console.error('Exception checking/creating user profile:', profileError);
+        hasError = true;
+      }
+
+      // 4. Initialize user progress tracking
+      try {
+        // Check if progress already exists
+        const { data: existingProgress } = await supabase
+          .from('user_progress')
+          .select('id')
+          .eq('user_id', userId)
+          .single();
+          
+        if (existingProgress) {
+          console.log(`User progress already exists for user ${userId}`, existingProgress);
+        } else {
+          // Create progress record directly
+          console.log(`Creating progress for user ${userId}`);
+          
+          const { data: progressData, error: progressError } = await supabase
+            .from('user_progress')
+            .insert([{
+              user_id: userId,
+              high_score: 0,
+              games_played: 0,
+              problems_solved: 0,
+              last_played_at: new Date().toISOString(),
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              additional_stats: {
+                total_time_played: 0,
+                total_correct_answers: 0,
+                total_questions_attempted: 0,
+                best_streak: 0
+              }
+            }])
+            .select();
+            
+          if (progressError) {
+            console.error('Failed to initialize user progress:', progressError);
+            hasError = true;
+          } else {
+            console.log('User progress created successfully:', progressData);
+          }
+        }
+      } catch (progressError) {
+        console.error('Exception checking/creating user progress:', progressError);
+        hasError = true;
+      }
+    } else {
+      console.error('No userId found in user.created event');
+      hasError = true;
+    }
+
+    if (hasError) {
+      // Return a 500 error so Clerk will retry the webhook
+      return new Response('Error processing user.created event', { status: 500 });
     }
   }
 

@@ -19,26 +19,34 @@ export async function initializeUserProgress(userId: string): Promise<boolean> {
       return false;
     }
 
+    console.log(`Attempting to initialize progress for user: ${userId}`);
+
     // Create initial user progress record in Supabase
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('user_progress')
       .insert({
         user_id: userId,
-        completed_problems: 0,
-        topics_mastered: 0,
-        last_active: new Date().toISOString(),
-        streak_days: 0,
-        current_level: 1,
-        xp_points: 0,
-        created_at: new Date().toISOString()
-      });
+        high_score: 0,
+        games_played: 0,
+        problems_solved: 0,
+        last_played_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        additional_stats: {
+          total_time_played: 0,
+          total_correct_answers: 0,
+          total_questions_attempted: 0,
+          best_streak: 0
+        }
+      })
+      .select();
 
     if (error) {
       console.error('Error initializing user progress:', error);
       return false;
     }
 
-    console.log(`User progress initialized for user: ${userId}`);
+    console.log(`User progress initialized for user: ${userId}`, data);
     return true;
   } catch (error) {
     console.error('Exception initializing user progress:', error);

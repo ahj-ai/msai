@@ -25,6 +25,8 @@ interface GameScreenProps {
   isIncorrect: boolean
   gameMode: "timed" | "problems"
   problemsLeft?: number
+  streakMilestone?: boolean
+  streakBonus?: number
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
@@ -41,6 +43,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
   isIncorrect,
   gameMode,
   problemsLeft,
+  streakMilestone = false,
+  streakBonus = 0,
 }) => {
   const inputAnimation = useAnimation()
 
@@ -103,10 +107,30 @@ const GameScreen: React.FC<GameScreenProps> = ({
               <p className="text-sm text-gray-600">Neural Score</p>
               <p className="text-xl font-bold text-indigo-600">{score}</p>
             </div>
-            <div className="bg-white rounded-lg p-3 text-center border border-indigo-100 shadow-sm">
-              <Zap className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+            <div 
+              className={`bg-white rounded-lg p-3 text-center border shadow-sm transition-all duration-500 ${
+                streak > 0 && streak % 5 === 0 
+                  ? "border-purple-500 ring-2 ring-purple-300"
+                  : "border-indigo-100"
+              }`}
+            >
+              <Zap className={`w-5 h-5 mx-auto mb-1 ${
+                streak > 0 && streak % 5 === 0 
+                  ? "text-purple-600 animate-pulse"
+                  : "text-purple-600"
+              }`} />
               <p className="text-sm text-gray-600">Brain Chain</p>
-              <p className="text-xl font-bold text-purple-600">{streak}</p>
+              <motion.p
+                animate={
+                  streak > 0 && streak % 5 === 0 
+                    ? { scale: [1, 1.2, 1], color: ["#7e3af2", "#d946ef", "#7e3af2"] } 
+                    : {}
+                }
+                transition={{ duration: 1.5, repeat: 2 }}
+                className="text-xl font-bold text-purple-600"
+              >
+                {streak}
+              </motion.p>
             </div>
           </div>
         </div>
@@ -160,6 +184,36 @@ const GameScreen: React.FC<GameScreenProps> = ({
             </motion.div>
           )}
         </div>
+
+        {streak > 0 && streak % 5 === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mt-4 bg-white border-2 border-purple-500 p-3 rounded-lg text-center shadow-lg"
+          >
+            <motion.div className="flex flex-col items-center">
+              <motion.p 
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+                className="font-bold text-purple-800 text-lg"
+              >
+                {streak} Streak! 🔥 Bonus Activated!
+              </motion.p>
+              
+              {streakBonus > 0 && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.2, 1] }}
+                  transition={{ duration: 0.5 }}
+                  className="mt-1 bg-purple-100 px-4 py-1 rounded-full"
+                >
+                  <span className="text-purple-800 font-bold">+{streakBonus} points</span>
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
 
         {lastAnswerTime && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-gray-600 mt-4">

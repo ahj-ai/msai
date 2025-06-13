@@ -37,6 +37,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
   const [totalResponseTime, setTotalResponseTime] = useState(0)
   const [gameMode, setGameMode] = useState<GameMode>("timed")
   const [problemsLeft, setProblemsLeft] = useState(100)
+  const [streakMilestone, setStreakMilestone] = useState(false)
+  const [streakBonus, setStreakBonus] = useState(0)
 
   const soundEffects = useSoundEffects()
 
@@ -73,9 +75,25 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
       const newStreak = streak + 1
       setStreak(newStreak)
       setMaxStreak((prev) => Math.max(prev, newStreak))
-      if (newStreak > 0) {
-        points += Math.floor(newStreak / 5)
+      
+      // Calculate streak bonus points - more significant bonus
+      let bonusPoints = 0;
+      if (newStreak > 0 && newStreak % 5 === 0) {
+        // Increase bonus for higher streaks
+        bonusPoints = Math.floor(newStreak / 5) * 2;
+        setStreakBonus(bonusPoints);
+        
+        soundEffects.playStreakMilestone()
+        setStreakMilestone(true)
+        
+        // Reset the streak milestone flag after some time
+        setTimeout(() => {
+          setStreakMilestone(false);
+          setStreakBonus(0);
+        }, 3000)
       }
+      
+      points += bonusPoints;
 
       setScore((prevScore) => {
         const newScore = prevScore + points
@@ -96,6 +114,7 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
       soundEffects.playZap()
       setIsIncorrect(true)
       setStreak(0)
+      setStreakBonus(0)
       setIncorrectAnswers((prev) => prev + 1)
       setTimeout(() => {
         setIsIncorrect(false)
@@ -114,6 +133,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
     setIncorrectAnswers(0)
     setTotalTime(0)
     setTotalResponseTime(0)
+    setStreakMilestone(false)
+    setStreakBonus(0)
     if (gameMode === "timed") {
       setTimeLeft(timerSetting * 30)
     } else if (gameMode === "problems") {
@@ -228,6 +249,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
               isCorrect={isCorrect}
               isIncorrect={isIncorrect}
               gameMode={gameMode}
+              streakMilestone={streakMilestone}
+              streakBonus={streakBonus}
             />
           </motion.div>
         )}
