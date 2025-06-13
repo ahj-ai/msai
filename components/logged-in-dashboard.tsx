@@ -780,6 +780,7 @@ const MainDashboard = ({ stats }: { stats: UserStats }) => {
                       style={{ width: accuracyWidth }}
                     ></div>
                   </div>
+
                 </div>
                 
                 <div>
@@ -1097,3 +1098,4 @@ const StatCard = ({ title, value }: StatCardProps) => (
 );
 
 export default LoggedInDashboard;
+

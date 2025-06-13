@@ -134,15 +134,11 @@ export const PricingContent = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center">
                     <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
-                    <span className="text-gray-800">1,000 Stacks per month</span>
+                    <span className="text-gray-800">300 Stacks per month</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
                     <span className="text-gray-800">Everything in Free</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="text-green-500 mr-3 h-5 w-5 flex-shrink-0" />
-                    <span className="text-gray-800">Discounted follow-ups</span>
                   </div>
                 </div>
                 <div className="mt-auto">
@@ -152,7 +148,7 @@ export const PricingContent = () => {
                         className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2"
                         onClick={() => alert('Subscription functionality is currently unavailable.')}
                       >
-                        Get MathStack AI Pro ($14.99/mo)
+                        Get MathStack AI Pro
                       </Button>
                     </div>
                   ) : (
@@ -188,25 +184,11 @@ export const PricingContent = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <div className="text-gray-800 font-medium">Small Stack Pack</div>
-                          <div className="text-sm text-gray-600">250 Stack Pack</div>
+                          <div className="text-sm text-gray-600">75 Stack Pack</div>
                         </div>
                         <span className="text-2xl font-bold text-gray-800">$4.99</span>
                       </div>
                       <div className="text-xs text-gray-500">One-Time Purchase</div>
-                      <div className="text-xs text-gray-500">USA: $4.99 USD (Regional pricing available)</div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <div className="text-gray-800 font-medium">Large Stack Pack</div>
-                          <div className="text-sm text-gray-600">1,200 Stack Pack</div>
-                        </div>
-                        <span className="text-2xl font-bold text-gray-800">$19.99</span>
-                      </div>
-                      <div className="text-xs text-gray-500">One-Time Purchase</div>
-                      <div className="text-xs text-gray-500">USA: $19.99 USD (Regional pricing available)</div>
                     </div>
                   </div>
                 </div>
@@ -217,13 +199,7 @@ export const PricingContent = () => {
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2"
                         onClick={() => alert('Stack pack purchases are currently unavailable.')}
                       >
-                        Get Small Stack Pack ($4.99)
-                      </Button>
-                      <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2"
-                        onClick={() => alert('Stack pack purchases are currently unavailable.')}
-                      >
-                        Get Large Stack Pack ($19.99)
+                        Get Small Stack Pack
                       </Button>
                     </div>
                   ) : (
@@ -259,25 +235,6 @@ export const PricingContent = () => {
               <div className="text-3xl font-bold text-indigo-600 mb-2">24/7</div>
               <p className="text-gray-600">Support Available</p>
             </div>
-          </div>
-          
-          <div className="mt-10 pt-8 border-t border-gray-100 text-center">
-            <div className="flex flex-wrap justify-center gap-6 items-center mb-6">
-              <span className="text-gray-600 font-medium">Secure Payment:</span>
-              <div className="flex gap-4">
-                <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-xs font-semibold text-gray-700">VISA</span>
-                </div>
-                <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-xs font-semibold text-gray-700">MC</span>
-                </div>
-                <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-xs font-semibold text-gray-700">AMEX</span>
-                </div>
-              </div>
-            </div>
-            <p className="text-green-600 font-medium">30-day money-back guarantee • Cancel anytime</p>
-            <p className="text-sm text-gray-600 mt-2">All purchases are subject to our <Link href="/refund" className="text-indigo-600 hover:underline">Refund Policy</Link></p>
           </div>
         </div>
 
