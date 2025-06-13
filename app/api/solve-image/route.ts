@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { NextResponse, NextRequest } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
-import { OPERATION_COSTS } from '../user/stacks/route';
+import { OPERATION_COSTS } from '@/lib/constants';
 
 const MODEL_NAME = "gemini-2.5-flash-preview-05-20"; // Using the latest Gemini 2.5 model
 const API_KEY = process.env.GEMINI_API_KEY || "";

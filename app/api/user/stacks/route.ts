@@ -1,18 +1,13 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
+import { OPERATION_COSTS } from '@/lib/constants';
 
 // Create a service role client that bypasses RLS
 const serviceSupabase = createClient(
   process.env.SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
-
-// Cost of different operations in stacks
-export const OPERATION_COSTS = {
-  ASK_QUESTION: 3,  // Ask the Lab costs 3 credits
-  SOLVE_IMAGE: 5    // Snap and Solve costs 5 credits
-};
 
 export async function GET(request: NextRequest) {
   try {
