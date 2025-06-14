@@ -1,9 +1,7 @@
 "use client"
-
 import React from 'react'
 import { Brain, Clock, Target, Award, Zap, BookOpen } from 'lucide-react';
 import { PageLayout } from "@/components/PageLayout";
-
 export function WhyMathStackAI() {
   return (
     <PageLayout showNavFooter={true}>
@@ -73,7 +71,7 @@ export function WhyMathStackAI() {
               Stay on track
             </h2>
             <p className="text-gray-600 leading-relaxed">
-              Access 24/7 to catch up on missed lessons or get extra practice whenever you need it most.
+              Need help at any hour? Tutors aren’t available 24/7, but MathStack AI is—get step-by-step solutions and extra practice whenever you need it most.
             </p>
           </div>
 
@@ -104,15 +102,13 @@ export function WhyMathStackAI() {
           </div>
         </div>
 
-        </div>
-
         {/* How AI Works Section */}
         <div className="max-w-4xl mx-auto px-4 text-center mb-16">
           <div className="bg-white p-8 rounded-2xl shadow-sm">
             <h2 className="text-3xl md:text-4xl font-bold mb-5 text-gray-900">How does the AI work?</h2>
             <div className="space-y-6 text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
               <p>
-                Think of it like having an expert math tutor available 24/7. When you're stuck on a tricky problem, our AI is there to provide instant, detailed help. Just type in your question or upload a photo of the problem.
+                Think of it like having an expert math tutor—except MathStack AI is available 24/7, even when human tutors aren’t. When you're stuck on a tricky problem, our AI is there to provide instant, detailed help. Just type in your question or upload a photo of the problem.
               </p>
               <p>
                 Instead of just giving you the answer, MathStackAI breaks down the solution into clear, step-by-step explanations. It's designed to help you understand the underlying concepts, so you're not just solving one problem—you're building the skills to tackle any problem.
@@ -191,9 +187,8 @@ export function WhyMathStackAI() {
           </div>
         </div>
 
-
       </div>
+    </div>
     </PageLayout>
   )
 }
-

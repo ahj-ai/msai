@@ -26,7 +26,7 @@ export const PricingContent = () => {
     "Step-by-step solutions with detailed explanations",
     "Support for text and image-based math problems",
     "Adaptive learning that grows with your skills",
-    "24/7 availability for instant math help",
+    "MathStack AI is available 24/7 for instant math help (tutors are not)",
   ]
 
   const faqs = [
@@ -224,16 +224,16 @@ export const PricingContent = () => {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">10,000+</div>
-              <p className="text-gray-600">Active Students</p>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">1,000+</div>
+              <p className="text-gray-600">Step by Step Solutions Generated</p>
             </div>
             <div className="text-center p-6 bg-gray-50 rounded-xl">
               <div className="text-3xl font-bold text-indigo-600 mb-2">95%</div>
               <p className="text-gray-600">Report Improved Grades</p>
             </div>
             <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">24/7</div>
-              <p className="text-gray-600">Support Available</p>
+              <div className="text-3xl font-bold text-indigo-600 mb-2">AI</div>
+              <p className="text-gray-600">Tutors aren't available 24/7, but <span className="font-semibold text-[#6C63FF]">MathStack AI</span> is</p>
             </div>
           </div>
         </div>
