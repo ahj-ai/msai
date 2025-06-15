@@ -32,7 +32,7 @@ export default function NavBar({ children }: NavBarProps) {
               <Link 
                 href="/dashboard" 
                 className={`text-gray-700 hover:text-[#6C63FF] transition-colors px-2 py-1.5 rounded-md ${
-                  isActive('/dashboard') ? 'text-[#6C63FF] font-medium' : ''
+                  isActive('/dashboard') ? 'text-[#6C63FF] font-semibold border-b-2 border-[#6C63FF]' : ''
                 }`}
               >
                 Dashboard
@@ -40,7 +40,7 @@ export default function NavBar({ children }: NavBarProps) {
               <Link 
                 href="/brainiac" 
                 className={`text-gray-700 hover:text-[#6C63FF] transition-colors px-2 py-1.5 rounded-md ${
-                  isActive('/brainiac') || pathname?.startsWith('/brainiac') ? 'text-[#6C63FF] font-medium' : ''
+                  isActive('/brainiac') || pathname?.startsWith('/brainiac') ? 'text-[#6C63FF] font-semibold border-b-2 border-[#6C63FF]' : ''
                 }`}
               >
                 Brainiac
@@ -48,7 +48,7 @@ export default function NavBar({ children }: NavBarProps) {
               <Link 
                 href="/problem-lab" 
                 className={`text-gray-700 hover:text-[#6C63FF] transition-colors px-2 py-1.5 rounded-md ${
-                  isActive('/problem-lab') || pathname?.startsWith('/problem-lab') ? 'text-[#6C63FF] font-medium' : ''
+                  isActive('/problem-lab') || pathname?.startsWith('/problem-lab') ? 'text-[#6C63FF] font-semibold border-b-2 border-[#6C63FF]' : ''
                 }`}
               >
                 Problem Lab
@@ -100,7 +100,7 @@ export default function NavBar({ children }: NavBarProps) {
                   key={href}
                   href={href}
                   className={`text-gray-700 hover:text-[#6C63FF] transition-colors px-2 py-1.5 rounded-md ${
-                    isActive(href) ? 'text-[#6C63FF] font-medium' : ''
+                    isActive(href) ? 'text-[#6C63FF] font-semibold border-b-2 border-[#6C63FF]' : ''
                   }`}
                 >
                   {label}
