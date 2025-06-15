@@ -4,7 +4,7 @@ import { Brain, Clock, Target, Award, Zap, BookOpen } from 'lucide-react';
 import { PageLayout } from "@/components/PageLayout";
 export function WhyMathStackAI() {
   return (
-    <PageLayout showNavFooter={true}>
+    <PageLayout>
       <div className="bg-gradient-to-b from-white to-[#F8F9FB] min-h-screen">
         <div className="container mx-auto px-4 py-12 max-w-6xl">
           <div className="text-center mb-12">

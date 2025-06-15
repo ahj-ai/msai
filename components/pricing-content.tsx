@@ -53,7 +53,7 @@ export const PricingContent = () => {
   ];
 
   return (
-    <PageLayout showNavFooter={true}>
+    <PageLayout>
       <div className="min-h-screen bg-off-white">
         <div className="container mx-auto px-4 py-16">
           {/* Header Section */}
