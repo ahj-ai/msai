@@ -9,7 +9,7 @@ export type SubscriptionStatus = {
 }
 
 // Custom hook to check the user's subscription status
-export function useSubscription(): SubscriptionStatus {
+export function useSubscription(): SubscriptionStatus & { refresh: () => Promise<void> } {
   const { userId, isLoaded, isSignedIn } = useAuth();
   const [status, setStatus] = useState<SubscriptionStatus>({
     isLoading: true,
@@ -29,8 +29,12 @@ export function useSubscription(): SubscriptionStatus {
     }
     
     try {
-      const response = await fetch('/api/stripe/subscription-status');
+      // Add a timestamp to bust cache
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/stripe/subscription-status?t=${timestamp}`);
       const data = await response.json();
+      
+      console.log('🔄 Subscription status refreshed:', data);
       
       setStatus({
         isLoading: false,
@@ -43,9 +47,26 @@ export function useSubscription(): SubscriptionStatus {
     }
   }, [userId, isLoaded, isSignedIn]);
 
+  // Refresh on mount and whenever userId/auth status changes
   useEffect(() => {
     fetchSubscriptionStatus();
   }, [fetchSubscriptionStatus]);
+  
+  // Force refresh on visibility change (when user returns to tab)
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        console.log('🔄 Page visible, refreshing subscription status');
+        fetchSubscriptionStatus();
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [fetchSubscriptionStatus]);
 
-  return status;
+  return {
+    ...status,
+    refresh: fetchSubscriptionStatus
+  };
 }

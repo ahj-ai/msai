@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import MathStackLogo from './MathStackLogo';
@@ -16,16 +17,34 @@ interface NavBarProps {
 
 // Component to conditionally render Pro badge or Upgrade button
 function NavBarSubscriptionStatus() {
-  const { isPro, isLoading } = useSubscription();
+  const { isPro, isLoading, refresh } = useSubscription();
   
-  if (isLoading) return null;
+  // Force refresh subscription status when component mounts
+  useEffect(() => {
+    console.log('🔄 NavBarSubscriptionStatus mounted, refreshing subscription status');
+    refresh();
+    
+    // Set up an interval to periodically check subscription status
+    // This is especially useful after completing a checkout
+    const checkInterval = setInterval(() => {
+      console.log('🔄 Periodic subscription status refresh');
+      refresh();
+    }, 10000); // Check every 10 seconds
+    
+    return () => clearInterval(checkInterval);
+  }, [refresh]);
+  
+  if (isLoading) return (
+    <div className="w-20 h-6 bg-gray-200 animate-pulse rounded-full"></div>
+  );
   
   if (isPro) {
     return (
       <ProBadge 
         variant="default" 
         size="default" 
-        className="flex items-center shadow-sm hover:shadow transition-shadow"
+        className="flex items-center shadow-sm hover:shadow transition-shadow cursor-pointer"
+        onClick={() => refresh()}
       />
     );
   }

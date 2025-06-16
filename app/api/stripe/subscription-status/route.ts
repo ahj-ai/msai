@@ -1,21 +1,33 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase client with service role key to bypass RLS
+const supabaseServiceRole = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 // This endpoint returns the current user's subscription status
 export async function GET() {
+  // Add cache headers to prevent caching
+  const headers = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  };
   try {
     // Verify authentication
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { isPro: false, plan: 'free', status: null },
-        { status: 200 }
+        { status: 200, headers }
       );
     }
 
     // Fetch the user's subscription from the database
-    const { data: subscriptions, error } = await supabase
+    const { data: subscriptions, error } = await supabaseServiceRole
       .from('user_subscriptions')
       .select('*')
       .eq('user_id', userId)
@@ -26,7 +38,7 @@ export async function GET() {
       console.error('Error fetching subscription:', error);
       return NextResponse.json(
         { isPro: false, plan: 'free', status: null },
-        { status: 200 }
+        { status: 200, headers }
       );
     }
     
@@ -34,7 +46,7 @@ export async function GET() {
     if (!subscriptions || subscriptions.length === 0) {
       return NextResponse.json(
         { isPro: false, plan: 'free', status: null },
-        { status: 200 }
+        { status: 200, headers }
       );
     }
     
@@ -46,12 +58,12 @@ export async function GET() {
       plan: isPro ? subscription.plan : 'free',
       status: subscription.status,
       periodEnd: subscription.usage_period_ends_at
-    });
+    }, { headers });
   } catch (error: any) {
     console.error('Error checking subscription status:', error);
     return NextResponse.json(
       { isPro: false, plan: 'free', status: null, error: error.message },
-      { status: 200 }
+      { status: 200, headers }
     );
   }
 }
