@@ -81,16 +81,10 @@ export default function CheckoutSuccessPage() {
           {loading ? (
             <p className="text-sm text-gray-500">Verifying your subscription...</p>
           ) : (
-            <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 justify-center">
+            <div className="flex justify-center">
               <Button asChild>
                 <Link href="/dashboard">
                   Go to Dashboard
-                </Link>
-              </Button>
-              
-              <Button variant="outline" asChild>
-                <Link href="/pricing">
-                  View Subscription Details
                 </Link>
               </Button>
             </div>

@@ -2,7 +2,8 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target, Crown } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target, Crown, Star } from "lucide-react";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { useAuth } from "@/lib/auth";
 import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals } from "@/lib/supabase";
 import { useSubscription } from "@/hooks/use-subscription";
@@ -35,7 +36,10 @@ interface GameModeCardProps extends Omit<FeatureCardProps, 'icon'> {
 
 interface StatCardProps {
   title: string;
-  value: number | string;
+  value?: number | string;
+  icon?: LucideIcon;
+  iconColor?: string;
+  customContent?: React.ReactNode;
 }
 
 interface UserStats {
@@ -163,11 +167,26 @@ const LoggedInDashboard = () => {
               </div>
             </div>
 
+            {/* Performance Overview Section */}
+            <div>
+              <h2 className="text-base font-semibold text-gray-700 mb-4 ml-1">Performance Overview</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
+                <StatCard
+                  title="Accuracy"
+                  customContent={
+                    <CircularProgress value={userStats.accuracy || 0} size={56} strokeWidth={6} color="#22c55e">
+                      <span className="text-lg font-bold text-green-600">{userStats.accuracy || 0}%</span>
+                    </CircularProgress>
+                  }
+                />
+                <StatCard title="High Score" value={userStats.highScore} icon={Trophy} iconColor="text-yellow-500" />
+                <StatCard title="Games Played" value={userStats.gamesPlayed} icon={Star} iconColor="text-blue-500" />
+                <StatCard title="Problems Solved" value={userStats.problemsSolved} icon={Zap} iconColor="text-green-500" />
+              </div>
+            </div>
+
             {/* Main Dashboard Content */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <StatCard title="High Score" value={userStats.highScore} />
-              <StatCard title="Games Played" value={userStats.gamesPlayed} />
-              <StatCard title="Problems Solved" value={userStats.problemsSolved} />
             </div>
 
             {/* Feature Cards Section */}
@@ -439,10 +458,17 @@ const GameModeCard = ({ title, description, icon: Icon, linkText, linkHref }: Ga
   </Card>
 );
 
-const StatCard = ({ title, value }: StatCardProps) => (
-  <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-    <p className="text-sm font-medium text-gray-500">{title}</p>
-    <p className="mt-1 text-3xl font-semibold text-gray-900">{value}</p>
+const StatCard = ({ title, value, icon: Icon, iconColor, customContent }: StatCardProps) => (
+  <div className="bg-white border border-gray-200 rounded-xl p-7 text-center shadow-md flex flex-col items-center min-h-[155px]">
+    {customContent ? (
+      <div className="mb-2">{customContent}</div>
+    ) : (
+      Icon && <Icon className={`w-8 h-8 mb-2 ${iconColor || 'text-indigo-500'}`} strokeWidth={1.5} />
+    )}
+    {value !== undefined && !customContent && (
+      <div className={`text-3xl font-bold mb-1 ${iconColor || 'text-indigo-600'}`}>{value}</div>
+    )}
+    <div className="text-xs text-gray-500 font-medium tracking-wide mt-1">{title}</div>
   </div>
 );
 
