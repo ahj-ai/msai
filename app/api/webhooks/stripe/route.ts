@@ -11,6 +11,33 @@ const supabaseServiceRole = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+/**
+ * Safely converts a Unix timestamp to an ISO string date
+ * This prevents RangeError: Invalid time value errors
+ */
+function safelyGetISOString(unixTimestamp: number | null | undefined): string {
+  try {
+    if (!unixTimestamp) {
+      return new Date().toISOString();
+    }
+    
+    // Convert from seconds to milliseconds if needed
+    const timestamp = unixTimestamp < 10000000000 ? unixTimestamp * 1000 : unixTimestamp;
+    const date = new Date(timestamp);
+    
+    // Validate the date is valid before converting to ISO string
+    if (isNaN(date.getTime())) {
+      console.error('Invalid timestamp received:', unixTimestamp);
+      return new Date().toISOString();
+    }
+    
+    return date.toISOString();
+  } catch (error) {
+    console.error('Error processing timestamp:', error);
+    return new Date().toISOString();
+  }
+}
+
 // Webhook handler for Stripe events
 export async function POST(req: Request) {
   console.log('🔔 Webhook received at:', new Date().toISOString());
@@ -138,25 +165,117 @@ async function handleSubscriptionCheckout(session: Stripe.Checkout.Session, user
   // Store subscription in database
   console.log('Attempting to store subscription in Supabase for user:', userId);
   try {
-    const { data, error } = await supabaseServiceRole
+    // First, check if a subscription record exists for this user
+    const { data: existingSubscription, error: fetchError } = await supabaseServiceRole
       .from('user_subscriptions')
-      .upsert({
-        user_id: userId,
-        stripe_customer_id: subscription.customer as string,
-        stripe_subscription_id: subscription.id,
-        subscription_id: subscription.id, // Keep both for compatibility
-        status: subscription.status,
-        plan: planType,
-        price_id: priceId,
-        current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
-        current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (fetchError) {
+      console.error('Error checking for existing subscription:', fetchError);
+      return;
+    }
+    
+    // Prepare subscription data
+    const subscriptionData = {
+      user_id: userId,
+      stripe_customer_id: subscription.customer as string,
+      stripe_subscription_id: subscription.id,
+      subscription_id: subscription.id, // Keep both for compatibility
+      status: subscription.status,
+      plan: planType,
+      price_id: priceId,
+      usage_period_ends_at: safelyGetISOString((subscription as any).current_period_end),
+      updated_at: new Date().toISOString()
+    };
+    
+    let error;
+    
+    if (existingSubscription?.id) {
+      // Update existing subscription
+      console.log('Updating existing subscription for user:', userId);
+      const { error: updateError } = await supabaseServiceRole
+        .from('user_subscriptions')
+        .update(subscriptionData)
+        .eq('id', existingSubscription.id);
+      
+      error = updateError;
+    } else {
+      // Insert new subscription
+      console.log('Creating new subscription for user:', userId);
+      const { error: insertError } = await supabaseServiceRole
+        .from('user_subscriptions')
+        .insert(subscriptionData);
+      
+      error = insertError;
+    }
 
     if (error) {
       console.error('Error storing subscription in Supabase:', error);
     } else {
       console.log('Successfully stored subscription in Supabase');
+      
+      // Credit the initial 300 stacks for Pro subscription
+      console.log('🎁 Crediting 300 stacks for Pro subscription');
+      
+      try {
+        // First, get existing credits
+        console.log('📊 Fetching existing stacks for user:', userId);
+        const { data: existingProfile, error: fetchError } = await supabaseServiceRole
+          .from('user_profiles')
+          .select('stacks')
+          .eq('user_id', userId)
+          .single();
+        
+        if (fetchError && fetchError.code !== 'PGRST116') {
+          console.error('❌ Error fetching existing stacks:', fetchError);
+        }
+        
+        const currentStacks = existingProfile?.stacks || 0;
+        const bonusStacks = 300; // Pro subscription bonus
+        const newStackTotal = currentStacks + bonusStacks;
+        
+        console.log('📊 Current stacks:', currentStacks);
+        console.log('📊 Bonus stacks:', bonusStacks);
+        console.log('📊 New stack total:', newStackTotal);
+        
+        // Update user's stack balance - IMPORTANT: user_profiles table has a primary key on user_id
+        const { data: updateData, error: updateError } = await supabaseServiceRole
+          .from('user_profiles')
+          .upsert({
+            user_id: userId,
+            stacks: newStackTotal,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+        
+        if (updateError) {
+          console.error('❌ Error updating stacks for Pro subscription:', updateError);
+        } else {
+          console.log('✅ Successfully credited 300 stacks for Pro subscription. New total:', newStackTotal);
+          console.log('✅ Update result:', updateData);
+          
+          // Log the stack credit transaction
+          const { error: txError } = await supabaseServiceRole
+            .from('user_transactions')
+            .insert({
+              user_id: userId,
+              amount: 0, // Subscription price already logged separately
+              currency: 'usd',
+              payment_id: subscription.id,
+              product_id: subscription.items.data[0]?.price.product as string,
+              transaction_type: 'subscription_bonus_stacks',
+            });
+          
+          if (txError) {
+            console.error('❌ Error logging bonus stacks transaction:', txError);
+          } else {
+            console.log('✅ Successfully logged bonus stacks transaction');
+          }
+        }
+      } catch (err) {
+        console.error('💥 Exception when crediting Pro subscription bonus stacks:', err);
+      }
     }
   } catch (err) {
     console.error('Exception when storing subscription:', err);

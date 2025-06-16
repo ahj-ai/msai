@@ -6,9 +6,35 @@ import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import MathStackLogo from './MathStackLogo';
 import { StacksDisplay } from '@/components/ui/stacks-display';
+import { useSubscription } from '@/hooks/use-subscription';
+import { ProBadge } from '@/components/ui/pro-badge';
+import { Crown } from 'lucide-react';
 
 interface NavBarProps {
   children?: React.ReactNode;
+}
+
+// Component to conditionally render Pro badge or Upgrade button
+function NavBarSubscriptionStatus() {
+  const { isPro, isLoading } = useSubscription();
+  
+  if (isLoading) return null;
+  
+  if (isPro) {
+    return (
+      <ProBadge 
+        variant="default" 
+        size="default" 
+        className="flex items-center shadow-sm hover:shadow transition-shadow"
+      />
+    );
+  }
+  
+  return (
+    <Link href="/pricing" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg">
+      Upgrade
+    </Link>
+  );
 }
 
 export default function NavBar({ children }: NavBarProps) {
@@ -113,9 +139,7 @@ export default function NavBar({ children }: NavBarProps) {
           <div className="flex items-center space-x-4">
             <SignedIn>
               <StacksDisplay />
-              <Link href="/pricing" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg">
-                Upgrade
-              </Link>
+              <NavBarSubscriptionStatus />
             </SignedIn>
             {children}
           </div>
