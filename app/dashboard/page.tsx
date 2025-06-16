@@ -10,6 +10,7 @@ import { Dashboard } from "@/components/dashboard";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SubscriptionBanner } from '@/components/subscription-banner';
 
 function RedirectToHome() {
   const router = useRouter();
@@ -49,7 +50,10 @@ export default function DashboardPage() {
   return (
     <>
       <SignedIn>
-        <LoggedInDashboard />
+        <div className="flex flex-col">
+          <SubscriptionBanner />
+          <LoggedInDashboard />
+        </div>
       </SignedIn>
       <SignedOut>
         <RedirectToHome />

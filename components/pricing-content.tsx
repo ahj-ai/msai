@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,12 +8,127 @@ import { Badge } from "./ui/badge"
 import { Check, Star, Zap } from "lucide-react"
 import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { PageLayout } from "@/components/PageLayout";
+import { toast } from "@/components/ui/use-toast"
+// Reimport the PageLayout component
+import { PageLayout } from "@/components/PageLayout"
+import { useRouter, useSearchParams } from "next/navigation"
+import { ProBadge } from "@/components/pro-badge"
 
 import { useAuth, SignUpButton } from "@clerk/nextjs";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const PricingContent = () => {
   const { isSignedIn } = useAuth();
+  const { isPro } = useSubscription();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Handle success/cancel from Stripe checkout
+  useEffect(() => {
+    // Check for success parameter
+    if (searchParams?.get('success')) {
+      toast({
+        title: "Subscription successful!",
+        description: "Welcome to MathStack Pro! You now have access to all premium features.",
+        variant: "success",
+      });
+      // Force refresh subscription status
+      router.refresh();
+    }
+    
+    // Check for canceled parameter
+    if (searchParams?.get('canceled')) {
+      toast({
+        title: "Subscription canceled",
+        description: "Your subscription process was canceled. No charges were made.",
+        variant: "default",
+      });
+    }
+  }, [searchParams, router]);
+  
+  // Handle subscription button click
+  const handleSubscribe = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: 'price_1RYy6O04B8TSHNkkSKszmPJS', // MathStack Pro price ID
+          mode: 'subscription',
+          metadata: {
+            productType: 'subscription',
+            planName: 'MathStack Pro'
+          }
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle credit/stack pack purchase
+  const handlePurchaseCredits = async (priceId: string, stacks: number) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: priceId,
+          mode: 'payment',
+          metadata: {
+            productType: 'credits',
+            stacks: stacks.toString()
+          }
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const stackUsage = [
     { action: "Generate a Practice Problem Set", cost: "Free" },
     { action: "Ask a new Text Question", cost: "3 Stacks" },
@@ -53,8 +169,7 @@ export const PricingContent = () => {
   ];
 
   return (
-    <PageLayout>
-      <div className="min-h-screen bg-off-white">
+    <div className="min-h-screen bg-off-white">
         <div className="container mx-auto px-4 py-16">
           {/* Header Section */}
           <motion.div
@@ -141,20 +256,24 @@ export const PricingContent = () => {
                     <span className="text-gray-800">Everything in Free</span>
                   </div>
                 </div>
-                <div className="mt-auto">
-                  {isSignedIn ? (
-                    <div className="space-y-3">
-                      <Button 
-                        className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2"
-                        onClick={() => alert('Subscription functionality is currently unavailable.')}
-                      >
-                        Get MathStack AI Pro
-                      </Button>
+                <div className="mt-8 flex flex-col gap-4">
+                  {isPro ? (
+                    <div className="flex items-center justify-center">
+                      <ProBadge size="lg" className="text-lg py-2 px-4" />
                     </div>
+                  ) : isSignedIn ? (
+                    <Button 
+                      size="lg" 
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={handleSubscribe}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Processing..." : "Upgrade to Pro"}
+                    </Button>
                   ) : (
                     <SignUpButton mode="modal">
-                      <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-2">
-                        Sign Up to Subscribe
+                      <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+                        Sign Up to Upgrade
                       </Button>
                     </SignUpButton>
                   )}
@@ -197,9 +316,10 @@ export const PricingContent = () => {
                     <div className="space-y-3">
                       <Button 
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2"
-                        onClick={() => alert('Stack pack purchases are currently unavailable.')}
+                        onClick={() => handlePurchaseCredits('price_1RY9hP04B8TSHNkkEsK9Fx4O', 75)}
+                        disabled={isLoading}
                       >
-                        Get Small Stack Pack
+                        {isLoading ? "Processing..." : "Get Small Stack Pack"}
                       </Button>
                     </div>
                   ) : (
@@ -322,8 +442,7 @@ export const PricingContent = () => {
             </a>
           </div>
         </motion.div>
-        </div>
       </div>
-    </PageLayout>
+    </div>
   );
 }

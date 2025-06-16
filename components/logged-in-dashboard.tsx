@@ -2,9 +2,11 @@
 
 import { useState, ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target } from "lucide-react";
+import { Home, Menu, X, Trophy, Zap, Lock, LucideIcon, AlertCircle, Book, Eye, Clock, RefreshCw, Target, Crown } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase, getUserProblems, getUserWeeklyGoals, updateGoalProgress, generateDefaultWeeklyGoals } from "@/lib/supabase";
+import { useSubscription } from "@/hooks/use-subscription";
+import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -47,8 +49,6 @@ interface UserStats {
   accuracy?: number;
 }
 
-
-
 interface SavedProblem {
   id?: string;
   user_id?: string;
@@ -78,6 +78,9 @@ const LoggedInDashboard = () => {
   
   // Get actual user data from auth context
   const { user } = useAuth();
+  
+  // Get subscription status
+  const { isPro, isLoading: subscriptionLoading, plan } = useSubscription();
 
   // Fetch user progress data from Supabase
   useEffect(() => {
@@ -138,7 +141,173 @@ const LoggedInDashboard = () => {
       case "saved-problems":
         return <SavedProblemsDashboard />;
       default:
-        return <MainDashboard stats={userStats} />;
+        return (
+          <div className="p-4 space-y-6">
+            {/* Welcome Section with Pro Badge */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Welcome back{user?.name ? `, ${user.name}` : ''}!
+                  </h1>
+                  <p className="text-gray-600 mt-1">Ready to solve some math problems?</p>
+                </div>
+                {isPro && (
+                  <div className="flex items-center space-x-1.5">
+                    <Badge variant="outline" className="border-amber-500 bg-amber-50 text-amber-700 flex items-center gap-1 py-2 pl-2 pr-3">
+                      <Crown className="h-5 w-5 text-amber-500" />
+                      <span className="font-medium">Pro Subscriber</span>
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Main Dashboard Content */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <StatCard title="High Score" value={userStats.highScore} />
+              <StatCard title="Games Played" value={userStats.gamesPlayed} />
+              <StatCard title="Problems Solved" value={userStats.problemsSolved} />
+            </div>
+
+            {/* Feature Cards Section */}
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold text-gray-900">Explore MathStackAI</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <FeatureCard
+                  title="Brainiac Game"
+                  description="Test your math skills in our fast-paced quiz game"
+                  icon={Zap}
+                  linkText="Play Now"
+                  linkHref="/brainiac"
+                />
+                <FeatureCard
+                  title="Problem Lab"
+                  description="Practice with thousands of math problems across all levels"
+                  icon={Book}
+                  linkText="Start Practicing"
+                  linkHref="/problem-lab"
+                />
+                <FeatureCard
+                  title="Image Solver"
+                  description="Upload photos of math problems and get instant solutions"
+                  icon={Eye}
+                  linkText="Upload Image"
+                  linkHref="/image-solver"
+                />
+              </div>
+            </div>
+            
+            {/* Game Stats Card */}
+            <Card className="bg-white shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                    <Zap className="mr-2 h-5 w-5 text-yellow-500" />
+                    Game Stats
+                  </CardTitle>
+                  <Link href="/brainiac" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
+                    Play
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-1 text-sm">
+                      <span>Games Played</span>
+                      <span>{userStats.gamesPlayed}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-gray-200">
+                      <div 
+                        className="h-2 rounded-full bg-yellow-500" 
+                        style={{ width: `${Math.min(100, userStats.gamesPlayed * 2)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1 text-sm">
+                      <span>Response Time</span>
+                      <span>{userStats.averageResponseTime ? `${userStats.averageResponseTime.toFixed(1)}s` : "N/A"}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-gray-200">
+                      <div 
+                        className="h-2 rounded-full bg-green-500" 
+                        style={{ width: `${userStats.averageResponseTime ? Math.min((10 / userStats.averageResponseTime) * 100, 100) : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {userStats.totalTimePlayed && (
+                    <div className="pt-2 text-sm">
+                      <span className="font-medium">Total Play Time:</span> 
+                      <span className="ml-2">{Math.round(userStats.totalTimePlayed / 60)} minutes</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Problem Lab Stats Card */}
+            <Card className="bg-white shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                    <Book className="mr-2 h-5 w-5 text-blue-500" />
+                    Problem Lab
+                  </CardTitle>
+                  <Link href="/problem-lab" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
+                    Browse
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-1 text-sm">
+                      <span>Accuracy</span>
+                      <span>{userStats.accuracy ? `${userStats.accuracy}%` : "N/A"}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-gray-200">
+                      <div 
+                        className={`h-2 rounded-full ${userStats.accuracy && userStats.accuracy >= 80 ? "bg-green-500" : userStats.accuracy && userStats.accuracy >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
+                        style={{ width: `${userStats.accuracy || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1 text-sm">
+                      <span>Problems</span>
+                      <span>{userStats.problemsSolved}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-gray-200">
+                      <div 
+                        className="h-2 rounded-full bg-blue-500" 
+                        style={{ width: `${Math.min((userStats.problemsSolved / 100) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 pt-2">
+                    {userStats.problemsSolved >= 10 && (
+                      <div className="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                        <Trophy className="h-3.5 w-3.5 mr-1" /> 10+ Problems
+                      </div>
+                    )}
+                    
+                    {userStats.accuracy && userStats.accuracy >= 80 && (
+                      <div className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                        <Target className="h-3.5 w-3.5 mr-1" /> 80%+ Accuracy
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
     }
   };
 
@@ -202,12 +371,22 @@ const LoggedInDashboard = () => {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden bg-gray-50">
         <header className="flex h-12 items-center justify-between bg-gray-50 px-4 md:px-6">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
+            {isPro && (
+              <div className="hidden md:flex items-center space-x-1.5">
+                <Badge variant="outline" className="border-amber-500 bg-amber-50 text-amber-700 flex items-center gap-1 py-1.5 pl-1.5 pr-2.5">
+                  <Crown className="h-4 w-4 text-amber-500" />
+                  <span>Pro Subscriber</span>
+                </Badge>
+              </div>
+            )}
             <button
-              className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 md:hidden mr-2"
+              type="button"
+              className="-ml-0.5 -mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 lg:hidden"
               onClick={toggleSidebar}
             >
-              <Menu className="h-5 w-5" />
+              <span className="sr-only">Open sidebar</span>
+              <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div className="flex items-center space-x-4">
@@ -218,820 +397,9 @@ const LoggedInDashboard = () => {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-0 md:p-2">
-          <div className="max-w-7xl mx-auto w-full">
-            {renderContent()}
-          </div>
+        <main className="flex-1 overflow-auto p-4 md:p-6">
+          {renderContent()}
         </main>
-      </div>
-    </div>
-  );
-};
-
-const NavItem = ({ icon: Icon, label, active, onClick }: NavItemProps) => (
-  <button
-    onClick={onClick}
-    className={`flex w-full items-center px-4 py-3 text-sm font-medium ${
-      active
-        ? 'border-r-2 border-indigo-600 bg-indigo-50 text-indigo-700'
-        : 'text-gray-600 hover:bg-gray-100'
-    }`}
-  >
-    <Icon className="h-5 w-5" />
-    <span className="ml-3">{label}</span>
-  </button>
-);
-
-interface WeeklyGoal {
-  id: string;
-  goal_type: string;
-  current: number;
-  target: number;
-  message: string;
-  unit?: string;
-  completed: boolean;
-}
-
-const WeeklyGoalCard = ({ goal, onUpdate }: { goal: WeeklyGoal; onUpdate?: (goalId: string, progress: number) => void }) => {
-  const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
-  
-  // Define gradient colors based on progress and completion
-  let gradientClass = "from-indigo-500 to-blue-600";
-  let progressBarClass = "bg-blue-300";
-  let iconColor = "text-blue-200";
-  
-  if (progress >= 100) {
-    gradientClass = "from-emerald-500 to-green-600";
-    progressBarClass = "bg-green-300";
-    iconColor = "text-green-200";
-  } else if (progress >= 66) {
-    gradientClass = "from-blue-500 to-indigo-600";
-    progressBarClass = "bg-blue-300";
-    iconColor = "text-blue-200";
-  } else if (progress >= 33) {
-    gradientClass = "from-violet-500 to-purple-600";
-    progressBarClass = "bg-violet-300";
-    iconColor = "text-violet-200";
-  } else {
-    gradientClass = "from-indigo-500 to-blue-600";
-    progressBarClass = "bg-indigo-300";
-    iconColor = "text-indigo-200";
-  }
-  
-  // Handle manual progress update
-  const handleIncrement = () => {
-    if (onUpdate && !goal.completed) {
-      onUpdate(goal.id, goal.current + 1);
-    }
-  };
-  
-  // Goal type to icon mapping
-  const goalTypeIcons = {
-    'games_played': (
-      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17 10H19C21 10 22 9 22 7V5C22 3 21 2 19 2H17C15 2 14 3 14 5V7C14 9 15 10 17 10Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M5 22H7C9 22 10 21 10 19V17C10 15 9 14 7 14H5C3 14 2 15 2 17V19C2 21 3 22 5 22Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M6 10C8.20914 10 10 8.20914 10 6C10 3.79086 8.20914 2 6 2C3.79086 2 2 3.79086 2 6C2 8.20914 3.79086 10 6 10Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M18 22C20.2091 22 22 20.2091 22 18C22 15.7909 20.2091 14 18 14C15.7909 14 14 15.7909 14 18C14 20.2091 15.7909 22 18 22Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    'problems_solved': (
-      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M7.5 12L10.5 15L16.5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    'practice_time': (
-      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M15.7099 15.18L12.6099 13.33C12.0699 13.01 11.6299 12.24 11.6299 11.61V7.51001" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    'default': (
-      <svg className={`w-6 h-6 ${iconColor}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M12 16V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    )
-  };
-  
-  // Get appropriate icon for goal type
-  const goalIcon = goalTypeIcons[goal.goal_type as keyof typeof goalTypeIcons] || goalTypeIcons.default;
-  
-  return (
-    <Card className="overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-      <div className={`bg-gradient-to-br ${gradientClass} h-2.5`}></div>
-      <CardContent className="p-5">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex items-center">
-            <div className={`mr-3 rounded-lg p-1.5 bg-opacity-10 ${goal.completed ? 'bg-green-100' : 'bg-blue-100'}`}>
-              {goalIcon}
-            </div>
-            <h3 className="font-semibold text-gray-800">{goal.message}</h3>
-          </div>
-          {goal.completed && (
-            <span className="bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded-full font-medium">
-              Completed!
-            </span>
-          )}
-        </div>
-        
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600 font-medium">
-            {goal.current} / {goal.target} {goal.unit || ''}
-          </span>
-          <span className={`text-sm font-semibold ${progress >= 100 ? 'text-green-600' : 'text-blue-600'}`}>
-            {progress}%
-          </span>
-        </div>
-        
-        <div className="w-full bg-gray-100 rounded-full h-2.5 mb-4">
-          <div 
-            className={`h-2.5 rounded-full ${progressBarClass}`}
-            style={{ width: `${progress}%`, transition: 'width 0.5s ease-in-out' }}
-          ></div>
-        </div>
-        
-        {onUpdate && !goal.completed && (
-          <Button 
-            onClick={handleIncrement}
-            variant="outline" 
-            size="sm" 
-            className="w-full mt-1 border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-colors font-medium"
-          >
-            <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 8V16M8 12H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
-            Add Progress
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
-const MainDashboard = ({ stats }: { stats: UserStats }) => {
-  const { user } = useAuth();
-  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([]);
-  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
-  const [goalError, setGoalError] = useState<string | null>(null);
-
-  
-  // Fetch weekly goals from Supabase
-  useEffect(() => {
-    const fetchWeeklyGoals = async () => {
-      if (!user?.id) return;
-      
-      setIsLoadingGoals(true);
-      try {
-        const { data, error, success } = await getUserWeeklyGoals(user.id);
-        
-        if (success && data) {
-          setWeeklyGoals(data);
-        } else if (error) {
-          console.error('Error fetching weekly goals:', error);
-          setGoalError('Failed to load weekly goals');
-        }
-        
-        // If no goals found, generate default goals
-        if (success && (!data || data.length === 0)) {
-          console.log('No weekly goals found, generating defaults');
-          const result = await generateDefaultWeeklyGoals(user.id);
-          
-          if (result.success && result.data) {
-            setWeeklyGoals(result.data);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch weekly goals:', err);
-        setGoalError('Failed to load weekly goals');
-      } finally {
-        setIsLoadingGoals(false);
-      }
-    };
-    
-    fetchWeeklyGoals();
-  }, [user]);
-  
-
-  
-  // Handle goal progress update
-  const handleGoalUpdate = async (goalId: string, progress: number) => {
-    if (!user?.id) return;
-    
-    try {
-      const { success, data, error } = await updateGoalProgress(user.id, goalId, progress);
-      
-      if (success && data) {
-        // Update the goals in state
-        setWeeklyGoals(prevGoals => 
-          prevGoals.map(goal => 
-            goal.id === goalId ? { ...goal, current: progress, completed: progress >= goal.target } : goal
-          )
-        );
-      } else if (error) {
-        console.error('Error updating goal progress:', error);
-      }
-    } catch (err) {
-      console.error('Failed to update goal progress:', err);
-    }
-  };
-
-  // Functions to determine color based on value
-  const getAccuracyColor = (value: number) => {
-    if (value >= 80) return "text-green-500 bg-green-50";
-    if (value >= 60) return "text-yellow-500 bg-yellow-50";
-    return "text-red-500 bg-red-50";
-  };
-
-  const getStreakColor = (value: number) => {
-    if (value >= 10) return "text-indigo-600 bg-indigo-50";
-    if (value >= 5) return "text-blue-500 bg-blue-50";
-    return "text-gray-600 bg-gray-50";
-  };
-
-  // Calculate the width percentage for progress bars
-  const accuracyWidth = stats.accuracy ? `${stats.accuracy}%` : "0%";
-  const problemsWidth = stats.problemsSolved > 100 ? "100%" : `${stats.problemsSolved}%`;
-  const timeWidth = stats.averageResponseTime ? `${Math.min(100, stats.averageResponseTime * 10)}%` : "0%";
-  
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="mb-4 text-2xl font-bold text-gray-900">Welcome back!</h1>
-        
-        {/* Performance Overview Section */}
-        <div className="mb-6">
-          <h2 className="mb-3 text-xl font-semibold text-gray-800">Performance Overview</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Circular Progress for Accuracy */}
-            <div className={`rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg ${stats.accuracy && stats.accuracy >= 80 ? "hover:shadow-green-200/50" : stats.accuracy && stats.accuracy >= 60 ? "hover:shadow-yellow-200/50" : "hover:shadow-red-200/50"} hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group`}>
-              <div className="relative inline-flex items-center justify-center">
-                <svg className="w-20 h-20 transition-transform duration-300 group-hover:scale-110">
-                  <circle 
-                    className="text-gray-200" 
-                    strokeWidth="8" 
-                    stroke="currentColor" 
-                    fill="transparent" 
-                    r="32" 
-                    cx="40" 
-                    cy="40"
-                  />
-                  <circle 
-                    className={stats.accuracy ? (stats.accuracy >= 80 ? "text-green-500" : stats.accuracy >= 60 ? "text-yellow-500" : "text-red-500") : "text-gray-300"}
-                    strokeWidth="8" 
-                    strokeDasharray={`${stats.accuracy ? stats.accuracy * 2.01 : 0} 201`} 
-                    strokeLinecap="round" 
-                    stroke="currentColor" 
-                    fill="transparent" 
-                    r="32" 
-                    cx="40" 
-                    cy="40"
-                    transform="rotate(-90 40 40)"
-                  />
-                </svg>
-                <span className="absolute text-xl font-bold">{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
-              </div>
-              <p className="mt-2 text-sm font-medium text-gray-500">Accuracy</p>
-            </div>
-            
-            {/* High Score */}
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-yellow-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
-              <div className="mb-2">
-                <Trophy className="h-8 w-8 mx-auto text-yellow-500 transition-transform duration-300 group-hover:scale-110" />
-              </div>
-              <p className="text-3xl font-bold text-yellow-700">{stats.highScore}</p>
-              <p className="mt-1 text-sm font-medium text-gray-500">High Score</p>
-            </div>
-            
-            {/* Games Played */}
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
-              <div className="mb-2">
-                <svg className="h-8 w-8 mx-auto text-blue-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                </svg>
-              </div>
-              <p className="text-3xl font-bold text-blue-700">{stats.gamesPlayed}</p>
-              <p className="mt-1 text-sm font-medium text-gray-500">Games Played</p>
-            </div>
-            
-            {/* Problems Solved */}
-            <div className="rounded-lg border border-gray-200/50 bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-md p-4 shadow-sm text-center transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50 hover:from-white/95 hover:to-white/80 hover:scale-105 hover:-translate-y-1 group">
-              <div className="mb-2">
-                <svg className="h-8 w-8 mx-auto text-green-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11 15H6L13 1V9H18L11 23V15Z" />
-                </svg>
-              </div>
-              <p className="text-3xl font-bold text-green-700">{stats.problemsSolved}</p>
-              <p className="mt-1 text-sm font-medium text-gray-500">Problems Solved</p>
-            </div>
-          </div>
-        </div>
-        
-        {/* Weekly Goals Section */}
-        <div className="mb-8">
-          <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                <span className="mr-2">🎯</span> This Week's Goals
-              </h2>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={async () => {
-                  if (user?.id) {
-                    setIsLoadingGoals(true);
-                    try {
-                      const result = await generateDefaultWeeklyGoals(user.id);
-                      if (result.success && result.data) {
-                        setWeeklyGoals(result.data);
-                      }
-                    } catch (err) {
-                      console.error('Failed to refresh goals:', err);
-                    } finally {
-                      setIsLoadingGoals(false);
-                    }
-                  }
-                }}
-              >
-                <RefreshCw className="h-4 w-4 mr-1" /> Refresh Goals
-              </Button>
-            </div>
-            
-            {isLoadingGoals ? (
-              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between mb-1">
-                        <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/6"></div>
-                      </div>
-                      <div className="h-2 bg-gray-200 rounded w-full"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : goalError ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-                <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
-                <p className="text-sm text-red-700">{goalError}</p>
-              </div>
-            ) : weeklyGoals.length === 0 ? (
-              <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
-                <Target className="mx-auto h-10 w-10 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500 mb-4">No weekly goals set</p>
-                <Button 
-                  onClick={async () => {
-                    if (user?.id) {
-                      setIsLoadingGoals(true);
-                      try {
-                        const result = await generateDefaultWeeklyGoals(user.id);
-                        if (result.success && result.data) {
-                          setWeeklyGoals(result.data);
-                        }
-                      } catch (err) {
-                        console.error('Failed to generate goals:', err);
-                      } finally {
-                        setIsLoadingGoals(false);
-                      }
-                    }
-                  }}
-                >
-                  Generate Goals
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {weeklyGoals.map((goal) => {
-                  const progress = Math.min(100, Math.round((goal.current / goal.target) * 100));
-                  let progressColor = "bg-indigo-500";
-                  
-                  if (progress >= 100) {
-                    progressColor = "bg-emerald-500";
-                  } else if (progress >= 66) {
-                    progressColor = "bg-blue-500"; 
-                  } else if (progress >= 33) {
-                    progressColor = "bg-violet-500";
-                  }
-                  
-                  // Goal type to icon mapping
-                  const goalIcons = {
-                    'games_played': <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>,
-                    'problems_solved': <svg className="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="currentColor"><path d="M11 15H6L13 1V9H18L11 23V15Z" /></svg>,
-                    'practice_time': <Clock className="w-4 h-4 text-indigo-500" />,
-                    'default': <Target className="w-4 h-4 text-gray-500" />
-                  };
-                  
-                  const icon = goal.goal_type in goalIcons 
-                    ? goalIcons[goal.goal_type as keyof typeof goalIcons]
-                    : goalIcons.default;
-                  
-                  return (
-                    <div key={goal.id} className="pb-3 last:pb-0 group">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center">
-                          <span className="mr-2 flex-shrink-0 w-5 h-5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            {icon}
-                          </span>
-                          <span className="ml-1 text-sm font-medium text-gray-700">{goal.message}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-xs font-medium text-gray-500 mr-2">
-                            {goal.current}/{goal.target} {goal.unit || ''}
-                          </span>
-                          {goal.completed && (
-                            <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full text-center">
-                              ✓
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <div className="flex-1 mr-2">
-                          <div className="w-full bg-gray-100 rounded-full h-1.5">
-                            <div 
-                              className={`h-1.5 rounded-full ${progressColor} transition-all duration-500 ease-out`}
-                              style={{ width: `${progress}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                        
-                        {!goal.completed && (
-                          <Button
-                            onClick={() => handleGoalUpdate(goal.id, goal.current + 1)}
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 rounded-full hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
-                          >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 5v14M5 12h14" />
-                            </svg>
-                            <span className="sr-only">Add Progress</span>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-        
-
-        
-        {/* Learning Journey Stats */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold text-gray-800">Your Learning Journey</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Brainiac Stats Card */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
-                  Brainiac
-                </h3>
-                <Link href="/brainiac" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
-                  Practice
-                </Link>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1 text-sm">
-                    <span>Games Played</span>
-                    <span>{stats.gamesPlayed}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-gray-200">
-                    <div 
-                      className="h-2 rounded-full bg-yellow-500" 
-                      style={{ width: `${Math.min(100, stats.gamesPlayed * 2)}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1 text-sm">
-                    <span>Response Time</span>
-                    <span>{stats.averageResponseTime ? `${stats.averageResponseTime.toFixed(1)}s` : "N/A"}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-gray-200">
-                    <div 
-                      className="h-2 rounded-full bg-green-500" 
-                      style={{ width: timeWidth }}
-                    ></div>
-                  </div>
-                </div>
-                
-                {stats.totalTimePlayed && (
-                  <div className="pt-2 text-sm">
-                    <span className="font-medium">Total Play Time:</span> 
-                    <span className="ml-2">{Math.round(stats.totalTimePlayed / 60)} minutes</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Problem Lab Stats Card */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <Book className="mr-2 h-5 w-5 text-blue-500" />
-                  Problem Lab
-                </h3>
-                <Link href="/problem-lab" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
-                  Browse
-                </Link>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1 text-sm">
-                    <span>Accuracy</span>
-                    <span>{stats.accuracy ? `${stats.accuracy}%` : "N/A"}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-gray-200">
-                    <div 
-                      className={`h-2 rounded-full ${stats.accuracy && stats.accuracy >= 80 ? "bg-green-500" : stats.accuracy && stats.accuracy >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
-                      style={{ width: accuracyWidth }}
-                    ></div>
-                  </div>
-
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1 text-sm">
-                    <span>Problems</span>
-                    <span>{stats.problemsSolved}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-gray-200">
-                    <div 
-                      className="h-2 rounded-full bg-blue-500" 
-                      style={{ width: problemsWidth }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 pt-2">
-                  {stats.problemsSolved >= 10 && (
-                    <div className="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                      10+ Problems
-                    </div>
-                  )}
-                  {stats.accuracy && stats.accuracy >= 80 && (
-                    <div className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                      High Accuracy
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-
-// Stats counter card component for SavedProblemsDashboard
-const ProblemStatsCard = ({ value, label, color }: { value: number; label: string; color: string }) => {
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-      <p className={`text-4xl font-bold ${color}`}>{value}</p>
-      <p className="text-gray-500 text-sm mt-1">{label}</p>
-    </div>
-  );
-};
-
-const SavedProblemsDashboard = () => {
-  const { user } = useAuth();
-  const [savedProblems, setSavedProblems] = useState<SavedProblem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedProblem, setSelectedProblem] = useState<SavedProblem | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Calculate problem stats
-  const problemStats = {
-    total: savedProblems.length,
-    regular: savedProblems.filter(p => p.difficulty === 'Easy' || p.difficulty === 'Medium').length,
-    advanced: savedProblems.filter(p => p.difficulty === 'Hard' || p.difficulty === 'Advanced').length,
-    subjects: Array.from(new Set(savedProblems.map(p => p.subject))).length
-  };
-
-  // Fetch user's saved problems from Supabase
-  useEffect(() => {
-    const fetchSavedProblems = async () => {
-      if (!user?.id) return;
-      
-      setIsLoading(true);
-      try {
-        // Get all saved problems regardless of source
-        const result = await getUserProblems(user.id, 50);
-        if (result.success && result.data) {
-          setSavedProblems(result.data);
-        } else {
-          setError('Failed to load your saved problems');
-        }
-      } catch (err) {
-        console.error('Error fetching saved problems:', err);
-        setError('Failed to load your saved problems');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSavedProblems();
-  }, [user]);
-
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Saved Problems</h1>
-        <p className="text-gray-600">Access your saved math problems for review and practice.</p>
-      </div>
-      
-      {/* Problem Stats Section */}
-      <div className="mb-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <ProblemStatsCard value={problemStats.total} label="Total Problems" color="text-purple-600" />
-          <ProblemStatsCard value={problemStats.regular} label="Regular" color="text-orange-500" />
-          <ProblemStatsCard value={problemStats.advanced} label="Advanced" color="text-red-600" />
-          <ProblemStatsCard value={problemStats.subjects} label="Subjects" color="text-green-600" />
-        </div>
-      </div>
-
-      {/* Header with action button */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-medium text-gray-900">Your Saved Problems</h2>
-          <Link href="/problem-lab">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Book className="h-4 w-4" /> Find New Problems
-            </Button>
-          </Link>
-        </div>
-      </div>
-      
-      {/* Saved Problems Content */}
-      <div>
-        {isLoading ? (
-          <div className="flex justify-center items-center p-12">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-          </div>
-        ) : error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-            <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        ) : savedProblems.length === 0 ? (
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-            <Book className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-            <p className="text-sm text-gray-500">
-              You haven't saved any problems yet
-            </p>
-            <Link href="/problem-lab">
-              <Button className="mt-4" variant="outline">
-                Go to Problem Lab
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {selectedProblem ? (
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-blue-50 flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">
-                      {selectedProblem.subject} - {selectedProblem.topic}
-                    </CardTitle>
-                    <CardDescription>
-                      {selectedProblem.difficulty} Difficulty
-                    </CardDescription>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => setSelectedProblem(null)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="mb-6">
-                    <h3 className="text-md font-medium mb-2">Question</h3>
-                    <div className="p-4 bg-gray-50 rounded-md">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                        components={{
-                          // Applying classes to the root element
-                          p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
-                        }}
-                      >
-                        {selectedProblem.question}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-
-                  <div className="mb-6">
-                    <h3 className="text-md font-medium mb-2">Solution</h3>
-                    <div className="p-4 bg-gray-50 rounded-md">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                        components={{
-                          // Applying classes to the root element
-                          p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
-                        }}
-                      >
-                        {selectedProblem.solution}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-
-                  {selectedProblem.solution_steps && selectedProblem.solution_steps.length > 0 && (
-                    <div>
-                      <h3 className="text-md font-medium mb-2">Solution Steps</h3>
-                      <div className="space-y-3">
-                        {selectedProblem.solution_steps.map((step, index) => (
-                          <div key={index} className="p-3 bg-gray-50 rounded-md">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkMath]}
-                              rehypePlugins={[rehypeKatex]}
-                              components={{
-                                p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
-                              }}
-                            >
-                              {step}
-                            </ReactMarkdown>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="mt-6">
-                    <Link href="/problem-lab">
-                      <Button className="w-full">
-                        <Book className="mr-2 h-4 w-4" />
-                        Practice in Problem Lab
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {savedProblems.map((problem, index) => (
-                  <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow" 
-                        onClick={() => setSelectedProblem(problem)}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-md">{problem.subject}</CardTitle>
-                          <CardDescription>{problem.topic}</CardDescription>
-                        </div>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          problem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                          problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {problem.difficulty}
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="text-sm line-clamp-2 text-gray-700">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                          components={{
-                            p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
-                          }}
-                        >
-                          {problem.question}
-                        </ReactMarkdown>
-                      </div>
-                      <div className="flex justify-end mt-2">
-                        <Button variant="ghost" size="sm" className="text-blue-600">
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -1078,5 +446,262 @@ const StatCard = ({ title, value }: StatCardProps) => (
   </div>
 );
 
-export default LoggedInDashboard;
+// Stats counter card component for SavedProblemsDashboard
+interface ProblemStatsCardProps {
+  value: number;
+  label: string;
+  color: string;
+}
 
+const ProblemStatsCard = ({ value, label, color }: ProblemStatsCardProps) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4 text-center">
+      <p className={`text-4xl font-bold ${color}`}>{value}</p>
+      <p className="text-gray-500 text-sm mt-1">{label}</p>
+    </div>
+  );
+};
+
+const SavedProblemsDashboard = () => {
+  const { user } = useAuth();
+  const [savedProblems, setSavedProblems] = useState<SavedProblem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProblem, setSelectedProblem] = useState<SavedProblem | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Calculate problem stats
+  const problemStats = {
+    total: savedProblems.length,
+    regular: savedProblems.filter(p => p.difficulty === 'Easy' || p.difficulty === 'Medium').length,
+    advanced: savedProblems.filter(p => p.difficulty === 'Hard' || p.difficulty === 'Advanced').length,
+    subjects: Array.from(new Set(savedProblems.map(p => p.subject))).length
+  };
+
+  // Fetch user's saved problems from Supabase
+  useEffect(() => {
+    const fetchSavedProblems = async () => {
+      if (!user?.id) return;
+      
+      setIsLoading(true);
+      try {
+        // Get all saved problems regardless of source
+        const result = await getUserProblems(user.id, 50);
+        if (result.success && result.data) {
+          setSavedProblems(result.data);
+        } else {
+          setError('Failed to load your saved problems');
+        }
+      } catch (err) {
+        console.error('Error fetching saved problems:', err);
+        setError('An unexpected error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSavedProblems();
+  }, [user?.id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Problem Statistics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <ProblemStatsCard 
+          value={problemStats.total} 
+          label="Total Problems" 
+          color="text-blue-600" 
+        />
+        <ProblemStatsCard 
+          value={problemStats.regular} 
+          label="Regular Level" 
+          color="text-green-600" 
+        />
+        <ProblemStatsCard 
+          value={problemStats.advanced} 
+          label="Advanced Level" 
+          color="text-red-600" 
+        />
+        <ProblemStatsCard 
+          value={problemStats.subjects} 
+          label="Subjects" 
+          color="text-purple-600" 
+        />
+      </div>
+
+      {/* Saved Problems List */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Your Saved Problems</h3>
+        
+        {/* Problem Detail Modal */}
+        {selectedProblem && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">{selectedProblem.subject}</h2>
+                    <p className="text-gray-600">{selectedProblem.topic}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      selectedProblem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                      selectedProblem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {selectedProblem.difficulty}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setSelectedProblem(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Question */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-indigo-900 mb-2">Problem</h3>
+                    <div className="bg-indigo-50 p-4 rounded-lg">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={{
+                          // Applying classes to the root element
+                          p: ({node, ...props}) => <p className="prose max-w-none text-indigo-800" {...props} />
+                        }}
+                      >
+                        {selectedProblem.question}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                  
+                  {/* Solution */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-900 mb-2">Solution</h3>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={{
+                          // Applying classes to the root element
+                          p: ({node, ...props}) => <p className="prose max-w-none text-blue-800" {...props} />
+                        }}
+                      >
+                        {selectedProblem.solution}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                  
+                  {/* Answer */}
+                  {selectedProblem.answer && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-green-900 mb-2">Answer</h3>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                          components={{
+                            p: ({node, ...props}) => <p className="prose max-w-none text-green-800" {...props} />
+                          }}
+                        >
+                          {selectedProblem.answer}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Problems Grid */}
+        {savedProblems.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Book className="h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No saved problems yet</h3>
+              <p className="text-gray-500 text-center mb-6">
+                Start practicing in the Problem Lab to save problems for later review.
+              </p>
+              <div className="flex gap-4">
+                <Link href="/problem-lab">
+                  <Button className="w-full">
+                    <Book className="mr-2 h-4 w-4" />
+                    Practice in Problem Lab
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {savedProblems.map((problem, index) => (
+              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow" 
+                    onClick={() => setSelectedProblem(problem)}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-md">{problem.subject}</CardTitle>
+                      <CardDescription>{problem.topic}</CardDescription>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      problem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                      problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {problem.difficulty}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="text-sm line-clamp-2 text-gray-700">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
+                      components={{
+                        p: ({node, ...props}) => <p className="prose max-w-none" {...props} />
+                      }}
+                    >
+                      {problem.question}
+                    </ReactMarkdown>
+                  </div>
+                  <div className="flex justify-end mt-2">
+                    <Button variant="ghost" size="sm" className="text-blue-600">
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default LoggedInDashboard;
