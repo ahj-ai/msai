@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { SignedIn, SignedOut } from '@clerk/nextjs';
+import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
 import MathStackLogo from './MathStackLogo';
 import { StacksDisplay } from '@/components/ui/stacks-display';
 import { useSubscription } from '@/hooks/use-subscription';
@@ -18,16 +18,15 @@ interface NavBarProps {
 // Component to conditionally render Pro badge or Upgrade button
 function NavBarSubscriptionStatus() {
   const { isPro, isLoading, refresh } = useSubscription();
+  const { openUserProfile } = useClerk();
   
   // Force refresh subscription status when component mounts
   useEffect(() => {
-    console.log('🔄 NavBarSubscriptionStatus mounted, refreshing subscription status');
     refresh();
     
     // Set up an interval to periodically check subscription status
     // This is especially useful after completing a checkout
     const checkInterval = setInterval(() => {
-      console.log('🔄 Periodic subscription status refresh');
       refresh();
     }, 10000); // Check every 10 seconds
     
@@ -38,21 +37,34 @@ function NavBarSubscriptionStatus() {
     <div className="w-20 h-6 bg-gray-200 animate-pulse rounded-full"></div>
   );
   
+  // Function to open Clerk's user profile modal
+  const handleOpenSubscriptionManagement = () => {
+    // Open Clerk's user profile modal - user can navigate to Billing tab
+    openUserProfile();
+  };
+  
   if (isPro) {
     return (
-      <ProBadge 
-        variant="default" 
-        size="default" 
-        className="flex items-center shadow-sm hover:shadow transition-shadow cursor-pointer"
-        onClick={() => refresh()}
-      />
+      <div 
+        onClick={handleOpenSubscriptionManagement} 
+        className="cursor-pointer flex items-center gap-1.5"
+      >
+        <ProBadge 
+          variant="default" 
+          size="default" 
+          className="flex items-center shadow-sm hover:shadow transition-shadow"
+        />
+      </div>
     );
   }
   
   return (
-    <Link href="/pricing" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg">
-      Upgrade
-    </Link>
+    <div className="flex items-center">
+      <Link href="/pricing" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg flex items-center gap-1.5">
+        <Crown className="h-4 w-4" />
+        <span>Upgrade</span>
+      </Link>
+    </div>
   );
 }
 

@@ -14,6 +14,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { useSearchParams } from "next/navigation";
 
 interface NavItemProps {
   icon: LucideIcon;
@@ -69,6 +70,15 @@ interface SavedProblem {
   metadata?: Record<string, any>;
 }
 
+interface WeeklyGoal {
+  id: string;
+  goal_type: string;
+  target: number;
+  current: number;
+  start_date: string;
+  end_date: string;
+}
+
 const LoggedInDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -79,12 +89,24 @@ const LoggedInDashboard = () => {
     problemsSolved: 0,
   });
   const [error, setError] = useState<string | null>(null);
+  const [recentSavedProblems, setRecentSavedProblems] = useState<SavedProblem[]>([]);
+  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([]);
   
   // Get actual user data from auth context
   const { user } = useAuth();
   
   // Get subscription status
   const { isPro, isLoading: subscriptionLoading, plan } = useSubscription();
+
+  // Handle URL parameters for tab switching
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const tab = searchParams?.get('tab');
+    if (tab && (tab === 'dashboard' || tab === 'saved-problems')) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Fetch user progress data from Supabase
   useEffect(() => {
@@ -126,6 +148,18 @@ const LoggedInDashboard = () => {
               accuracy
             });
           }
+
+          // Fetch recent saved problems
+          const { data: savedProblemsData } = await getUserProblems(user.id);
+          if (savedProblemsData) {
+            setRecentSavedProblems(savedProblemsData.slice(0, 3)); // Get last 3 problems
+          }
+
+          // Fetch weekly goals
+          const { data: goalsData, success: goalsSuccess } = await getUserWeeklyGoals(user.id);
+          if (goalsSuccess && goalsData) {
+            setWeeklyGoals(goalsData);
+          }
         } catch (err) {
           console.error('Failed to fetch user progress:', err);
           setError('An unexpected error occurred');
@@ -147,51 +181,145 @@ const LoggedInDashboard = () => {
       default:
         return (
           <div className="p-4 space-y-6">
-            {/* Welcome Section with Pro Badge */}
+            {/* Welcome Section - Removed Pro Badge */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Welcome back{user?.name ? `, ${user.name}` : ''}!
-                  </h1>
-                  <p className="text-gray-600 mt-1">Ready to solve some math problems?</p>
-                </div>
-                {isPro && (
-                  <div className="flex items-center space-x-1.5">
-                    <Badge variant="outline" className="border-amber-500 bg-amber-50 text-amber-700 flex items-center gap-1 py-2 pl-2 pr-3">
-                      <Crown className="h-5 w-5 text-amber-500" />
-                      <span className="font-medium">Pro Subscriber</span>
-                    </Badge>
-                  </div>
-                )}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Welcome back{user?.name ? `, ${user.name}` : ''}!
+                </h1>
+                <p className="text-gray-600 mt-1">Ready to solve some math problems?</p>
               </div>
             </div>
 
-            {/* Performance Overview Section */}
+            {/* Performance Overview Section - Added context to metrics */}
             <div>
               <h2 className="text-base font-semibold text-gray-700 mb-4 ml-1">Performance Overview</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
                 <StatCard
-                  title="Accuracy"
+                  title="Accuracy (All Time)"
                   customContent={
                     <CircularProgress value={userStats.accuracy || 0} size={56} strokeWidth={6} color="#22c55e">
                       <span className="text-lg font-bold text-green-600">{userStats.accuracy || 0}%</span>
                     </CircularProgress>
                   }
                 />
-                <StatCard title="High Score" value={userStats.highScore} icon={Trophy} iconColor="text-yellow-500" />
-                <StatCard title="Games Played" value={userStats.gamesPlayed} icon={Star} iconColor="text-blue-500" />
-                <StatCard title="Problems Solved" value={userStats.problemsSolved} icon={Zap} iconColor="text-green-500" />
+                <StatCard title="Brainiac High Score" value={userStats.highScore} icon={Trophy} iconColor="text-yellow-500" />
+                <StatCard title="Games Played (Total)" value={userStats.gamesPlayed} icon={Star} iconColor="text-blue-500" />
+                <StatCard title="Problems Solved (Total)" value={userStats.problemsSolved} icon={Zap} iconColor="text-green-500" />
               </div>
             </div>
 
-            {/* Main Dashboard Content */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {/* Recent Activity & Goals Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Recent Saved Problems */}
+              <Card className="bg-white shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                      <Book className="mr-2 h-5 w-5 text-blue-500" />
+                      Recent Saved Problems
+                    </CardTitle>
+                    <Link href="/dashboard?tab=saved-problems" className="text-indigo-600 text-sm hover:text-indigo-800 hover:underline">
+                      View All
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {recentSavedProblems.length === 0 ? (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 text-sm mb-3">No saved problems yet</p>
+                      <Link href="/problem-lab">
+                        <Button size="sm" variant="outline">
+                          Start Practicing
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentSavedProblems.map((problem, index) => (
+                        <div 
+                          key={index} 
+                          className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                          onClick={() => setActiveTab('saved-problems')}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {problem.subject} - {problem.topic}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                              {problem.question.substring(0, 80)}...
+                            </p>
+                          </div>
+                          <span className={`ml-2 text-xs px-2 py-1 rounded-full flex-shrink-0 ${
+                            problem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                            problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {problem.difficulty}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Weekly Goals */}
+              <Card className="bg-white shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                      <Target className="mr-2 h-5 w-5 text-green-500" />
+                      Weekly Goals
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {weeklyGoals.length === 0 ? (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 text-sm">No active goals this week</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {weeklyGoals.slice(0, 2).map((goal, index) => {
+                        const progress = Math.min((goal.current / goal.target) * 100, 100);
+                        const goalTypeLabels: Record<string, string> = {
+                          'problems_solved': 'Problems Solved',
+                          'games_played': 'Games Played',
+                          'practice_time': 'Practice Time (min)',
+                          'accuracy': 'Accuracy Target'
+                        };
+                        
+                        return (
+                          <div key={index}>
+                            <div className="flex justify-between mb-1 text-sm">
+                              <span className="font-medium">{goalTypeLabels[goal.goal_type] || goal.goal_type}</span>
+                              <span className="text-gray-600">{goal.current}/{goal.target}</span>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-gray-200">
+                              <div 
+                                className="h-2 rounded-full bg-green-500 transition-all duration-300" 
+                                style={{ width: `${progress}%` }}
+                              ></div>
+                            </div>
+                            {progress >= 100 && (
+                              <div className="flex items-center mt-1">
+                                <Trophy className="h-3 w-3 text-yellow-500 mr-1" />
+                                <span className="text-xs text-green-600 font-medium">Goal Completed!</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Feature Cards Section */}
+            {/* What's Next Section - Improved header */}
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900">Explore MathStackAI</h2>
+              <h2 className="text-xl font-semibold text-gray-900">What's Next?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FeatureCard
                   title="Brainiac Game"

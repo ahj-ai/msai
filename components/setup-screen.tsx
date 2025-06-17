@@ -38,8 +38,8 @@ const SetupScreen = ({
     {
       value: "problems",
       label: "Brainiac Challenge",
-      icon: Hash,
-      description: "Can you beat the California State Math Standards? Challenge yourself!",
+      icon: Brain,
+      description: "100 problems, 5 minutes. Can you get a perfect score?"
     },
   ]
 
@@ -114,7 +114,7 @@ const SetupScreen = ({
                     <Button
                       onClick={() => setGameMode(m.value)}
                       variant={gameMode === m.value ? "default" : "outline"}
-                      className={`w-full h-20 relative group ${
+                      className={`w-full h-20 relative group transition-all duration-300 ${
                         gameMode === m.value
                           ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg border-0"
                           : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-indigo-100"

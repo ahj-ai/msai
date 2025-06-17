@@ -51,7 +51,6 @@ export default function DashboardPage() {
     <>
       <SignedIn>
         <div className="flex flex-col">
-          <SubscriptionBanner />
           <LoggedInDashboard />
         </div>
       </SignedIn>

@@ -45,7 +45,7 @@ export function Dashboard() {
         <QuickAccessCard
           title="Brainiac Challenge"
           icon={Brain}
-          description="Sharpen your mental math skills"
+          description="Beat the CA state standards!"
           linkHref="/brainiac"
           linkText="Start Challenge"
         />
@@ -81,15 +81,17 @@ interface QuickAccessCardProps {
 
 function QuickAccessCard({ title, icon: Icon, description, linkHref, linkText, isPremiumLocked = false }: QuickAccessCardProps) {
   return (
-    <Card className="bg-gray-800/50 border-purple-500/20">
+    <Card className="bg-gray-800/50 border-purple-500/20 overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <CardTitle className="text-2xl font-bold text-purple-200">{title}</CardTitle>
-        <Icon className="w-8 h-8 text-purple-400" />
+        <CardTitle className="text-2xl font-bold text-purple-200 flex items-center">
+          <Icon className="w-8 h-8 mr-3 text-purple-400" />
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-300 mb-4">{description}</p>
+        <p className="text-gray-300 mb-4 h-10">{description}</p>
         <Link href={linkHref}>
-          <Button className="w-full bg-purple-600 hover:bg-purple-700">
+          <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 transition-all duration-300">
             {linkText}
             {isPremiumLocked && <Lock className="w-4 h-4 ml-2" />}
           </Button>
