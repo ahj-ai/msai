@@ -45,7 +45,7 @@ const SetupScreen = ({
 
   const difficultyEmojis: DifficultyLevel[] = ["🧠", "🧠🧠", "🧠🧠🧠"]
   const difficultyLabels = ["Genius", "Mastermind", "Brainiac"]
-  const problemModeTimes = [10, 5, 2.5] // in minutes
+  const problemModeTimes = [5, 5, 5] // all set to 5 minutes
 
   return (
     <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-white shadow-lg rounded-xl overflow-hidden border border-indigo-100">
@@ -84,7 +84,7 @@ const SetupScreen = ({
 
           <div>
             <h3 className="text-lg font-semibold mb-4 text-gray-800">Difficulty Level</h3>
-            <div className="space-y-2">
+            <div className="space-y-6">
               <Slider
                 value={[difficultyEmojis.indexOf(difficulty) + 1]}
                 onValueChange={(value) => setDifficulty(difficultyEmojis[value[0] - 1])}
@@ -93,14 +93,38 @@ const SetupScreen = ({
                 step={1}
                 className="py-4"
               />
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="grid grid-cols-3 gap-3 text-sm">
                 {difficultyLabels.map((label, i) => (
-                  <div key={label} className="text-center">
-                    <div className="text-xl mb-1">{difficultyEmojis[i]}</div>
-                    <div>{label}</div>
+                  <div 
+                    key={label} 
+                    className={`rounded-lg p-4 text-center transition-all duration-300 ${i === difficultyEmojis.indexOf(difficulty) ? 
+                      'bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] text-white shadow-md' : 
+                      'bg-gray-50 border border-gray-100 text-gray-700'}`}
+                    onClick={() => setDifficulty(difficultyEmojis[i])}
+                  >
+                    <div className="text-2xl mb-2">{difficultyEmojis[i]}</div>
+                    <div className="font-bold mb-1">{label}</div>
+                    <div className="text-xs opacity-80">
+                      {i === 0 && "Single-digit operations, simple math"}
+                      {i === 1 && "Two-digit numbers, moderate complexity"}
+                      {i === 2 && "Advanced problems, max mental challenge"}
+                    </div>
                   </div>
                 ))}
               </div>
+              {gameMode === "problems" && (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 rounded-full bg-red-500 mr-1"></div>
+                    <span className="text-gray-700 text-sm">3 lives</span>
+                  </div>
+                  <span className="text-gray-500">•</span>
+                  <div className="flex items-center">
+                    <Hash className="w-4 h-4 text-indigo-500 mr-1" />
+                    <span className="text-gray-700 text-sm">100 problems</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -155,7 +179,7 @@ const SetupScreen = ({
             <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Time Limit</h3>
               <p className="text-center text-gray-600 mt-2">
-                {problemModeTimes[difficultyEmojis.indexOf(difficulty)]} minutes
+                5 minutes
               </p>
             </div>
           )}

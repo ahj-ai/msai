@@ -19,6 +19,7 @@ const MathGame = () => {
   const [timeLeft, setTimeLeft] = useState(60)
   const [isGameActive, setIsGameActive] = useState(false)
   const [topic, setTopic] = useState<Topic>("surprise")
+  const [lives, setLives] = useState(3)
   type Difficulty = "🧠" | "🧠🧠" | "🧠🧠🧠"
 const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
   const [timerSetting, setTimerSetting] = useState(1)
@@ -39,6 +40,8 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
   const [problemsLeft, setProblemsLeft] = useState(100)
   const [streakMilestone, setStreakMilestone] = useState(false)
   const [streakBonus, setStreakBonus] = useState(0)
+  // Track the reason for game over: completed all problems, ran out of lives, or time ran out
+  const [gameOverReason, setGameOverReason] = useState<'completed' | 'out_of_lives' | 'time_up'>('time_up')
 
   const soundEffects = useSoundEffects()
 
@@ -127,6 +130,23 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
       setStreak(0)
       setStreakBonus(0)
       setIncorrectAnswers((prev) => prev + 1)
+      
+      // For problems mode, decrement lives on incorrect answers
+      if (gameMode === "problems") {
+        setLives(prev => {
+          const newLives = prev - 1;
+          // Check if this was the last life
+          if (newLives <= 0) {
+            setGameOverReason('out_of_lives');
+            setTimeout(() => {
+              setIsGameActive(false);
+              setGameOver(true);
+            }, 1000);
+          }
+          return newLives;
+        });
+      }
+      
       setTimeout(() => {
         setIsIncorrect(false)
         setUserAnswer("")
@@ -146,12 +166,13 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
     setTotalResponseTime(0)
     setStreakMilestone(false)
     setStreakBonus(0)
+    setLives(3)
     if (gameMode === "timed") {
       setTimeLeft(timerSetting * 30)
     } else if (gameMode === "problems") {
       setProblemsLeft(100)
-      const problemModeTimes = [10, 5, 2.5]
-      setTimeLeft(problemModeTimes[["🧠", "🧠🧠", "🧠🧠🧠"].indexOf(difficulty)] * 60)
+      // All difficulties set to 5 minutes (300 seconds)
+      setTimeLeft(5 * 60)
     }
     generateNewProblem()
   }, [timerSetting, generateNewProblem, gameMode, difficulty])
@@ -176,11 +197,25 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
         setTotalTime((prev) => prev + 1)
       }, 1000)
     } else if (timeLeft <= 0 || (gameMode === "problems" && problemsLeft <= 0)) {
-      setIsGameActive(false)
-      setGameOver(true)
+      // Set the reason for game over
+      if (timeLeft <= 0) {
+        setGameOverReason('time_up');
+      } else if (gameMode === "problems" && problemsLeft <= 0) {
+        setGameOverReason('completed');
+      }
+      
+      setIsGameActive(false);
+      setGameOver(true);
     }
     return () => clearInterval(timer)
   }, [isGameActive, timeLeft, gameMode, problemsLeft, soundEffects])
+
+  // Reset game over reason when starting a new game
+  useEffect(() => {
+    if (isGameActive) {
+      setGameOverReason('time_up'); // Default reason, will be updated if needed
+    }
+  }, [isGameActive])
 
   if (!isMounted) {
     return null
@@ -233,6 +268,7 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
               onRestart={restartGame}
               gameMode={gameMode}
               difficulty={difficulty}
+              gameOverReason={gameOverReason}
             />
           </motion.div>
         ) : (
@@ -262,6 +298,7 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
               gameMode={gameMode}
               streakMilestone={streakMilestone}
               streakBonus={streakBonus}
+              lives={lives}
             />
           </motion.div>
         )}

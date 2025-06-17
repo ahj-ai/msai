@@ -72,9 +72,35 @@ export function generateProblem(topic: string, difficulty: Difficulty): ProblemT
 }
 
 function generateAdditionProblem(difficulty: Difficulty): ProblemType {
-  const max = difficulty === "🧠" ? 10 : difficulty === "🧠🧠" ? 100 : 1000
-  const a = generateNumber(1, max)
-  const b = generateNumber(1, max)
+  // Level 1: Single digit addition (mentally easy)
+  // Level 2: Two-digit + one-digit or friendly two-digit numbers (10s, 5s)
+  // Level 3: Two-digit + two-digit with some carrying
+  
+  let a, b;
+  
+  if (difficulty === "🧠") {
+    // Level 1: Simple single-digit addition
+    a = generateNumber(1, 9);
+    b = generateNumber(1, 9);
+  } else if (difficulty === "🧠🧠") {
+    // Level 2: Two-digit + one-digit or friendly numbers
+    const pattern = Math.random() < 0.5;
+    
+    if (pattern) {
+      // Two-digit + one-digit
+      a = generateNumber(10, 50);
+      b = generateNumber(1, 9);
+    } else {
+      // Friendly two-digit numbers (multiples of 5 or 10)
+      a = generateNumber(1, 9) * 10;
+      b = generateNumber(1, 9) * 5;
+    }
+  } else {
+    // Level 3: Two-digit addition with carrying
+    a = generateNumber(10, 80);
+    b = generateNumber(20, 70);
+  }
+  
   return {
     question: `${a} + ${b} = ?`,
     answer: a + b,
@@ -82,9 +108,40 @@ function generateAdditionProblem(difficulty: Difficulty): ProblemType {
 }
 
 function generateSubtractionProblem(difficulty: Difficulty): ProblemType {
-  const max = difficulty === "🧠" ? 10 : difficulty === "🧠🧠" ? 100 : 1000
-  const a = generateNumber(1, max)
-  const b = generateNumber(1, a)
+  // Level 1: Single digit subtraction (mentally easy)
+  // Level 2: Two-digit - one-digit, or friendly two-digit numbers (10s, 5s)
+  // Level 3: Two-digit subtraction with borrowing
+  
+  let a, b;
+  
+  if (difficulty === "🧠") {
+    // Level 1: Simple single-digit subtraction
+    b = generateNumber(1, 5);
+    a = b + generateNumber(1, 4); // Ensure a > b
+  } else if (difficulty === "🧠🧠") {
+    const pattern = Math.random() < 0.5;
+    
+    if (pattern) {
+      // Two-digit - one-digit
+      a = generateNumber(11, 50);
+      b = generateNumber(1, 9);
+    } else {
+      // Friendly two-digit numbers (multiples of 5 or 10)
+      b = generateNumber(1, 5) * 10;
+      a = b + generateNumber(1, 5) * 10; // Ensure a > b
+    }
+  } else {
+    // Level 3: Two-digit subtraction with borrowing
+    // Ensure ones digit of a is smaller than ones digit of b to force borrowing
+    const aOnes = generateNumber(0, 5);
+    const bOnes = generateNumber(aOnes + 1, 9);
+    const aTens = generateNumber(2, 9);
+    const bTens = generateNumber(1, aTens - 1); // Ensure overall a > b
+    
+    a = aTens * 10 + aOnes;
+    b = bTens * 10 + bOnes;
+  }
+  
   return {
     question: `${a} - ${b} = ?`,
     answer: a - b,
@@ -92,9 +149,34 @@ function generateSubtractionProblem(difficulty: Difficulty): ProblemType {
 }
 
 function generateMultiplicationProblem(difficulty: Difficulty): ProblemType {
-  const max = difficulty === "🧠" ? 10 : difficulty === "🧠🧠" ? 20 : 50
-  const a = generateNumber(2, max)
-  const b = generateNumber(2, max)
+  // Level 1: Single digit multiplication (basic times tables)
+  // Level 2: Multiplication by 10s, 5s, or small doubles
+  // Level 3: Two-digit by one-digit with some calculation
+  
+  let a, b;
+  
+  if (difficulty === "🧠") {
+    // Level 1: Basic times tables (2-9)
+    a = generateNumber(2, 9);
+    b = generateNumber(2, 9);
+  } else if (difficulty === "🧠🧠") {
+    const pattern = Math.random() < 0.7;
+    
+    if (pattern) {
+      // Multiplication by 10s or 5s
+      a = generateNumber(1, 9);
+      b = Math.random() < 0.5 ? 10 : 5;
+    } else {
+      // Small doubles (squaring small numbers)
+      a = generateNumber(2, 12);
+      b = a;
+    }
+  } else {
+    // Level 3: Two-digit by one-digit
+    a = generateNumber(11, 30);
+    b = generateNumber(3, 9);
+  }
+  
   return {
     question: `${a} × ${b} = ?`,
     answer: a * b,
@@ -102,9 +184,41 @@ function generateMultiplicationProblem(difficulty: Difficulty): ProblemType {
 }
 
 function generateDivisionProblem(difficulty: Difficulty): ProblemType {
-  const max = difficulty === "🧠" ? 10 : difficulty === "🧠🧠" ? 20 : 50
-  const b = generateNumber(2, max)
-  const a = b * generateNumber(2, max)
+  // Level 1: Simple division with small answers (1-10)
+  // Level 2: Division by 5s and 10s or simple division
+  // Level 3: Medium difficulty division with potential remainder
+  
+  let a, b;
+  
+  if (difficulty === "🧠") {
+    // Level 1: Simple division from times tables
+    b = generateNumber(2, 9);
+    const quotient = generateNumber(1, 5);
+    a = b * quotient; // This ensures a cleanly divisible number
+  } else if (difficulty === "🧠🧠") {
+    const pattern = Math.random() < 0.6;
+    
+    if (pattern) {
+      // Division by 5s or 10s
+      b = Math.random() < 0.5 ? 5 : 10;
+      a = b * generateNumber(1, 12);
+    } else {
+      // Simple division
+      b = generateNumber(2, 12);
+      a = b * generateNumber(2, 8);
+    }
+  } else {
+    // Level 3: Medium division
+    b = generateNumber(3, 15);
+    if (Math.random() < 0.7) {
+      // Clean division
+      a = b * generateNumber(3, 12);
+    } else {
+      // Division with small remainder
+      a = b * generateNumber(3, 12) + generateNumber(1, b - 1);
+    }
+  }
+  
   return {
     question: `${a} ÷ ${b} = ?`,
     answer: a / b,
@@ -112,8 +226,29 @@ function generateDivisionProblem(difficulty: Difficulty): ProblemType {
 }
 
 function generateSquareProblem(difficulty: Difficulty): ProblemType {
-  const max = difficulty === "🧠" ? 10 : difficulty === "🧠🧠" ? 20 : 30
-  const a = generateNumber(2, max)
+  // Level 1: Squares of 1-5 (easy to calculate)
+  // Level 2: Squares of 6-12
+  // Level 3: Squares of teens or special patterns (15, 25, etc.)
+  
+  let a;
+  
+  if (difficulty === "🧠") {
+    // Level 1: Small squares (1-5)
+    a = generateNumber(1, 5);
+  } else if (difficulty === "🧠🧠") {
+    // Level 2: Medium squares (6-12)
+    a = generateNumber(6, 12);
+  } else {
+    // Level 3: Larger or special numbers
+    if (Math.random() < 0.7) {
+      // Teens
+      a = generateNumber(13, 20);
+    } else {
+      // Ending in 5 (special pattern)
+      a = generateNumber(1, 4) * 10 + 5; // 15, 25, 35, 45
+    }
+  }
+  
   return {
     question: `${a}² = ?`,
     answer: a * a,

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence, useAnimation } from "framer-motion"
-import { ArrowLeft, Zap, Star, Timer, Trophy, Sparkles } from "lucide-react"
+import { ArrowLeft, Zap, Star, Timer, Trophy, Sparkles, Heart } from "lucide-react"
 import "katex/dist/katex.min.css"
 import Latex from "react-latex-next"
 
@@ -27,6 +27,7 @@ interface GameScreenProps {
   problemsLeft?: number
   streakMilestone?: boolean
   streakBonus?: number
+  lives?: number
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
@@ -45,6 +46,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   problemsLeft,
   streakMilestone = false,
   streakBonus = 0,
+  lives = 3,
 }) => {
   const inputAnimation = useAnimation()
 
@@ -116,7 +118,23 @@ const GameScreen: React.FC<GameScreenProps> = ({
         <div className="w-6" />
       </CardHeader>
       <CardContent className="p-8 bg-white">
-        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-100 shadow-sm">
+        {/* Game stats display */}
+        {gameMode === "problems" && (
+          <div className="flex justify-between mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 p-3 rounded-lg border border-indigo-100 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-indigo-700">Remaining:</span>
+              <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent font-bold text-lg">
+                {problemsLeft}/100
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: lives }).map((_, i) => (
+                <Heart key={i} className="text-red-500 w-5 h-5 fill-red-500" />
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 mb-4 border border-indigo-100 shadow-sm">
           <AnimatePresence mode="wait">
             <motion.div
               key={problem.question}

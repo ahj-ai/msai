@@ -21,6 +21,7 @@ interface GameOverScreenProps {
   averageResponseTime: number
   gameMode: GameMode
   difficulty?: DifficultyLevel
+  gameOverReason?: 'completed' | 'out_of_lives' | 'time_up'
 }
 
 const GameOverScreen: React.FC<GameOverScreenProps> = ({
@@ -34,6 +35,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
   averageResponseTime,
   gameMode,
   difficulty = "🧠",
+  gameOverReason = 'time_up',
 }) => {
   const { user, isLoggedIn } = useAuth()
   
@@ -90,7 +92,21 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
       <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
         <CardTitle className="text-4xl font-bold text-center tracking-wider">GAME OVER</CardTitle>
         <div className="text-center opacity-90 mt-2 text-white">
-          {gameMode === "timed" ? "Mindathlon Complete!" : "Mindurance Challenge Complete!"}
+          {gameMode === "timed" ? 
+            "Mindathlon Complete!" : 
+            gameOverReason === 'completed' ? 
+              "Challenge Completed!" : 
+              gameOverReason === 'out_of_lives' ? 
+                "Out of Lives!" : 
+                "Time's Up!"}
+        </div>
+        <div className="text-center opacity-80 mt-2 text-white text-sm">
+          {gameMode === "problems" && gameOverReason === 'out_of_lives' && (
+            <span>You used all 3 lives. Better luck next time!</span>
+          )}
+          {gameMode === "problems" && gameOverReason === 'completed' && (
+            <span>Congratulations! You conquered all 100 problems!</span>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-8 bg-white">
