@@ -2,44 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+/* Import variable fonts */
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+/* KaTeX is already imported via the KaTeX package */
 
 :root {
+  /* Color variables */
   --foreground-rgb: 51, 51, 51;
   --background-rgb: 249, 249, 255;
   --primary-accent: 108, 99, 255;
   --secondary-accent: 94, 96, 206;
   --text-primary: 51, 51, 51;
   --text-secondary: 102, 102, 102;
+  
+  /* Typography system */
+  --font-display: 'Satoshi', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-math: 'KaTeX_Math', 'Computer Modern', serif;
+  
+  /* Spacing system */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
 }
 
 @layer base {
   body {
     @apply bg-gradient-to-b from-[#F9F9FF] to-white text-[rgb(var(--text-primary))] antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: var(--font-body);
     line-height: 1.6;
+    letter-spacing: 0.01em;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "ss01" 1, "ss02" 1, "ss03" 1;
+    font-variation-settings: "opsz" auto;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    @apply font-semibold tracking-tight;
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight;
     color: rgb(var(--primary-accent));
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
   
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl leading-tight;
+    @apply text-4xl md:text-5xl lg:text-6xl;
+    font-weight: 800;
   }
   
   h2 {
-    @apply text-3xl md:text-4xl leading-tight;
+    @apply text-3xl md:text-4xl;
+    font-weight: 700;
   }
   
   h3 {
-    @apply text-2xl md:text-3xl leading-tight;
+    @apply text-2xl md:text-3xl;
+    font-weight: 700;
   }
   
   p {
-    @apply text-[rgb(var(--text-secondary))] leading-relaxed;
+    @apply text-[rgb(var(--text-secondary))];
+    font-weight: 400;
+  }
+  
+  code, pre, kbd {
+    font-family: var(--font-mono);
+    font-feature-settings: "liga" 0, "calt" 1;
+  }
+  
+  .math, .katex {
+    font-family: var(--font-math);
   }
   
   .btn-primary {
@@ -57,5 +97,86 @@
   
   .container {
     @apply px-4 sm:px-6 mx-auto max-w-7xl;
+  }
+  
+  /* Fluid typography scaling */
+  /* Base sizes */
+  html {
+    font-size: clamp(15px, 0.94rem + 0.25vw, 18px); /* Fluid base font size */
+  }
+  
+  /* Responsive headings with viewport-based scaling */
+  h1 {
+    font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
+  }
+  
+  h2 {
+    font-size: clamp(2rem, 4vw + 0.5rem, 3.5rem);
+  }
+  
+  h3 {
+    font-size: clamp(1.5rem, 3vw + 0.25rem, 2.5rem);
+  }
+  
+  h4 {
+    font-size: clamp(1.25rem, 1.5vw + 0.5rem, 1.75rem);
+  }
+  
+  /* Fluid paragraph text */
+  p, li, blockquote {
+    font-size: clamp(1rem, 1rem + 0.15vw, 1.125rem);
+  }
+  
+  /* Text hover animations */
+  .text-hover-animate {
+    transition: transform 0.2s ease;
+  }
+  .text-hover-animate:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Enhanced vertical rhythm */
+  /* Standard section spacing using our 4/8/16px system */
+  .rhythm-y > * + * {
+    margin-top: var(--space-4);
+  }
+  
+  .rhythm-y-sm > * + * {
+    margin-top: var(--space-2);
+  }
+  
+  .rhythm-y-md > * + * {
+    margin-top: var(--space-6);
+  }
+  
+  .rhythm-y-lg > * + * {
+    margin-top: var(--space-8);
+  }
+  
+  .rhythm-y-xl > * + * {
+    margin-top: var(--space-12);
+  }
+  
+  /* Adjust paragraph spacing */
+  p + p {
+    margin-top: 1.15em;
+  }
+  
+  /* Heading consistent spacing */
+  h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 0.75em;
+  }
+  
+  h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+    margin-top: 0.5em;
+  }
+  
+  /* WCAG AAA Compliant Text Classes */
+  .text-high-contrast {
+    color: rgb(27, 27, 31); /* Very dark color for maximum contrast on light backgrounds */
+  }
+  
+  .text-high-contrast-light {
+    color: rgb(245, 245, 250); /* Very light color for maximum contrast on dark backgrounds */
   }
 }

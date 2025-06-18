@@ -570,16 +570,16 @@ const LoggedInDashboard = () => {
 };
 
 const FeatureCard = ({ title, description, icon: Icon, linkText, linkHref }: FeatureCardProps) => (
-  <Card className="h-full transition-all hover:shadow-md">
+  <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 rhythm-y">
     <CardHeader>
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100">
-        <Icon className="h-6 w-6 text-indigo-600" />
+      <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-indigo-100">
+        <Icon className="h-7 w-7 text-indigo-600" />
       </div>
-      <CardTitle className="mt-4 text-xl">{title}</CardTitle>
-      <CardDescription className="text-base">{description}</CardDescription>
+      <CardTitle className="mt-5 font-display text-xl font-bold tracking-tight text-high-contrast">{title}</CardTitle>
+      <CardDescription className="font-body text-base leading-relaxed">{description}</CardDescription>
     </CardHeader>
     <CardContent>
-      <Button asChild>
+      <Button asChild className="font-body font-medium tracking-tight hover:scale-[1.02] transition-transform duration-200">
         <Link href={linkHref}>{linkText}</Link>
       </Button>
     </CardContent>
@@ -604,16 +604,16 @@ const GameModeCard = ({ title, description, icon: Icon, linkText, linkHref }: Ga
 );
 
 const StatCard = ({ title, value, icon: Icon, iconColor, customContent }: StatCardProps) => (
-  <div className="bg-white border border-gray-200 rounded-xl p-7 text-center shadow-md flex flex-col items-center min-h-[155px]">
+  <div className="bg-white border border-gray-200 rounded-xl p-7 text-center shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col items-center min-h-[155px] rhythm-y">
     {customContent ? (
-      <div className="mb-2">{customContent}</div>
+      <div className="mb-3">{customContent}</div>
     ) : (
-      Icon && <Icon className={`w-8 h-8 mb-2 ${iconColor || 'text-indigo-500'}`} strokeWidth={1.5} />
+      Icon && <Icon className={`w-8 h-8 mb-3 ${iconColor || 'text-indigo-500'}`} strokeWidth={1.5} />
     )}
     {value !== undefined && !customContent && (
-      <div className={`text-3xl font-bold mb-1 ${iconColor || 'text-indigo-600'}`}>{value}</div>
+      <div className={`font-mono text-3xl font-bold mb-2 ${iconColor || 'text-indigo-600'}`}>{value}</div>
     )}
-    <div className="text-xs text-gray-500 font-medium tracking-wide mt-1">{title}</div>
+    <div className="font-body text-sm text-deep-sapphire font-medium tracking-tight mt-1">{title}</div>
   </div>
 );
 

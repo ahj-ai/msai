@@ -112,7 +112,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
         <Button onClick={onBackToMenu} variant="ghost" className="text-white hover:bg-white/10">
           <ArrowLeft className="w-6 h-6" />
         </Button>
-        <CardTitle className="text-3xl font-bold tracking-wider">BRAINIAC</CardTitle>
+        <CardTitle className="text-3xl font-display font-bold tracking-tight">BRAINIAC</CardTitle>
         <div className="w-6" />
       </CardHeader>
       <CardContent className="p-8 bg-white">
@@ -120,8 +120,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
         {gameMode === "problems" && (
           <div className="flex justify-between mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 p-3 rounded-lg border border-indigo-100 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-indigo-700">Remaining:</span>
-              <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent font-bold text-lg">
+              <span className="font-body font-semibold text-indigo-700">Remaining:</span>
+              <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent font-mono font-bold text-lg">
                 {problemsLeft}/100
               </span>
             </div>
@@ -141,7 +141,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
               exit={{ opacity: 0, y: 20 }}
               className="text-center"
             >
-              <motion.div className="text-5xl font-bold text-indigo-700 mb-4 tracking-wider">
+              <motion.div className="text-5xl font-display font-bold text-indigo-700 mb-4 tracking-tight">
                 <Latex>{`$${problem.question}$`}</Latex>
               </motion.div>
             </motion.div>
@@ -150,15 +150,15 @@ const GameScreen: React.FC<GameScreenProps> = ({
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-white rounded-lg p-3 text-center border border-indigo-100 shadow-sm">
               <Timer className="w-5 h-5 text-green-600 mx-auto mb-1" />
-              <p className="text-sm text-gray-600">{gameMode === "timed" ? "Synapse Time" : "Problems Left"}</p>
-              <p className="text-xl font-bold text-green-600">
+              <p className="text-sm font-body text-gray-600">{gameMode === "timed" ? "Synapse Time" : "Problems Left"}</p>
+              <p className="text-xl font-mono font-bold text-green-600">
                 {gameMode === "timed" ? Math.ceil(timeLeft) : problemsLeft}
               </p>
             </div>
             <div className="bg-white rounded-lg p-3 text-center border border-indigo-100 shadow-sm">
               <Trophy className="w-5 h-5 text-indigo-600 mx-auto mb-1" />
-              <p className="text-sm text-gray-600">Neural Score</p>
-              <p className="text-xl font-bold text-indigo-600">{score}</p>
+              <p className="text-sm font-body text-gray-600">Neural Score</p>
+              <p className="text-xl font-mono font-bold text-indigo-600">{score}</p>
             </div>
             <div 
               className={`bg-white rounded-lg p-3 text-center border shadow-sm transition-all duration-500 relative overflow-hidden ${
@@ -179,7 +179,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
                   ? "text-purple-600 animate-pulse"
                   : "text-purple-600"
               }`} />
-              <p className="text-sm text-gray-600">Brain Chain</p>
+              <p className="text-sm font-body text-gray-600">Brain Chain</p>
               <motion.p
                 animate={
                   streak > 0 && streak % 5 === 0 
@@ -187,7 +187,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
                     : {}
                 }
                 transition={{ duration: 1.5, repeat: streak > 0 && streak % 5 === 0 ? 2 : 0 }}
-                className="text-xl font-bold text-purple-600"
+                className="text-xl font-mono font-bold text-purple-600"
               >
                 {streak}
               </motion.p>
@@ -199,13 +199,13 @@ const GameScreen: React.FC<GameScreenProps> = ({
           <form onSubmit={handleSubmit}>
             <motion.div animate={inputAnimation}>
               <Input
-                type="number"
-                inputMode="numeric"
-                pattern="-?\d*"
+                type="text"
+                inputMode="text"
+                pattern="-?[\d\.\/]*"
                 onChange={handleInputChange}
                 value={userAnswer}
-                placeholder="Enter neural response..."
-                className={`text-center text-2xl py-6 bg-white border text-gray-800 placeholder-gray-400 ${
+                placeholder="Enter number or fraction (e.g. 2/6)..."
+                className={`text-center text-2xl py-6 bg-white border text-gray-800 placeholder-gray-400 font-mono ${
                   isCorrect
                     ? "ring-2 ring-green-500/50 border-green-500"
                     : isIncorrect
@@ -266,11 +266,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
                     >
                       <Sparkles className="h-6 w-6 text-yellow-300" />
                       <motion.p 
-                        className="font-bold text-white text-xl"
+                        className="font-display font-bold text-white text-xl tracking-tight"
                         animate={{ scale: [1, 1.05, 1] }}
                         transition={{ duration: 0.8, repeat: Infinity }}
                       >
-                        {streak} STREAK!
+                        <span className="font-mono">{streak}</span> STREAK!
                       </motion.p>
                       <Sparkles className="h-6 w-6 text-yellow-300" />
                     </motion.div>
@@ -282,14 +282,14 @@ const GameScreen: React.FC<GameScreenProps> = ({
                       transition={{ duration: 0.5, delay: 0.2 }}
                     >
                       <Trophy className="h-5 w-5 text-yellow-500" />
-                      <span className="text-purple-800 font-bold text-lg">+{streakBonus} BONUS POINTS</span>
+                      <span className="text-purple-800 font-bold text-lg font-body">+<span className="font-mono">{streakBonus}</span> BONUS POINTS</span>
                     </motion.div>
                     
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6 }}
-                      className="text-white text-sm mt-2 font-medium"
+                      className="text-white text-sm mt-2 font-body font-medium tracking-normal"
                     >
                       Keep going for even more bonus points!
                     </motion.p>

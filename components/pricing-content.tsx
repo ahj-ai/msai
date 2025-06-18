@@ -336,36 +336,36 @@ export const PricingContent = () => {
         </div>
 
         {/* Trust Signals Section */}
-        <div className="max-w-4xl mx-auto mb-20 px-6 py-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Trusted by students and educators worldwide</h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">Join thousands of learners who have improved their math skills with MathStack AI</p>
+        <div className="max-w-4xl mx-auto mb-20 px-6 py-12 bg-white rounded-2xl shadow-sm border border-gray-100 rhythm-y">
+          <div className="text-center mb-10">
+            <h3 className="font-display text-3xl font-bold text-high-contrast mb-4 tracking-tight">Trusted by students and educators worldwide</h3>
+            <p className="font-body text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">Join thousands of learners who have improved their math skills with MathStack AI</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">1,000+</div>
-              <p className="text-gray-600">Step by Step Solutions Generated</p>
+            <div className="text-center p-8 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+              <div className="font-mono text-3xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent mb-3">1,000+</div>
+              <p className="font-body text-deep-sapphire">Step by Step Solutions Generated</p>
             </div>
-            <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">95%</div>
-              <p className="text-gray-600">Report Improved Grades</p>
+            <div className="text-center p-8 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+              <div className="font-mono text-3xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent mb-3">95%</div>
+              <p className="font-body text-deep-sapphire">Report Improved Grades</p>
             </div>
-            <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">AI</div>
-              <p className="text-gray-600">Tutors aren't available 24/7, but <span className="font-semibold text-[#6C63FF]">MathStack AI</span> is</p>
+            <div className="text-center p-8 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+              <div className="font-mono text-3xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent mb-3">AI</div>
+              <p className="font-body text-deep-sapphire">Tutors aren't available 24/7, but <span className="font-semibold text-[#6C63FF]">MathStack AI</span> is</p>
             </div>
           </div>
         </div>
 
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto mb-20">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h2>
-          <div className="space-y-4">
+          <h2 className="font-display text-4xl font-bold text-center text-high-contrast tracking-tight mb-12">Frequently Asked Questions</h2>
+          <div className="space-y-6">
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-0" className="border border-gray-200 rounded-lg p-4">
-                <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">How does the annual billing work?</AccordionTrigger>
-                <AccordionContent className="text-gray-600 mt-2">
+              <AccordionItem value="item-0" className="border border-gray-200 rounded-lg p-4 hover:border-[#6C63FF]/30 transition-colors duration-300">
+                <AccordionTrigger className="font-display text-lg font-semibold text-high-contrast tracking-tight hover:no-underline">How does the annual billing work?</AccordionTrigger>
+                <AccordionContent className="font-body text-gray-600 mt-3 leading-relaxed">
                   You pay $120/year for Premium access. Your subscription will automatically renew each year unless you choose to cancel.
                 </AccordionContent>
               </AccordionItem>

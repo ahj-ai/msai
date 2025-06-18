@@ -1622,7 +1622,7 @@ export function ProblemLab() {
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowAllSteps(true)}
-                            className="text-xs px-3 py-1 flex items-center gap-1"
+                            className="text-xs px-3 py-1 flex items-center gap-1 font-display font-medium tracking-tight transition-all duration-300 hover:-translate-y-0.5"
                             disabled={showAllSteps}
                           >
                             <span className="inline-block"><HelpCircle className="w-4 h-4 text-indigo-600" /></span>
@@ -1635,20 +1635,34 @@ export function ProblemLab() {
                   {/* Solution Steps (shown when correct or stumped) */}
                   {(isCorrect || showAllSteps) && currentProblem.solutionSteps && (
                     <div className="mt-8 pt-6 border-t border-gray-100">
-                      <h3 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <h3 className="text-sm font-display font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <Check className="w-4 h-4" /> Solution Steps
                       </h3>
                       <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
                         <ol className="list-decimal pl-5 space-y-4">
                           {currentProblem.solutionSteps.map((step, index) => (
-                            <li key={index} className="text-gray-700 text-base">
+                            <li key={index} className="text-gray-700 text-base font-body">
                               <div className="bg-white p-3 rounded-md shadow-xs">
-                                <ReactMarkdown
-                                  remarkPlugins={[remarkMath]}
-                                  rehypePlugins={[rehypeKatex]}
+                                <div className="font-body leading-relaxed">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkMath]}
+                                    rehypePlugins={[rehypeKatex]}
+                                    components={{
+                                    // @ts-ignore - inline is actually available in the props but TypeScript doesn't recognize it
+                                    code: ({ node, inline, className, children, ...props }: any) => (
+                                      <code className={`${className || ''} ${inline ? 'font-mono text-sm' : 'font-mono text-sm'}`} {...props}>
+                                        {children}
+                                      </code>
+                                    ),
+                                    // @ts-ignore - node is actually available in the props but TypeScript doesn't recognize it
+                                    strong: ({ node, children }: any) => (
+                                      <strong className="font-bold">{children}</strong>
+                                    )
+                                  }}
                                 >
                                   {ensureLatexDelimiters(step)}
                                 </ReactMarkdown>
+                                </div>
                               </div>
                             </li>
                           ))}
@@ -1662,7 +1676,7 @@ export function ProblemLab() {
                             onClick={saveProblemsToSupabase}
                             disabled={isSavingProblems}
                             variant="outline"
-                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 flex items-center gap-2"
+                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 flex items-center gap-2 font-display font-medium tracking-tight transition-all duration-300 hover:-translate-y-0.5"
                           >
                             {isSavingProblems ? (
                               <>
@@ -1681,7 +1695,7 @@ export function ProblemLab() {
                       
                       {/* Success message after saving */}
                       {problemsSaved && (
-                        <div className="mt-4 p-2 bg-green-50 border border-green-100 rounded text-green-700 text-sm flex items-center gap-2">
+                        <div className="mt-4 p-2 bg-green-50 border border-green-100 rounded text-green-700 text-sm flex items-center gap-2 font-body">
                           <CheckCircle className="w-4 h-4" />
                           Problem saved successfully!
                         </div>

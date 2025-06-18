@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignUpButton } from '@clerk/nextjs';
 import { RedirectToDashboard } from '../components/redirect-to-dashboard';
@@ -20,17 +21,17 @@ function TestimonialCard({ quote, name, role }: {
   role: string;
 }) {
   return (
-    <div className="border border-white/10 p-8 rounded-lg bg-white/5">
-      <p className="text-white/90 mb-6 leading-relaxed relative">
-        <span className="text-[#B619E7] text-xl absolute -left-3 -top-2">“</span>
+    <div className="border border-white/10 p-8 rounded-lg bg-white/5 transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 rhythm-y">
+      <p className="font-body text-high-contrast-light text-white/95 mb-6 leading-relaxed relative">
+        <span className="font-display text-[#B619E7] text-2xl absolute -left-3 -top-2 font-bold">"</span>
         {quote}
-        <span className="text-[#B619E7] text-xl">”</span>
+        <span className="font-display text-[#B619E7] text-2xl font-bold">"</span>
       </p>
       <div className="flex items-center mt-6">
-        <div className="w-12 h-12 bg-[#B619E7]/20 rounded-full mr-4 border border-[#B619E7]/30"></div>
+        <div className="w-12 h-12 bg-[#B619E7]/20 rounded-full mr-4 border border-[#B619E7]/30 transition-all duration-300 hover:bg-[#B619E7]/30 text-hover-animate"></div>
         <div>
-          <div className="font-semibold text-white">{name}</div>
-          <div className="text-white/70 text-sm">{role}</div>
+          <div className="font-display font-semibold text-white tracking-tight text-hover-animate">{name}</div>
+          <div className="font-body text-white/80 text-sm tracking-relaxed">{role}</div>
         </div>
       </div>
     </div>
@@ -40,6 +41,9 @@ function TestimonialCard({ quote, name, role }: {
 
 
 export default function Home() {
+  const [mathProblem, setMathProblem] = useState("2x + 5 = 13");
+  const [showSolution, setShowSolution] = useState(false);
+  
   const features: Feature[] = [
     {
       icon: <Zap className="w-8 h-8 text-[#6C63FF]" />,
@@ -82,17 +86,11 @@ export default function Home() {
         <section className="section">
           <div className="container">
             <div className="max-w-5xl mx-auto text-center">
-              {/* Attention-grabbing badge */}
-              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6C63FF]/10 to-[#5E60CE]/10 border border-[#6C63FF]/20 rounded-full mb-6">
-                <Zap className="w-4 h-4 text-[#6C63FF] mr-2" />
-                <span className="text-sm font-medium text-[#6C63FF]">10x Faster Than ChatGPT for Math</span>
-              </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 pb-2">
-                Stop Fighting <br />
-                <span className="animate-gradient-x bg-gradient-to-r from-[#6C63FF] via-[#8A6FFD] to-[#5E60CE] bg-clip-text text-transparent">ChatGPT for Math</span>
+              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-extrabold mb-8 pb-2 tracking-tight">
+                Built for Math.<br />
+                <span className="animate-gradient-x bg-gradient-to-r from-[#6C63FF] via-[#8A6FFD] to-[#5E60CE] bg-clip-text text-transparent text-hover-animate">Built for You.</span>
               </h1>
-              
               <style jsx>{`
                 @keyframes gradient-x {
                   0% {
@@ -110,9 +108,8 @@ export default function Home() {
                   animation: gradient-x 8s ease infinite;
                 }
               `}</style>
-              
-              <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-                ChatGPT gives you walls of text. <span className="font-semibold text-gray-800">MathStack AI gives you results.</span> Get instant step-by-step solutions, master speed with our <span className="font-semibold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">Brainiac</span> game, and practice unlimited problems in the <span className="font-semibold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">Problem Lab</span>.
+              <p className="font-body text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+                MathStack AI gives you results—not walls of text. Get instant step-by-step solutions, master speed with Brainiac, and practice unlimited problems in the Problem Lab.
               </p>
 
               {/* Social proof */}
@@ -123,26 +120,82 @@ export default function Home() {
                     <div className="w-8 h-8 bg-gradient-to-r from-[#8A6FFD] to-[#6C63FF] rounded-full border-2 border-white"></div>
                     <div className="w-8 h-8 bg-gradient-to-r from-[#5E60CE] to-[#8A6FFD] rounded-full border-2 border-white"></div>
                   </div>
-                  <span>🚀 2x faster learning</span>
+                  <span className="font-body font-medium tracking-tight">🚀 <span className="font-mono">2x</span> faster learning</span>
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <SignUpButton mode="modal">
                   <button 
-                    className="btn-primary inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white relative overflow-hidden group"
+                    className="btn-primary inline-flex items-center justify-center px-8 py-4 text-lg font-display font-bold text-white relative overflow-hidden group transition-all duration-300 hover:-translate-y-1"
                   >
-                    <span className="relative z-10">Start free trial</span>
+                    <span className="relative z-10 tracking-tight">Start free trial</span>
                     <ArrowRight className="ml-2 w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#8A6FFD] to-[#6C63FF] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </button>
                 </SignUpButton>
                 <Link 
                   href="/why-mathstack-ai" 
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-[#6C63FF] hover:bg-[#6C63FF]/5 rounded-full transition-colors border-2 border-[#6C63FF]/20 hover:border-[#6C63FF]/40"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-display font-semibold tracking-tight text-[#6C63FF] hover:bg-[#6C63FF]/5 rounded-full transition-all duration-300 hover:-translate-y-1 border-2 border-[#6C63FF]/20 hover:border-[#6C63FF]/40 text-hover-animate"
                 >
-                  See the difference
+                  See the difference <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive AI Demo Section */}
+        <section className="section bg-gradient-to-r from-[#6C63FF]/5 to-[#5E60CE]/5">
+          <div className="container">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white border border-[#6C63FF]/20 rounded-2xl p-8 shadow-xl">
+                <div className="text-center mb-8">
+                  <h3 className="font-display text-3xl font-bold text-gray-900 mb-4">Watch AI Solve in Real-Time</h3>
+                  <p className="text-gray-600 font-body">Type any math problem and see the magic happen</p>
+                </div>
+                
+                <div className="bg-gray-900 rounded-2xl p-6 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-400 text-sm ml-2 font-mono">MathStack AI Console</span>
+                  </div>
+                  
+                  <div className="font-mono">
+                    <div className="text-green-400 mb-2">$ solve: {mathProblem}</div>
+                    {showSolution && (
+                      <div className="text-cyan-300 animate-fadeIn">
+                        <div>Step 1: Subtract 5 from both sides</div>
+                        <div className="ml-4 text-gray-400">2x + 5 - 5 = 13 - 5</div>
+                        <div className="ml-4 text-gray-400">2x = 8</div>
+                        <div className="mt-2">Step 2: Divide both sides by 2</div>
+                        <div className="ml-4 text-gray-400">x = 4</div>
+                        <div className="text-green-400 mt-2">✓ Solution: x = 4</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 justify-center">
+                  <button 
+                    onClick={() => setShowSolution(!showSolution)}
+                    className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#6C63FF] text-white px-8 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-lg font-display"
+                  >
+                    {showSolution ? 'Reset' : 'Solve Step-by-Step'}
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const problems = ["3x + 7 = 16", "2(x - 3) = 10", "x/4 + 2 = 6"]
+                      setMathProblem(problems[Math.floor(Math.random() * problems.length)])
+                      setShowSolution(false)
+                    }}
+                    className="bg-white border border-[#6C63FF] text-[#6C63FF] hover:bg-[#6C63FF]/5 px-8 py-3 rounded-xl font-semibold transition-all font-display"
+                  >
+                    Try Another
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -150,26 +203,26 @@ export default function Home() {
 
         {/* Comparison Section */}
         <section className="section bg-gray-50">
-            <div className="container">
+            <div className="container rhythm-y-lg">
                 <div className="max-w-4xl mx-auto text-center mb-16">
-                    <h2 className="text-3xl font-bold mb-4">The MathStackAI Difference</h2>
-                    <p className="text-gray-600">A purpose-built learning platform will always beat a generic chatbot. Here's why.</p>
+                    <h2 className="font-display text-3xl md:text-4xl font-bold mb-6 tracking-tight text-high-contrast">The MathStackAI Difference</h2>
+                    <p className="font-body text-xl text-gray-600 leading-relaxed">A purpose-built learning platform will always beat a generic chatbot. Here's why.</p>
                 </div>
                 <div className="max-w-3xl mx-auto">
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 divide-y divide-gray-200">
-                        <div className="grid grid-cols-3 gap-4 p-4 font-bold text-gray-800">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 divide-y divide-gray-200 hover:shadow-xl transition-all duration-300">
+                        <div className="grid grid-cols-3 gap-4 p-4 font-display font-bold text-gray-800 tracking-tight">
                             <div className="text-left">Feature</div>
                             <div className="text-center">MathStackAI</div>
                             <div className="text-center">Generic AI</div>
                         </div>
                         {comparisonFeatures.map((item) => (
-                            <div key={item.feature} className="grid grid-cols-3 gap-4 p-4 text-center items-center">
-                                <div className="text-left font-semibold text-gray-700">{item.feature}</div>
-                                <div>
+                            <div key={item.feature} className="grid grid-cols-3 gap-4 p-4 text-center items-center hover:bg-gray-50 transition-colors">
+                                <div className="text-left font-display font-semibold text-gray-700 tracking-tight">{item.feature}</div>
+                                <div className="text-hover-animate">
                                     <CheckCircle className="h-6 w-6 text-green-500 mx-auto" />
                                 </div>
-                                <div>
-                                    {item.gpt === true ? <CheckCircle className="h-6 w-6 text-green-500 mx-auto" /> : item.gpt === false ? <XCircle className="h-6 w-6 text-red-400 mx-auto" /> : <span className="text-sm text-gray-500 italic">{item.gpt}</span>}
+                                <div className="text-hover-animate">
+                                    {item.gpt === true ? <CheckCircle className="h-6 w-6 text-green-500 mx-auto" /> : item.gpt === false ? <XCircle className="h-6 w-6 text-red-400 mx-auto" /> : <span className="font-body text-sm text-gray-500 italic tracking-relaxed">{item.gpt}</span>}
                                 </div>
                             </div>
                         ))}
@@ -179,14 +232,12 @@ export default function Home() {
             </div>
         </section>
 
-        {/* Callout Section removed as requested */}
-
         {/* Features Section */}
         <section className="section bg-white">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-4xl font-bold mb-6">Built for Math Mastery</h2>
-              <p className="text-xl text-gray-600">While ChatGPT tries to do everything, we do one thing perfectly: make you a math genius.</p>
+              <h2 className="font-display text-4xl font-bold mb-6 tracking-tight">Built for Math Mastery</h2>
+              <p className="font-body text-xl text-gray-600 leading-relaxed">While ChatGPT tries to do everything, we do one thing perfectly: make you a math genius.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -201,26 +252,26 @@ export default function Home() {
         <section className="section bg-gray-900 text-white">
           <div className="container">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-block mb-6 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] px-4 py-2 rounded-full text-white font-medium">
-                <span className="flex items-center"><Zap className="w-4 h-4 mr-2" /> Limited Time: 7-Day Free Trial</span>
+              <div className="inline-block mb-6 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] px-4 py-2 rounded-full text-white">
+                <span className="flex items-center font-body font-medium tracking-tight"><Zap className="w-4 h-4 mr-2" /> Limited Time: <span className="font-mono">7-Day</span> Free Trial</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Stop Struggling with Math Today</h2>
-              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Start mastering math concepts 2x faster than with traditional methods.</p>
+              <h2 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Stop Struggling with Math Today</h2>
+              <p className="font-body text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">Start mastering math concepts <span className="font-mono font-medium">2x</span> faster than with traditional methods.</p>
               
               <div className="flex flex-col sm:flex-row justify-center gap-6 mb-8">
                 <SignedOut>
                   <SignUpButton mode="modal">
-                    <button className="btn btn-primary text-lg px-8 py-4 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#6C63FF] transition-all duration-300 rounded-xl shadow-lg hover:shadow-xl">
+                    <button className="btn btn-primary text-lg px-8 py-4 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#6C63FF] transition-all duration-300 rounded-xl shadow-lg hover:shadow-xl font-display font-bold tracking-tight text-hover-animate hover:-translate-y-1">
                       Start Free Trial Now
                     </button>
                   </SignUpButton>
-                  <Link href="/why-mathstack-ai" className="btn btn-outline text-lg px-8 py-4 border-2 border-white/30 hover:bg-white/10 transition-all duration-300 rounded-xl flex items-center justify-center">
+                  <Link href="/why-mathstack-ai" className="btn btn-outline text-lg px-8 py-4 border-2 border-white/30 hover:bg-white/10 transition-all duration-300 rounded-xl flex items-center justify-center font-display font-medium tracking-tight text-hover-animate hover:-translate-y-1">
                     <span>See How It Works</span> <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </SignedOut>
               </div>
               
-              <div className="text-sm text-gray-400">No credit card required. Cancel anytime.</div>
+              <div className="font-body text-sm text-gray-400 tracking-tight">No credit card required. Cancel anytime.</div>
             </div>
           </div>
         </section>
