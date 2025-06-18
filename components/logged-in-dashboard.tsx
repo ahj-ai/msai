@@ -108,6 +108,32 @@ const LoggedInDashboard = () => {
     }
   }, [searchParams]);
 
+  // Close sidebar when screen becomes large
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [sidebarOpen]);
+
   // Fetch user progress data from Supabase
   useEffect(() => {
     if (user) {
@@ -171,7 +197,7 @@ const LoggedInDashboard = () => {
       fetchUserProgress();
     }
   }, [user]);
-  
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const renderContent = () => {
@@ -459,94 +485,85 @@ const LoggedInDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Mobile sidebar */}
-      <div
-        className={`fixed inset-0 z-40 md:hidden ${sidebarOpen ? 'block' : 'hidden'}`}
-        onClick={toggleSidebar}
-      >
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile Menu Button */}
+      <div className="md:hidden fixed top-20 left-4 z-40">
+        <button
+          onClick={toggleSidebar}
+          className="p-3 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-5 w-5 text-gray-600" />
+        </button>
       </div>
 
-      {/* Sidebar - now more minimal with just icons */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-16 transform bg-white shadow-md rounded-r-xl transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:relative md:translate-x-0`}
-      >
-        <div className="flex h-16 items-center justify-center">
-          <button
-            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 md:hidden"
+      {/* Sidebar */}
+      <div className="md:flex">
+        {/* Mobile Overlay */}
+        {sidebarOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
             onClick={toggleSidebar}
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <nav className="mt-6 flex flex-col items-center space-y-4">
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`flex items-center justify-center p-3 rounded-md w-10 h-10 transition-all ${
-              activeTab === "dashboard"
-                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-            title="Dashboard"
-          >
-            <Home className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setActiveTab("saved-problems")}
-            className={`flex items-center justify-center p-3 rounded-md w-10 h-10 transition-all ${
-              activeTab === "saved-problems"
-                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-            title="Saved Problems"
-          >
-            <Book className="h-5 w-5" />
-          </button>
-        </nav>
-        <div className="absolute bottom-6 w-full flex justify-center">
-          <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center shadow-sm hover:shadow transition-shadow" title={user?.name || 'User'}>
-            <span className="text-sm font-medium text-indigo-700">
-              {user?.name?.charAt(0) || 'U'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden bg-gray-50">
-        <header className="flex h-12 items-center justify-between bg-gray-50 px-4 md:px-6">
-          <div className="flex items-center space-x-2">
-            {isPro && (
-              <div className="hidden md:flex items-center space-x-1.5">
-                <Badge variant="outline" className="border-amber-500 bg-amber-50 text-amber-700 flex items-center gap-1 py-1.5 pl-1.5 pr-2.5">
-                  <Crown className="h-4 w-4 text-amber-500" />
-                  <span>Pro Subscriber</span>
-                </Badge>
-              </div>
-            )}
-            <button
-              type="button"
-              className="-ml-0.5 -mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 lg:hidden"
-              onClick={toggleSidebar}
-            >
-              <span className="sr-only">Open sidebar</span>
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center md:hidden">
-              <span className="text-sm font-medium text-indigo-700">
-                {user?.name?.charAt(0) || 'U'}
-              </span>
+          />
+        )}
+        
+        {/* Sidebar Content */}
+        <div className={`
+          fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 
+          transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+          md:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto
+        `}>
+          <div className="p-6">
+            {/* Mobile Close Button */}
+            <div className="md:hidden flex justify-end mb-4">
+              <button
+                onClick={toggleSidebar}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
+
+            <nav className="space-y-2">
+              <button
+                onClick={() => {
+                  setActiveTab("dashboard");
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === "dashboard" 
+                    ? "bg-[#6C63FF]/10 text-[#6C63FF] font-medium" 
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Home className="mr-3 h-5 w-5" />
+                Dashboard
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("saved-problems");
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === "saved-problems" 
+                    ? "bg-[#6C63FF]/10 text-[#6C63FF] font-medium" 
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Book className="mr-3 h-5 w-5" />
+                Saved Problems
+              </button>
+            </nav>
           </div>
-        </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6">
-          {renderContent()}
-        </main>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 md:ml-0">
+          <div className="p-4 sm:p-6 md:p-8 pt-20 md:pt-8">
+            {renderContent()}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -40,22 +40,21 @@ export function StacksDisplay() {
   if (!userId) return null;
 
   return (
-    <span
-      className="flex items-center gap-2 px-2 py-1"
+    <div
+      className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-white rounded-lg border border-gray-200 shadow-sm min-w-0"
       title="Your available stacks for premium features"
-      style={{ minWidth: 70 }}
     >
-      <Zap className="w-4 h-4 text-[#6C63FF]" strokeWidth={2} />
-      <span className="text-sm font-semibold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+      <Zap className="w-4 h-4 text-[#6C63FF] flex-shrink-0" strokeWidth={2} />
+      <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent whitespace-nowrap">
         Stacks
       </span>
-      <span className="ml-1 text-sm font-bold text-[#242740]">
+      <span className="text-xs sm:text-sm font-bold text-[#242740] min-w-[20px] text-center">
         {isLoading ? (
           <span className="inline-block w-4 h-3 bg-gray-200 rounded animate-pulse" />
         ) : (
           stacks !== null ? stacks : '0'
         )}
       </span>
-    </span>
+    </div>
   );
 }

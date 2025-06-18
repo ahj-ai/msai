@@ -3,6 +3,10 @@ import { auth } from '@clerk/nextjs/server';
 import { stripe } from '@/lib/stripe';
 import { supabase } from '@/lib/supabase';
 
+// Mark this endpoint as a dynamic route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: Request) {
   try {
     // Get the session id from the URL

@@ -68,9 +68,32 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
     setLastAnswerTime(answerTime)
     setTotalResponseTime((prev) => prev + answerTime)
 
-    const submittedAnswer = Number.parseFloat(userAnswer)
+    // Parse the user answer, handling both decimal and fraction formats
+    let submittedAnswer: number
+    if (userAnswer.includes('/')) {
+      // Handle fraction format (e.g., "1/4")
+      const parts = userAnswer.split('/')
+      if (parts.length === 2) {
+        const numerator = Number.parseFloat(parts[0].trim())
+        const denominator = Number.parseFloat(parts[1].trim())
+        if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+          submittedAnswer = numerator / denominator
+        } else {
+          // Invalid fraction format
+          submittedAnswer = NaN
+        }
+      } else {
+        // Too many slash characters
+        submittedAnswer = NaN
+      }
+    } else {
+      // Standard decimal format
+      submittedAnswer = Number.parseFloat(userAnswer)
+    }
+    
     const correctAnswer = problem.answer
-    const isCorrect = Math.abs(submittedAnswer - correctAnswer) < 0.01
+    // Use a small epsilon for floating point comparison
+    const isCorrect = !isNaN(submittedAnswer) && Math.abs(submittedAnswer - correctAnswer) < 0.01
 
     if (isCorrect) {
       soundEffects.playCorrect()

@@ -2,10 +2,32 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
 
 export function Navigation() {
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+  
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <nav className="bg-gradient-to-b from-[#181024] via-[#22043a] to-[#1a0a2e]/95 backdrop-blur-sm fixed w-full z-50 border-b border-purple-900/20">
@@ -17,7 +39,7 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* Main Navigation Links */}
+          {/* Main Navigation Links - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
             {/* Products Dropdown */}
             <div className="relative group">
@@ -48,8 +70,8 @@ export function Navigation() {
             </Link>
           </div>
 
-          {/* Authentication Links */}
-          <div className="flex items-center space-x-4 ml-8">
+          {/* Authentication Links - Desktop */}
+          <div className="hidden md:flex items-center space-x-4 ml-8">
             <Link href="/login" className="text-gray-300 hover:text-purple-400 transition-colors">Log In</Link>
             <Link href="/signup">
               <Button 
@@ -59,8 +81,84 @@ export function Navigation() {
               </Button>
             </Link>
           </div>
+          
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-4">
+            <Link href="/login" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Log In</Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-md text-gray-300 hover:text-purple-400 focus:outline-none"
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
+      
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-16 bg-gradient-to-b from-[#181024]/98 via-[#22043a]/98 to-[#1a0a2e]/98 backdrop-blur-md z-40 overflow-y-auto">
+          <div className="px-4 py-6 space-y-6">
+            {/* Products Section */}
+            <div className="border-b border-purple-900/30 pb-4">
+              <h3 className="text-lg font-semibold text-purple-400 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent mb-3">Products</h3>
+              <div className="space-y-3 ml-2">
+                <Link 
+                  href="/brainiac" 
+                  className="block text-base font-medium py-2 px-3 rounded-md text-gray-300 hover:text-purple-400 hover:bg-purple-900/20 transition-colors"
+                >
+                  Brainiac
+                </Link>
+                <Link 
+                  href="/problem-lab" 
+                  className="block text-base font-medium py-2 px-3 rounded-md text-gray-300 hover:text-purple-400 hover:bg-purple-900/20 transition-colors"
+                >
+                  Problem Lab
+                </Link>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <Link 
+                href="/why-mathstack-ai" 
+                className={`block text-lg font-medium py-2.5 px-3 rounded-lg transition-colors ${
+                  pathname === '/why-mathstack-ai'
+                    ? 'text-purple-400 bg-purple-900/20' 
+                    : 'text-gray-300 hover:text-purple-400 hover:bg-purple-900/10'
+                }`}
+              >
+                Why MathStack AI?
+              </Link>
+              <Link 
+                href="/pricing" 
+                className={`block text-lg font-medium py-2.5 px-3 rounded-lg transition-colors ${
+                  pathname === '/pricing'
+                    ? 'text-purple-400 bg-purple-900/20' 
+                    : 'text-gray-300 hover:text-purple-400 hover:bg-purple-900/10'
+                }`}
+              >
+                Pricing
+              </Link>
+            </div>
+            
+            {/* Mobile Sign Up CTA */}
+            <div className="mt-6 pt-4 border-t border-purple-900/30">
+              <Link href="/signup" className="block w-full">
+                <Button 
+                  className="w-full bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] text-white hover:opacity-90 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
+                >
+                  Sign Up - It's Free!
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

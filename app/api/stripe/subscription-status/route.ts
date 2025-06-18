@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Mark this endpoint as a dynamic route that shouldn't be statically optimized
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Create Supabase client with service role key to bypass RLS
 const supabaseServiceRole = createClient(
   process.env.SUPABASE_URL!,

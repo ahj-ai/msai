@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
 import MathStackLogo from './MathStackLogo';
 import { StacksDisplay } from '@/components/ui/stacks-display';
 import { useSubscription } from '@/hooks/use-subscription';
 import { ProBadge } from '@/components/ui/pro-badge';
-import { Crown } from 'lucide-react';
+import { Crown, Menu, X } from 'lucide-react';
 
 interface NavBarProps {
   children?: React.ReactNode;
@@ -70,7 +70,27 @@ function NavBarSubscriptionStatus() {
 
 export default function NavBar({ children }: NavBarProps) {
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isActive = (path: string) => pathname === path;
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 border-b border-gray-100 shadow-sm">
@@ -82,7 +102,7 @@ export default function NavBar({ children }: NavBarProps) {
             </Link>
           </div>
 
-          {/* Main Navigation Links */}
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             {/* Signed In Navigation */}
             <SignedIn>
@@ -166,16 +186,118 @@ export default function NavBar({ children }: NavBarProps) {
             </SignedOut>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Mobile menu button and auth buttons */}
           <div className="flex items-center space-x-4">
             <SignedIn>
               <StacksDisplay />
               <NavBarSubscriptionStatus />
             </SignedIn>
             {children}
+            
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-md text-gray-700 hover:text-[#6C63FF] hover:bg-gray-100 transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto">
+          <div className="px-4 py-6 space-y-6">
+            {/* Signed In Mobile Navigation */}
+            <SignedIn>
+              <div className="space-y-4">
+                <Link 
+                  href="/dashboard" 
+                  className={`block text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                    isActive('/dashboard') 
+                      ? 'text-[#6C63FF] bg-[#6C63FF]/10' 
+                      : 'text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50'
+                  }`}
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  href="/brainiac" 
+                  className={`block text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                    isActive('/brainiac') || pathname?.startsWith('/brainiac')
+                      ? 'text-[#6C63FF] bg-[#6C63FF]/10' 
+                      : 'text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50'
+                  }`}
+                >
+                  Brainiac
+                </Link>
+                <Link 
+                  href="/problem-lab" 
+                  className={`block text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                    isActive('/problem-lab') || pathname?.startsWith('/problem-lab')
+                      ? 'text-[#6C63FF] bg-[#6C63FF]/10' 
+                      : 'text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50'
+                  }`}
+                >
+                  Problem Lab
+                </Link>
+              </div>
+            </SignedIn>
+
+            {/* Signed Out Mobile Navigation */}
+            <SignedOut>
+              <div className="space-y-4">
+                <div className="border-b border-gray-200 pb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Products</h3>
+                  <div className="space-y-2 ml-4">
+                    <Link 
+                      href="/brainiac" 
+                      className="block text-base py-2 px-3 rounded-md text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50 transition-colors"
+                    >
+                      Brainiac
+                    </Link>
+                    <Link 
+                      href="/problem-lab" 
+                      className="block text-base py-2 px-3 rounded-md text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50 transition-colors"
+                    >
+                      Problem Lab
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Link 
+                    href="/why-mathstack-ai" 
+                    className={`block text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                      isActive('/why-mathstack-ai')
+                        ? 'text-[#6C63FF] bg-[#6C63FF]/10' 
+                        : 'text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50'
+                    }`}
+                  >
+                    Why MathStack AI?
+                  </Link>
+                  <Link 
+                    href="/pricing" 
+                    className={`block text-lg font-medium py-3 px-4 rounded-lg transition-colors ${
+                      isActive('/pricing')
+                        ? 'text-[#6C63FF] bg-[#6C63FF]/10' 
+                        : 'text-gray-700 hover:text-[#6C63FF] hover:bg-gray-50'
+                    }`}
+                  >
+                    Pricing
+                  </Link>
+                </div>
+              </div>
+            </SignedOut>
+          </div>
+        </div>
+      )}
     </nav>
   );
-} 
+}

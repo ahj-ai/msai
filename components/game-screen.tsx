@@ -51,11 +51,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const inputAnimation = useAnimation()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow negative signs and digits only
-    const value = e.target.value.replace(/[^\d-]/g, "")
-    // Ensure only one negative sign at the start
-    const sanitizedValue = value.replace(/--+/g, "-").replace(/(\d)-/g, "$1")
-    setUserAnswer(sanitizedValue)
+    // Allow digits, minus, slash, sqrt, pi, dot, letters, and spaces
+    const value = e.target.value.replace(/[^\d\-\/\.\s\wπ√]/gi, "")
+    setUserAnswer(value)
   }
 
   const handleSubmit = (e: React.FormEvent) => {

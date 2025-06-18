@@ -77,8 +77,13 @@ export async function POST(req: Request) {
     }
     
     // Create the checkout session
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      return NextResponse.json(
+        { error: 'Base URL is not set. Please set NEXT_PUBLIC_BASE_URL in your environment.' },
+        { status: 500 }
+      );
+    }
     // Create the checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

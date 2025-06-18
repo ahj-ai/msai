@@ -1,12 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 
-export default function CheckoutSuccessPage() {
+// Loading component to show while suspended
+function CheckoutSuccessLoading() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-off-white">
+      <div className="w-full max-w-3xl text-center px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <h1 className="mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Loading...</h1>
+        <p className="mt-4 text-base text-gray-500">Verifying your purchase...</p>
+      </div>
+    </div>
+  );
+}
+
+// Create a client component that uses the searchParams
+function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -65,7 +78,9 @@ export default function CheckoutSuccessPage() {
         
         <h1 className="mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
           {purchaseType === 'subscription' ? 
-            'Thank you for your subscription!' : 
+            <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+              Thank you for your subscription!
+            </span> : 
             'Stack Pack purchased successfully!'}
         </h1>
         
@@ -82,7 +97,7 @@ export default function CheckoutSuccessPage() {
             <p className="text-sm text-gray-500">Verifying your subscription...</p>
           ) : (
             <div className="flex justify-center">
-              <Button asChild>
+              <Button asChild className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE]">
                 <Link href="/dashboard">
                   Go to Dashboard
                 </Link>
@@ -98,5 +113,14 @@ export default function CheckoutSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Export a component that wraps the content in a Suspense boundary
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<CheckoutSuccessLoading />}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

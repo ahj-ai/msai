@@ -24,8 +24,9 @@ export async function POST(req: Request) {
     }
 
     // Base session configuration
-    // Use hardcoded URLs for development to ensure they're valid
-    let successUrlBase = 'http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}';
+    // Use environment variable for production, fallback to localhost for development
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    let successUrlBase = `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
     
     // Add purchase type and stacks amount to success URL if it's a one-time payment
     if (mode === 'payment' && metadata?.stacks) {
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     }
     
     const successUrlFormatted = successUrl || successUrlBase;
-    const cancelUrlFormatted = cancelUrl || 'http://localhost:3000/pricing';
+    const cancelUrlFormatted = cancelUrl || `${baseUrl}/pricing`;
       
     const sessionConfig: any = {
       payment_method_types: ['card'],
