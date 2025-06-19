@@ -8,7 +8,8 @@ import { Badge } from "./ui/badge"
 import { Check, Star, Zap } from "lucide-react"
 import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/components/ui/use-toast";
+import { MATHSTACK_PRO_PRICE_ID, STACK_PACK_PRICE_ID } from '@/lib/stripe';
 // Reimport the PageLayout component
 import { PageLayout } from "@/components/PageLayout"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -57,7 +58,7 @@ export const PricingContent = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: 'price_1RYy6O04B8TSHNkkSKszmPJS', // MathStack Pro price ID
+          priceId: MATHSTACK_PRO_PRICE_ID!, // MathStack Pro price ID - Ensure STRIPE_PRO_SUBSCRIPTION_PRICE_ID is set in .env
           mode: 'subscription',
           metadata: {
             productType: 'subscription',
@@ -316,7 +317,7 @@ export const PricingContent = () => {
                     <div className="space-y-3">
                       <Button 
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2"
-                        onClick={() => handlePurchaseCredits('price_1RY9hP04B8TSHNkkEsK9Fx4O', 75)}
+                        onClick={() => handlePurchaseCredits(STACK_PACK_PRICE_ID!, 75)} // Ensure STRIPE_STACK_PACK_PRICE_ID is set
                         disabled={isLoading}
                       >
                         {isLoading ? "Processing..." : "Get Small Stack Pack"}

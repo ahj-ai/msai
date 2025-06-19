@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { stripe } from '@/lib/stripe';
+import { getStripe, PLAN_PRO } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
-import { PLAN_PRO } from '@/lib/stripe';
 import Stripe from 'stripe';
 
 // Create Supabase client with service role key for webhook operations (bypasses RLS)
@@ -58,7 +57,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
   
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       body,
       signature,
       webhookSecret
@@ -144,12 +143,12 @@ async function handleSubscriptionCheckout(session: Stripe.Checkout.Session, user
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(
+  const subscription = await getStripe().subscriptions.retrieve(
     session.subscription as string
   );
 
   // Get customer details
-  const customer = await stripe.customers.retrieve(
+  const customer = await getStripe().customers.retrieve(
     subscription.customer as string
   );
   
@@ -321,7 +320,7 @@ async function handleOneTimePaymentCheckout(session: Stripe.Checkout.Session, us
 
   // Get the line items to determine what was purchased
   console.log('📋 Fetching line items for session:', session.id);
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+  const lineItems = await getStripe().checkout.sessions.listLineItems(session.id, {
     expand: ['data.price.product']
   });
 
@@ -337,7 +336,7 @@ async function handleOneTimePaymentCheckout(session: Stripe.Checkout.Session, us
     console.log('💰 Processing price:', price.id);
     
     // Get price metadata to determine stack amount
-    const priceDetails = await stripe.prices.retrieve(price.id);
+    const priceDetails = await getStripe().prices.retrieve(price.id);
     console.log('💰 Price metadata:', priceDetails.metadata);
     const stacksToCredit = priceDetails.metadata?.stacks ? parseInt(priceDetails.metadata.stacks) : 0;
     

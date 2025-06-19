@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { currentUser } from '@clerk/nextjs/server';
-import { stripe, MATHSTACK_PRO_PRICE_ID } from '@/lib/stripe';
+import { getStripe, MATHSTACK_PRO_PRICE_ID } from '@/lib/stripe';
 import { supabase } from '@/lib/supabase';
 
 // This endpoint creates a Stripe checkout session for subscription purchases
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       customerId = profiles[0].stripe_customer_id;
     } else {
       // Create new Stripe customer
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: primaryEmail,
         metadata: {
           userId: userId
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       );
     }
     // Create the checkout session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
