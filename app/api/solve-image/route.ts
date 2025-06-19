@@ -69,42 +69,34 @@ export async function POST(req: NextRequest) {
       { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
     ];
 
-    const systemPrompt = `You are "Screenshot & Solve," an expert math tutor and instant help assistant. Your primary goal is to provide clear, engaging, and educational step-by-step solutions to help users learn concepts, not just get an answer. You are patient, thorough, and an expert in all levels of mathematics.
+    const systemPrompt = `You are "Snap & Solve," an expert math tutor. Your goal is to analyze an image of a math problem and provide a clear, step-by-step solution.
 
-CRITICALLY IMPORTANT: You MUST respond with a single minified JSON object. Do not include any text or markdown formatting outside of the JSON object. The JSON object must have the following structure:
+CRITICALLY IMPORTANT: You MUST respond with a single, minified JSON object. Do not use markdown or any text outside the JSON.
+The JSON object must follow this exact structure:
 {
   "problem": {
-    "title": "A brief title identifying the type of problem (e.g., 'Differentiation of a Polynomial').",
+    "title": "A brief title identifying the type of problem (e.g., 'Solving a Quadratic Equation').",
     "statement": "Restate the user's question clearly based on the image content. Use LaTeX for all mathematical components.",
-    "keyConcepts": ["A list of key concepts or formulas needed (e.g., 'The Power Rule')."]
+    "keyConcepts": ["A list of key concepts or formulas needed (e.g., 'Quadratic Formula')."]
   },
   "solution": [
     {
-      "step": "State the action being taken for this step (e.g., 'Differentiate the first term').",
-      "work": "Show all mathematical work and calculations for this step, using LaTeX.",
-      "explanation": "Provide a concise explanation of the reasoning or rule being applied."
+      "step": "State the action for this step (e.g., 'Identify coefficients a, b, and c').",
+      "work": "Show all mathematical work for this step, using LaTeX.",
+      "explanation": "Explain the reasoning or rule being applied."
     }
   ],
   "answer": {
     "finalResult": "State the final, simplified result, using LaTeX.",
-    "verification": "Include a brief section on how the answer could be verified, using LaTeX."
+    "verification": "Briefly explain how the answer could be verified."
   }
 }
 
-Core Directives:
-- ALL mathematical components—including variables (e.g., $x$), numbers, functions, and equations—MUST be rendered using LaTeX.
-- Use single dollar signs ($...$) for inline LaTeX.
-- Use double dollar signs ($$...$$) for block-level or display LaTeX equations.
-- Be thorough in your explanations, but avoid unnecessary jargon. Assume the user is intelligent but may be new to the concept.
-- If the image is unclear or you cannot confidently interpret the problem, the JSON response should indicate this clearly, perhaps in the 'problem.statement' or by returning an appropriate error structure within the JSON.`;
+ALL mathematical expressions MUST be valid LaTeX, enclosed in single ($) or double ($$) dollar signs. If the image is unclear or unreadable, state that clearly in the 'problem.statement' and do not attempt a solution.`;
 
     const parts = [
-      {
-        text: systemPrompt
-      },
-      {
-        text: "Your Task:\nHelp me solve the following math problem. I have attached an image of it. Please provide a detailed step-by-step solution and explanation according to the guidelines above."
-      },
+      { text: systemPrompt },
+      { text: "Your Task: Help me solve the math problem in the attached image." },
       {
         inlineData: {
           mimeType: mimeType,
@@ -169,7 +161,15 @@ Core Directives:
     }
 
     const responseText = geminiResult.response.text();
-    return NextResponse.json({ solution: responseText });
+    
+    try {
+      const solutionJson = JSON.parse(responseText);
+      return NextResponse.json({ solution: solutionJson });
+    } catch (parseError) {
+      console.error("Error parsing Gemini response JSON:", parseError);
+      // Return the raw text if it's not valid JSON, so the client can handle it.
+      return NextResponse.json({ solution: responseText });
+    }
 
   } catch (error) {
     console.error("Error in solve-image endpoint:", error);
