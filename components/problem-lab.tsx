@@ -750,7 +750,17 @@ const AskLabTab: React.FC = () => {
                 <textarea 
                   ref={questionTextareaRef}
                   value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
+                  onChange={(e) => {
+                    setQuestion(e.target.value);
+                    // Maintain focus position after state update
+                    const cursorPosition = e.target.selectionStart;
+                    setTimeout(() => {
+                      if (questionTextareaRef.current) {
+                        questionTextareaRef.current.focus();
+                        questionTextareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
+                      }
+                    }, 0);
+                  }}
                   className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
                   placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
                 />
