@@ -6,10 +6,11 @@ import { Problem, Difficulty } from '@/types/math'
 import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book, Coins } from 'lucide-react'
 
 // Interface for the structured JSON response from Gemini API
-interface ProblemSolution {
+interface GeminiJsonResponse {
   problem: {
     title: string;
     statement: string;
+    keyConcepts: string[];
   };
   solution: Array<{
     step: string;
@@ -17,25 +18,6 @@ interface ProblemSolution {
     work: string;
   }>;
   answer: {
-    finalResult: string;
-    verification: string;
-  };
-}
-
-interface GeminiJsonResponse {
-  // This can be either a single problem solution or an array of them
-  problems?: ProblemSolution[];
-  // Support for the original single problem format for backward compatibility
-  problem?: {
-    title: string;
-    statement: string;
-  };
-  solution?: Array<{
-    step: string;
-    explanation: string;
-    work: string;
-  }>;
-  answer?: {
     finalResult: string;
     verification: string;
   };
@@ -700,8 +682,8 @@ export function ProblemLab() {
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
-
-  // Handle asking a question
+  
+  // Handle question submission to the Ask Lab
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
     
@@ -713,57 +695,44 @@ export function ProblemLab() {
       const token = await getToken();
       
       if (!token) {
-        setAnswer('You need to be signed in to ask questions.');
+        setAnswer('You need to be signed in to use this feature.');
         return;
       }
       
-      // Call the Gemini API endpoint with authentication
       const response = await fetch('/api/ask-question', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ question: question.trim() }),
+        body: JSON.stringify({ question })
       });
       
       const data = await response.json();
       
       if (response.ok) {
-        // The API now returns a structured JSON response
-        try {
-          // Check if it's a structured JSON response or a legacy string
-          if (typeof data.answer === 'object' && data.answer !== null) {
-            // It's already a JSON object
-            setAnswer(data.answer);
-          } else if (typeof data.answer === 'string') {
-            // Legacy support - if it's still returning a string
-            setAnswer(data.answer);
-          } else {
-            throw new Error('Invalid response format');
-          }
-        } catch (parseError) {
-          console.error('Error parsing JSON response:', parseError);
-          setAnswer(`Error parsing the response. Please try again.`);
-        }
+        // Handle the structured response
+        setAnswer(data.answer);
       } else {
         if (data.code === 'INSUFFICIENT_STACKS') {
           setAnswer(`You don't have enough credits to use this feature. Each question costs 3 credits. ${data.available ? `You currently have ${data.available} credits.` : ''} Visit the pricing page to get more credits.`);
         } else {
-          setAnswer(`Sorry, there was an error processing your question: ${data.error}`);
+          setAnswer(data.error || 'Failed to process your question');
         }
+        console.error('Ask Lab error:', data.error);
       }
     } catch (error) {
-      console.error('Error asking question:', error);
-      setAnswer('Sorry, there was an error processing your question. Please try again.');
+      console.error("Ask Lab error:", error);
+      setAnswer('An error occurred while processing your question. Please try again.');
     } finally {
       setIsAskingQuestion(false);
     }
   };
-  
-  // Component for the Ask Lab tab
-  const AskLabTab: React.FC = () => {
-    return (
+
+// Component for the Ask Lab tab
+const AskLabTab: React.FC = () => {
+  return (
+    // ... (rest of the code remains the same)
       <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
         <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
@@ -845,185 +814,135 @@ export function ProblemLab() {
           </div>
           
           {/* Display answer with sections */}
-          {answer && (
+          {answer && typeof answer === 'object' && !Array.isArray(answer) ? (
+            // Render GeminiJsonResponse
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mt-6 space-y-6"
             >
               {/* Problem Section */}
-              <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Problem</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={{
-                      h3: ({node, ...props}) => {
-                        // Hide the original '### Problem' heading
-                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                          String(props.children[0]) : '';
-                        return content === 'Problem' ? null : <h3 {...props} />
-                      },
-                      // Only show content until the next '### Step-By-Step Solution' heading
-                      p: ({node, ...props}) => {
-                        const content = props.children ? String(props.children) : '';
-                        if (content.includes('### Step-By-Step Solution')) {
-                          return null;
-                        }
-                        return <p {...props} />;
-                      }
-                    }}
-                  >
-                    {typeof answer === 'string' ? answer.split('### Step-By-Step Solution')[0] : ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              
-              {/* Solution Section */}
-              <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Step-By-Step Solution</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={{
-                      h3: ({node, ...props}) => {
-                        // Hide the original '### Step-By-Step Solution' heading
-                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                          String(props.children[0]) : '';
-                        return content === 'Step-By-Step Solution' ? null : <h3 {...props} />
-                      }
-                    }}
-                  >
-                    {typeof answer === 'string' ? 
-                      answer.includes('### Step-By-Step Solution') ? 
-                        answer.split('### Step-By-Step Solution')[1]?.split('### Answer')[0] || '' : 
-                        '' : 
-                      ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              
-              {/* Answer Section */}
-              <div className="p-5 bg-green-50 border border-green-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Answer</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  {typeof answer === 'string' ? (
-                    // Legacy string/markdown format
+              {(answer as GeminiJsonResponse).problem && (
+                <div className="bg-gradient-to-r from-[#6C63FF]/10 to-[#5E60CE]/10 p-4 rounded-lg border border-indigo-100">
+                  <h3 className="text-lg font-semibold text-indigo-800 mb-2 flex items-center">
+                    <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+                      Problem
+                    </span>
+                  </h3>
+                  <h4 className="font-medium text-gray-900 mb-2">{(answer as GeminiJsonResponse).problem.title || 'No title available'}</h4>
+                  <div className="text-gray-700 prose prose-sm lg:prose-base max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkMath]}
                       rehypePlugins={[rehypeKatex]}
-                      components={{
-                        h3: ({node, ...props}) => {
-                          // Hide the original '### Problem' heading
-                          const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                            String(props.children[0]) : '';
-                          return content === 'Problem' ? null : <h3 {...props} />;
-                        }
-                      }}
                     >
-                      {answer}
+                      {(answer as GeminiJsonResponse).problem.statement || 'No problem statement available'}
                     </ReactMarkdown>
-                  ) : answer ? (
-                    // New JSON structure format
-                    <div className="space-y-6">
-                      {/* Problem Section */}
-                      {answer.problem && (
-                        <div className="bg-gradient-to-r from-[#6C63FF]/10 to-[#5E60CE]/10 p-4 rounded-lg border border-indigo-100">
-                          <h3 className="text-lg font-semibold text-indigo-800 mb-2 flex items-center">
-                            <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
-                              Problem
-                            </span>
-                          </h3>
-                          <h4 className="font-medium text-gray-900 mb-2">{answer.problem.title || 'No title available'}</h4>
-                          <div className="text-gray-700">
+                  </div>
+                  {(answer as GeminiJsonResponse).problem.keyConcepts && (answer as GeminiJsonResponse).problem.keyConcepts.length > 0 && (
+                    <div className="mt-3">
+                      <h5 className="text-sm font-semibold text-indigo-700 mb-1">Key Concepts:</h5>
+                      <ul className="list-disc list-outside text-sm text-gray-600 space-y-1 ml-5">
+                        {(answer as GeminiJsonResponse).problem.keyConcepts.map((concept: string, idx: number) => (
+                          <li key={idx} className="pl-1">
                             <ReactMarkdown
                               remarkPlugins={[remarkMath]}
                               rehypePlugins={[rehypeKatex]}
                             >
-                              {ensureLatexDelimiters(answer.problem.statement || 'No problem statement available')}
+                              {concept}
+                            </ReactMarkdown>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Solution Section */}
+              {(answer as GeminiJsonResponse).solution && (answer as GeminiJsonResponse).solution.length > 0 && (
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                    <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                      Step-By-Step Solution
+                    </span>
+                  </h3>
+                  <div className="space-y-6">
+                    {(answer as GeminiJsonResponse).solution.map((step: GeminiJsonResponse['solution'][0], index: number) => (
+                      <div key={index} className="border-l-2 border-blue-200 pl-4 py-1">
+                        <div className="font-medium text-blue-800">
+                          Step {index + 1}: {step.step || 'No step description'}
+                        </div>
+                        {step.explanation && (
+                          <div className="text-gray-700 mt-1 mb-2 prose prose-sm lg:prose-base max-w-none">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {step.explanation || 'No explanation provided'}
                             </ReactMarkdown>
                           </div>
-                        </div>
-                      )}
-                      
-                      {/* Solution Section */}
-                      {answer.solution && answer.solution.length > 0 && (
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                          <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                            <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                              Step-By-Step Solution
-                            </span>
-                          </h3>
-                          <div className="space-y-6">
-                            {answer.solution.map((step, index) => (
-                              <div key={index} className="border-l-2 border-blue-200 pl-4 py-1">
-                                <div className="font-medium text-blue-800">
-                                  Step {index + 1}: {step.step || 'No step description'}
-                                </div>
-                                {step.explanation && (
-                                  <div className="text-gray-700 mt-1 mb-2">
-                                    <ReactMarkdown
-                                      remarkPlugins={[remarkMath]}
-                                      rehypePlugins={[rehypeKatex]}
-                                    >
-                                      {ensureLatexDelimiters(step.explanation || 'No explanation provided')}
-                                    </ReactMarkdown>
-                                  </div>
-                                )}
-                                {step.work && (
-                                  <div className="bg-white p-2 rounded border border-gray-200 mt-1">
-                                    <ReactMarkdown
-                                      remarkPlugins={[remarkMath]}
-                                      rehypePlugins={[rehypeKatex]}
-                                    >
-                                      {ensureLatexDelimiters(step.work)}
-                                    </ReactMarkdown>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                        )}
+                        {step.work && (
+                          <div className="bg-white p-2 rounded border border-gray-200 mt-1 prose prose-sm lg:prose-base max-w-none">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {step.work}
+                            </ReactMarkdown>
                           </div>
-                        </div>
-                      )}
-                      
-                      {/* Answer Section */}
-                      {answer.answer && (
-                        <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                          <h3 className="text-lg font-semibold text-green-800 mb-2 flex items-center">
-                            <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                              Answer
-                            </span>
-                          </h3>
-                          {answer.answer.finalResult && (
-                            <div className="font-medium text-gray-900 mb-1">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkMath]}
-                                rehypePlugins={[rehypeKatex]}
-                              >
-                                {ensureLatexDelimiters(answer.answer.finalResult)}
-                              </ReactMarkdown>
-                            </div>
-                          )}
-                          {answer.answer.verification && (
-                            <div className="text-gray-700 mt-2">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkMath]}
-                                rehypePlugins={[rehypeKatex]}
-                              >
-                                {ensureLatexDelimiters(answer.answer.verification)}
-                              </ReactMarkdown>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+              
+              {/* Answer Section */}
+              {(answer as GeminiJsonResponse).answer && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                  <h3 className="text-lg font-semibold text-green-800 mb-2 flex items-center">
+                    <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                      Answer
+                    </span>
+                  </h3>
+                  {(answer as GeminiJsonResponse).answer.finalResult && (
+                    <div className="font-medium text-gray-900 mb-1 prose prose-sm lg:prose-base max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {(answer as GeminiJsonResponse).answer.finalResult}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                  {(answer as GeminiJsonResponse).answer.verification && (
+                    <div className="text-gray-700 mt-2 prose prose-sm lg:prose-base max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {(answer as GeminiJsonResponse).answer.verification}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          ) : answer && typeof answer === 'string' ? (
+            // Fallback for plain string answers (e.g., error messages not in JSON format)
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 p-5 bg-red-50 border border-red-100 rounded-lg shadow-sm"
+            >
+              <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider mb-3">Information</h3>
+              <div className="prose prose-sm lg:prose-base max-w-none text-gray-800">
+                <ReactMarkdown>{answer}</ReactMarkdown>
               </div>
             </motion.div>
-          )}
+          ) : null}
+
         </div>
       </CardContent>
     </Card>
