@@ -800,7 +800,7 @@ const AskLabTab: React.FC = () => {
                 <Button 
                   key={index}
                   variant="outline" 
-                  className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all"
+                  className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all h-auto py-3"
                   onClick={() => {
                     setQuestion(example);
                     if (questionTextareaRef.current) {
@@ -808,8 +808,8 @@ const AskLabTab: React.FC = () => {
                     }
                   }}
                 >
-                  <span>{example}</span>
-                  <ChevronRight className="w-4 h-4 text-indigo-400" />
+                  <span className="whitespace-normal pr-2">{example}</span>
+                  <ChevronRight className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                 </Button>
               ))}
             </div>
@@ -1114,24 +1114,24 @@ const AskLabTab: React.FC = () => {
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'main' ? 
               'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            <Beaker className="w-4 h-4" />
-            The Algebratory
+            <Beaker className="w-5 h-5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">The Algebratory</span>
           </button>
           <button 
             onClick={() => setActiveTab('ask')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'ask' ? 
               'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            <MessageSquare className="w-4 h-4" />
-            Ask the Lab
+            <MessageSquare className="w-5 h-5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Ask the Lab</span>
           </button>
           <button 
             onClick={() => setActiveTab('snap')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'snap' ? 
               'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            <Camera className="w-4 h-4" />
-            Screenshot & Solve
+            <Camera className="w-5 h-5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Screenshot & Solve</span>
           </button>
         </div>
       </div>
@@ -1199,7 +1199,7 @@ const AskLabTab: React.FC = () => {
           </CardHeader>
           <CardContent className="p-6 bg-white">
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Subject</Label>
                   <Select 
@@ -1257,7 +1257,7 @@ const AskLabTab: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Difficulty</Label>
                   <Select value={difficulty} onValueChange={handleDifficultyChange}>
@@ -1328,7 +1328,7 @@ const AskLabTab: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 flex flex-col lg:flex-row gap-8">
                   <Button
                     onClick={generateProblems}
                     disabled={!topic || isLoading || setupProgress < 100}
@@ -1393,13 +1393,14 @@ const AskLabTab: React.FC = () => {
                     </div>
                   </div>
                   <Button variant="ghost" className="text-white hover:bg-indigo-700" onClick={() => setShowProblemSolving(false)}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Lab
+                    <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Back to Lab</span>
                   </Button>
                 </div>
               </CardHeader>
               
-              <CardContent className="p-8 pt-6 bg-white">
-                <div className="mb-8 rounded-lg bg-gray-50 border border-gray-100 p-6 shadow-sm">
+              <CardContent className="p-4 sm:p-6 md:p-8 pt-6 bg-white">
+                <div className="mb-8 rounded-lg bg-gray-50 border border-gray-100 p-4 sm:p-6 shadow-sm">
                   <h3 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-3">Problem</h3>
                   <div className="whitespace-pre-wrap text-lg font-medium text-gray-800">
                     <ReactMarkdown
