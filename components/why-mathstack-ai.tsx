@@ -59,7 +59,7 @@ export function WhyMathStackAI() {
             </span>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-black mb-8 pb-2 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-bold mb-8 pb-2 leading-tight">
             <span className="text-gray-900">Why choose</span>
             <br />
             <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent animate-gradient">

@@ -25,8 +25,8 @@ export const getStripe = () => {
 };
 
 // Checkout Session consts
-export const MATHSTACK_PRO_PRICE_ID = process.env.STRIPE_PRO_SUBSCRIPTION_PRICE_ID;
-export const STACK_PACK_PRICE_ID = process.env.STRIPE_STACK_PACK_PRICE_ID;
+export const MATHSTACK_PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_SUBSCRIPTION_PRICE_ID;
+export const STACK_PACK_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_STACK_PACK_PRICE_ID;
 
 // Ensure the environment variables are set, especially in production.
 if (typeof window === 'undefined' && process.env.NODE_ENV === 'production') {

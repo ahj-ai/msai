@@ -52,6 +52,16 @@ export const PricingContent = () => {
   const handleSubscribe = async () => {
     setIsLoading(true);
     try {
+      if (!MATHSTACK_PRO_PRICE_ID) {
+        console.error("CRITICAL: MathStack Pro Price ID is not configured on the client. Cannot proceed.");
+        toast({
+          title: "Configuration Error",
+          description: "The subscription service is temporarily unavailable. Please contact support.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -93,6 +103,26 @@ export const PricingContent = () => {
   const handlePurchaseCredits = async (priceId: string, stacks: number) => {
     setIsLoading(true);
     try {
+      if (!priceId) { // Check the passed priceId, which should be STACK_PACK_PRICE_ID for this call
+        console.error("CRITICAL: Stack Pack Price ID is not configured or passed correctly to handlePurchaseCredits. Cannot proceed.");
+        toast({
+          title: "Configuration Error",
+          description: "The credit purchase service is temporarily unavailable. Please contact support.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (priceId === STACK_PACK_PRICE_ID && !STACK_PACK_PRICE_ID) { // Specific check if the main STACK_PACK_PRICE_ID from import is the issue
+        console.error("CRITICAL: STACK_PACK_PRICE_ID (imported) is not configured on the client. Cannot proceed with this specific pack.");
+        toast({
+          title: "Configuration Error",
+          description: "Selected credit pack is temporarily unavailable. Please contact support.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
