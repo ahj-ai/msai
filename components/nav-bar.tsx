@@ -11,9 +11,7 @@ import { useSubscription } from '@/hooks/use-subscription';
 import { ProBadge } from '@/components/ui/pro-badge';
 import { Crown, Menu, X, LogOut } from 'lucide-react';
 
-interface NavBarProps {
-  children?: React.ReactNode;
-}
+interface NavBarProps {}
 
 // Component to conditionally render Pro badge or Upgrade button
 function NavBarSubscriptionStatus() {
@@ -68,7 +66,7 @@ function NavBarSubscriptionStatus() {
   );
 }
 
-export default function NavBar({ children }: NavBarProps) {
+export default function NavBar({}: NavBarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isActive = (path: string) => pathname === path;
@@ -230,8 +228,12 @@ export default function NavBar({ children }: NavBarProps) {
             {/* Hide Sign In and Get Started buttons on mobile, show only on desktop */}
             <div className="hidden md:flex items-center space-x-4">
               <SignedOut>
-                <Link href="/sign-in" className="text-gray-700 font-medium hover:text-[#6C63FF] transition-colors">Sign In</Link>
-                <Link href="/sign-up" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg ml-2">Get Started</Link>
+                <SignInButton mode="modal">
+                  <button className="text-gray-700 font-medium hover:text-[#6C63FF] transition-colors">Sign In</button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg ml-2">Get Started</button>
+                </SignUpButton>
               </SignedOut>
             </div>
           </div>

@@ -11,6 +11,7 @@ import { GeistSans, GeistMono } from 'geist/font'
 import './globals.css'
 import NavBar from '@/components/nav-bar'
 import { Toaster } from '@/components/ui/toaster'
+
 import { AuthProvider } from '@/lib/auth'
 import Link from 'next/link'
 
@@ -97,64 +98,33 @@ export default function RootLayout({
     >
       <html lang="en" className="scroll-smooth">
         <body className={`${geistSans.className} ${geistMono.className} antialiased bg-gray-50`}>
-          {/* Wrap the entire app with AuthProvider */}
           <AuthProvider>
             <div className="min-h-screen flex flex-col">
-              <NavBar>
-                <div className="flex items-center space-x-3">
-                  <SignedOut>
-                    <SignInButton mode="modal">
-                      <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#6C63FF] transition-colors">
-                        Sign In
-                      </button>
-                    </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] rounded-full hover:opacity-90 transition-opacity shadow-md hover:shadow-lg">
-                        Get Started
-                      </button>
-                    </SignUpButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <UserButton 
-                      afterSignOutUrl="/"
-                      appearance={{
-                        elements: {
-                          userButtonAvatarBox: 'w-9 h-9',
-                          userButtonPopoverCard: 'shadow-lg border border-gray-100',
-                          userPreviewMainIdentifier: 'text-gray-900',
-                          userPreviewSecondaryIdentifier: 'text-gray-600',
-                          userButtonPopoverActionButtonText: 'text-gray-700 hover:text-[#6C63FF]',
-                          userButtonPopoverActionButtonIcon: 'text-gray-500',
-                        },
-                      }}
-                    />
-                  </SignedIn>
-                </div>
-              </NavBar>
-              
-              <main className="flex-grow pt-16">
-                {children}
-              </main>
-              <Toaster />
-              
-              <footer className="bg-white border-t border-gray-100 py-8 mt-12">
-                <div className="container mx-auto px-4 sm:px-6">
-                  <div className="flex flex-col md:flex-row justify-between items-center">
-                    <div className="mb-4 md:mb-0">
-                      <span className="text-xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
-                        MathStackAI
-                      </span>
-                      <p className="text-gray-500 text-sm mt-1"> {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
-                    </div>
-                    <div className="flex items-center space-x-6">
-                      <Link href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</Link>
-                      <span className="text-gray-300">•</span>
-                      <Link href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</Link>
+                <NavBar />
+                
+                <main className="flex-grow pt-16">
+                  {children}
+                </main>
+                <Toaster />
+                
+                <footer className="bg-white border-t border-gray-100 py-8 mt-12">
+                  <div className="container mx-auto px-4 sm:px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center">
+                      <div className="mb-4 md:mb-0">
+                        <span className="text-xl font-bold bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+                          MathStackAI
+                        </span>
+                        <p className="text-gray-500 text-sm mt-1"> {new Date().getFullYear()} MathStack AI. All rights reserved.</p>
+                      </div>
+                      <div className="flex items-center space-x-6">
+                        <Link href="/privacy" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Privacy Policy</Link>
+                        <span className="text-gray-300">•</span>
+                        <Link href="/terms" className="text-gray-500 hover:text-[#6C63FF] transition-colors text-sm">Terms of Service</Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </footer>
-          </div>
+                </footer>
+            </div>
           </AuthProvider>
         </body>
       </html>

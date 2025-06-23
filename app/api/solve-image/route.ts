@@ -2,51 +2,65 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/ge
 import { NextResponse, NextRequest } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
 import { OPERATION_COSTS } from '@/lib/constants';
+import { createClient } from '@supabase/supabase-js';
 
-const MODEL_NAME = "gemini-2.5-flash-preview-05-20"; // Using the latest Gemini 2.5 model
+// Initialize Supabase admin client for server-side operations
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const MODEL_NAME = "gemini-1.5-pro"; // Use a model compatible with the ENUM 'gemini-1.5-pro' or 'gemini-1.5-flash'
 const API_KEY = process.env.GEMINI_API_KEY || "";
 
-// Helper function to convert a ReadableStream to a base64 string
+// Helper function to convert a ReadableStream to a Buffer
 async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffer> {
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
   while (true) {
     const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    if (value) {
-      chunks.push(value);
-    }
+    if (done) break;
+    if (value) chunks.push(value);
   }
   return Buffer.concat(chunks);
 }
 
 export async function POST(req: NextRequest) {
-  if (!API_KEY) {
-    return NextResponse.json({ error: "API key not configured" }, { status: 500 });
-  }
+  const startTime = Date.now();
+  let userId: string | null = null;
+  let promptForLogging: string | null = null;
+  let responseForLogging: any = null;
+  let statusCodeForLogging: number = 500;
+  let errorMessageForLogging: string | null = null;
+  let requestTokens: number | undefined = undefined;
+  let responseTokens: number | undefined = undefined;
+  let finalResponse: NextResponse | null = null;
 
   try {
-    // Authenticate the user using Clerk
-    const { userId } = getAuth(req);
-    
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!API_KEY) {
+      errorMessageForLogging = "API key not configured";
+      statusCodeForLogging = 500;
+      return NextResponse.json({ error: errorMessageForLogging }, { status: statusCodeForLogging });
     }
-    
+
+    const auth = getAuth(req);
+    userId = auth.userId;
+
+    if (!userId) {
+      errorMessageForLogging = "Unauthorized";
+      statusCodeForLogging = 401;
+      return NextResponse.json({ error: errorMessageForLogging }, { status: statusCodeForLogging });
+    }
+
     const formData = await req.formData();
     const imageFile = formData.get("image") as File | null;
 
     if (!imageFile) {
-      return NextResponse.json({ error: "No image file provided" }, { status: 400 });
+      errorMessageForLogging = "No image file provided";
+      statusCodeForLogging = 400;
+      return NextResponse.json({ error: errorMessageForLogging }, { status: statusCodeForLogging });
     }
 
-    if (!API_KEY) {
-      return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
-    }
-    
-    // Convert the image file to the format Gemini API expects (base64 string and mimeType)
     const imageBuffer = await streamToBuffer(imageFile.stream());
     const imageBase64 = imageBuffer.toString("base64");
     const mimeType = imageFile.type;
@@ -54,14 +68,7 @@ export async function POST(req: NextRequest) {
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
-    const generationConfig = {
-      temperature: 0.4, // Adjust as needed
-      topK: 32,
-      topP: 1,
-      maxOutputTokens: 8192, // Adjust as needed
-    };
-
-    // Safety settings - adjust as needed
+    const generationConfig = { temperature: 0.4, topK: 32, topP: 1, maxOutputTokens: 8192 };
     const safetySettings = [
       { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
       { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
@@ -94,89 +101,85 @@ The JSON object must follow this exact structure:
 
 ALL mathematical expressions MUST be valid LaTeX, enclosed in single ($) or double ($$) dollar signs. If the image is unclear or unreadable, state that clearly in the 'problem.statement' and do not attempt a solution.`;
 
+    promptForLogging = `System Prompt: ${systemPrompt}\n\nUser Task: Help me solve the math problem in the attached image (${imageFile.name}, ${mimeType}).`;
+
     const parts = [
       { text: systemPrompt },
       { text: "Your Task: Help me solve the math problem in the attached image." },
-      {
-        inlineData: {
-          mimeType: mimeType,
-          data: imageBase64
-        }
-      }
+      { inlineData: { mimeType, data: imageBase64 } }
     ];
 
-    let geminiResult;
-    try {
-      geminiResult = await model.generateContent({
-        contents: [{ role: "user", parts }],
-        generationConfig,
-        safetySettings,
-      });
-    } catch (error) {
-      console.error("Error processing image with Gemini API:", error);
-      let errorMessage = "Failed to process image.";
-      if (error instanceof Error) {
-          errorMessage = error.message;
-      }
-      return NextResponse.json({ error: errorMessage }, { status: 500 });
+    const geminiResult = await model.generateContent({ contents: [{ role: "user", parts }], generationConfig, safetySettings });
+
+    const usageMetadata = geminiResult.response.usageMetadata;
+    if (usageMetadata) {
+        requestTokens = usageMetadata.promptTokenCount;
+        responseTokens = usageMetadata.candidatesTokenCount;
     }
 
-    // Only debit stacks if Gemini succeeded
-    try {
-      const authHeader = req.headers.get('authorization');
-      const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': authHeader || ''
-        },
-        body: JSON.stringify({
-          amount: OPERATION_COSTS.SOLVE_IMAGE,
-          operation: 'SOLVE_IMAGE',
-          description: `Snap and Solve image: ${imageFile.name || 'untitled'}`
-        })
-      });
-      
-      const spendData = await spendResponse.json();
-      
-      if (!spendResponse.ok) {
-        // If there's an insufficient stacks error, inform the user
-        if (spendResponse.status === 402 || spendData.code === 'INSUFFICIENT_STACKS') {
-          return NextResponse.json({
-            error: "Insufficient stacks to perform this operation",
-            code: "INSUFFICIENT_STACKS",
-            available: spendData.available,
-            required: OPERATION_COSTS.SOLVE_IMAGE
-          }, { status: 402 });
-        }
-        // Handle other errors
-        return NextResponse.json({
-          error: spendData.error || "Failed to process stacks for this operation"
-        }, { status: spendResponse.status });
+    const authHeader = req.headers.get('authorization');
+    const spendResponse = await fetch(new URL('/api/user/stacks', req.url).toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': authHeader || '' },
+      body: JSON.stringify({
+        amount: OPERATION_COSTS.SOLVE_IMAGE,
+        operation: 'SOLVE_IMAGE',
+        description: `Snap and Solve image: ${imageFile.name || 'untitled'}`
+      })
+    });
+
+    const spendData = await spendResponse.json();
+
+    if (!spendResponse.ok) {
+      errorMessageForLogging = spendData.error || "Failed to process stacks";
+      statusCodeForLogging = spendResponse.status;
+      if (spendResponse.status === 402 || spendData.code === 'INSUFFICIENT_STACKS') {
+        finalResponse = NextResponse.json({ ...spendData, error: "Insufficient stacks" }, { status: 402 });
+      } else {
+        finalResponse = NextResponse.json({ error: errorMessageForLogging }, { status: statusCodeForLogging });
       }
-      console.log(`Successfully spent ${OPERATION_COSTS.SOLVE_IMAGE} stacks for SOLVE_IMAGE operation. Remaining: ${spendData.remainingStacks}`);
-    } catch (stacksError) {
-      console.error("Error spending stacks:", stacksError);
-      return NextResponse.json({ error: "Failed to process stacks for this operation" }, { status: 500 });
+      return finalResponse;
     }
 
     const responseText = geminiResult.response.text();
-    
     try {
       const solutionJson = JSON.parse(responseText);
-      return NextResponse.json({ solution: solutionJson });
+      responseForLogging = solutionJson;
+      statusCodeForLogging = 200;
+      finalResponse = NextResponse.json({ solution: solutionJson });
     } catch (parseError) {
-      console.error("Error parsing Gemini response JSON:", parseError);
-      // Return the raw text if it's not valid JSON, so the client can handle it.
-      return NextResponse.json({ solution: responseText });
+      errorMessageForLogging = "The AI returned a response in an unexpected format.";
+      responseForLogging = { raw: responseText };
+      statusCodeForLogging = 500;
+      finalResponse = NextResponse.json({ solution: responseText }); // Still return raw text to client on parse error
     }
 
-  } catch (error) {
-    console.error("Error in solve-image endpoint:", error);
-    let errorMessage = "Failed to process image.";
-    if (error instanceof Error) {
-        errorMessage = error.message;
+    return finalResponse;
+
+  } catch (error: any) {
+    console.error("Error in solve-image route:", error);
+    errorMessageForLogging = error.message || "An unknown error occurred.";
+    statusCodeForLogging = error.status || 500;
+    finalResponse = NextResponse.json({ error: errorMessageForLogging }, { status: statusCodeForLogging });
+    return finalResponse;
+  } finally {
+    const latencyMs = Date.now() - startTime;
+
+    const { error: logError } = await supabaseAdmin.from('gemini_api_logs').insert({
+      user_id: userId,
+      product: 'snap_and_solve',
+      model_used: MODEL_NAME,
+      prompt: promptForLogging,
+      response: responseForLogging,
+      status_code: statusCodeForLogging,
+      error_message: errorMessageForLogging,
+      latency_ms: latencyMs,
+      request_tokens: requestTokens,
+      response_tokens: responseTokens,
+    });
+
+    if (logError) {
+      console.error("Failed to log Gemini API call to Supabase:", logError);
     }
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
