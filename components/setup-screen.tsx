@@ -53,7 +53,7 @@ const SetupScreen = ({
         <CardTitle className="text-4xl font-bold text-center tracking-wider">BRAINIAC</CardTitle>
         <div className="text-center opacity-90 mt-2 text-white">Power up your mental math</div>
       </CardHeader>
-      <CardContent className="p-8 bg-white">
+      <CardContent className="p-4 sm:p-8 bg-white overflow-y-auto max-h-[calc(100vh-5rem)]">
         <div className="space-y-8">
           <div>
             <h3 className="text-lg font-semibold mb-4 text-gray-800">Topic Selection</h3>

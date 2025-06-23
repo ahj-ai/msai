@@ -367,62 +367,58 @@ export function ProblemLab() {
   // Handle Snap & Solve submission
   const handleSnapSolve = async () => {
     if (!selectedImage) return;
-    
+
     setIsLoadingSnap(true);
     setSnapError('');
     setSolution(null);
-    setCurrentProblemIndex(0); // Reset problem index when submitting new image
-    
+    setCurrentProblemIndex(0);
+
     try {
-      // Get the authentication token from Clerk
       const token = await getToken();
-      
       if (!token) {
-        setSnapError('You need to be signed in to use this feature.');
-        return;
+        throw new Error('You must be signed in to use this feature.');
       }
-      
+
       const formData = new FormData();
       formData.append('image', selectedImage);
-      
+
       const response = await fetch('/api/solve-image', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // The API now returns a structured JSON response
+
+      const responseText = await response.text();
+      console.log("Raw response from /api/solve-image:", responseText);
+
+      if (!response.ok) {
+        let errorMsg = `Server error: ${response.status}`;
         try {
-          // Check if it's a structured JSON response or a legacy string
-          if (typeof data.solution === 'object' && data.solution !== null) {
-            // It's already a JSON object
-            setSolution(data.solution);
-          } else if (typeof data.solution === 'string') {
-            // Legacy support - if it's still returning a string
-            setSolution(data.solution);
+          const errorData = JSON.parse(responseText);
+          if (response.status === 402) {
+            errorMsg = 'Insufficient stacks to perform this action.';
           } else {
-            throw new Error('Invalid response format');
+            errorMsg = errorData.error || errorMsg;
           }
-        } catch (parseError) {
-          console.error('Error parsing JSON response:', parseError);
-          setSnapError('Error parsing the response. Please try again.');
+        } catch (e) {
+          console.error("Could not parse error response as JSON.", responseText);
         }
-      } else {
-        if (data.code === 'INSUFFICIENT_STACKS') {
-          setSnapError(`You don't have enough credits to use this feature. Each image solution costs 5 credits. ${data.available ? `You currently have ${data.available} credits.` : ''} Visit the pricing page to get more credits.`);
-        } else {
-          setSnapError(data.error || 'Failed to process image');
-        }
-        console.error('Screenshot & Solve error:', data.error);
+        throw new Error(errorMsg);
       }
-    } catch (error) {
+
+      const data = JSON.parse(responseText);
+      if (data.answer) {
+        setSolution(data.answer);
+      } else {
+        throw new Error('Invalid response format from server.');
+      }
+
+    } catch (error: any) {
       console.error("Snap & Solve error:", error);
-      setSnapError('An error occurred while processing your image');
+      const message = error.message || 'An unexpected error occurred.';
+      setSnapError(message);
     } finally {
       setIsLoadingSnap(false);
     }

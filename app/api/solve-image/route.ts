@@ -10,7 +10,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const MODEL_NAME = "gemini-1.5-pro"; // Use a model compatible with the ENUM 'gemini-1.5-pro' or 'gemini-1.5-flash'
+const MODEL_NAME = "gemini-2.5-flash";
 const API_KEY = process.env.GEMINI_API_KEY || "";
 
 // Helper function to convert a ReadableStream to a Buffer
@@ -141,17 +141,24 @@ ALL mathematical expressions MUST be valid LaTeX, enclosed in single ($) or doub
       return finalResponse;
     }
 
-    const responseText = geminiResult.response.text();
+    let responseText = geminiResult.response.text();
+    const jsonCodeBlockRegex = /```json\s*([\s\S]*?)```/;
+    const match = responseText.match(jsonCodeBlockRegex);
+    
+    if (match && match[1]) {
+      responseText = match[1].trim();
+    }
+
     try {
       const solutionJson = JSON.parse(responseText);
       responseForLogging = solutionJson;
       statusCodeForLogging = 200;
-      finalResponse = NextResponse.json({ solution: solutionJson });
+      finalResponse = NextResponse.json({ answer: solutionJson });
     } catch (parseError) {
       errorMessageForLogging = "The AI returned a response in an unexpected format.";
       responseForLogging = { raw: responseText };
       statusCodeForLogging = 500;
-      finalResponse = NextResponse.json({ solution: responseText }); // Still return raw text to client on parse error
+      finalResponse = NextResponse.json({ error: responseText }); // Still return raw text to client on parse error
     }
 
     return finalResponse;

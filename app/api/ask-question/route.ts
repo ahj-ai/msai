@@ -10,7 +10,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const MODEL_NAME = "gemini-1.5-pro"; // Use a model compatible with the ENUM 'gemini-1.5-pro' or 'gemini-1.5-flash'
+const MODEL_NAME = "gemini-2.5-flash";
 const API_KEY = process.env.GEMINI_API_KEY || "";
 
 export async function POST(req: NextRequest) {

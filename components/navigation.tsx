@@ -83,7 +83,7 @@ export function Navigation() {
           </div>
           
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
+          <div className="md:hidden flex items-center space-x-4 z-50">
             <Link href="/login" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Log In</Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
