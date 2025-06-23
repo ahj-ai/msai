@@ -253,7 +253,7 @@ export default function Home() {
           <div className="container">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-block mb-6 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] px-4 py-2 rounded-full text-white">
-                <span className="flex items-center font-body font-medium tracking-tight"><Zap className="w-4 h-4 mr-2" /> Limited Time: <span className="font-mono">7-Day</span> Free Trial</span>
+                <span className="flex items-center font-body font-medium tracking-tight"><Zap className="w-4 h-4 mr-2" /> Get <span className="font-mono mx-1">25</span> Free Stacks on Sign-Up</span>
               </div>
               <h2 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Stop Struggling with Math Today</h2>
               <p className="font-body text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">Start mastering math concepts <span className="font-mono font-medium">2x</span> faster than with traditional methods.</p>
@@ -262,7 +262,7 @@ export default function Home() {
                 <SignedOut>
                   <SignUpButton mode="modal">
                     <button className="btn btn-primary text-lg px-8 py-4 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#6C63FF] transition-all duration-300 rounded-xl shadow-lg hover:shadow-xl font-display font-bold tracking-tight text-hover-animate hover:-translate-y-1">
-                      Start Free Trial Now
+                      Get Started for Free
                     </button>
                   </SignUpButton>
                   <Link href="/why-mathstack-ai" className="btn btn-outline text-lg px-8 py-4 border-2 border-white/30 hover:bg-white/10 transition-all duration-300 rounded-xl flex items-center justify-center font-display font-medium tracking-tight text-hover-animate hover:-translate-y-1">
@@ -271,7 +271,7 @@ export default function Home() {
                 </SignedOut>
               </div>
               
-              <div className="font-body text-sm text-gray-400 tracking-tight">No credit card required. Cancel anytime.</div>
+              <div className="font-body text-sm text-gray-400 tracking-tight">No credit card required.</div>
             </div>
           </div>
         </section>

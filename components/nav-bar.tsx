@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { SignedIn, SignedOut, useClerk, SignInButton, SignUpButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, useClerk, SignInButton, SignUpButton, UserButton, SignOutButton } from '@clerk/nextjs';
 import MathStackLogo from './MathStackLogo';
 import { StacksDisplay } from '@/components/ui/stacks-display';
 import { useSubscription } from '@/hooks/use-subscription';
 import { ProBadge } from '@/components/ui/pro-badge';
-import { Crown, Menu, X } from 'lucide-react';
+import { Crown, Menu, X, LogOut } from 'lucide-react';
 
 interface NavBarProps {
   children?: React.ReactNode;
@@ -191,6 +191,14 @@ export default function NavBar({ children }: NavBarProps) {
               <div className="hidden md:flex items-center space-x-4">
                 <StacksDisplay />
                 <NavBarSubscriptionStatus />
+                <SignOutButton>
+                  <button
+                    className="flex items-center gap-1.5 text-gray-700 hover:text-[#6C63FF] transition-colors px-2 py-1.5 rounded-md"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </SignOutButton>
               </div>
               {/* Mobile hamburger menu for SignedIn users */}
               <button
@@ -286,6 +294,14 @@ export default function NavBar({ children }: NavBarProps) {
               >
                 Problem Lab
               </Link>
+              <SignOutButton>
+                <button
+                  className="flex items-center gap-2 w-full text-base font-medium py-3 px-4 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-left"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Sign Out</span>
+                </button>
+              </SignOutButton>
             </div>
           </SignedIn>
           <SignedOut>

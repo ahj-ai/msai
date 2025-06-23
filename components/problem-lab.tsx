@@ -67,10 +67,28 @@ const subjects = {
     available: true,
     topicGroups: {
       "Foundational Number Skills 🧱": [
-        "Decimal Place Value Mastery",
-        "Rounding with Confidence"
+        "Decimal Place Value Mastery"
       ],
-      "Arithmetic Operations 🔢": [
+      "Number Theory Unlocked 🔑": [
+        "Decimals 🤝 Percents",
+        "Divisibility Rules & Factors",
+        "Finding GCF (Greatest Common Factor)"
+      ],
+      "Expressions & Variables 🚀": [
+        "Evaluating Variable Expressions"
+      ],
+      "Equations & Inequalities 💡": [
+        "One-Step Equations (Integers, Decimals, Fractions)",
+        "Two-Step Equations (Integers, Decimals)",
+        "Tackling Multi-Step Equations"
+      ],
+      "Exponents, Sci-No & Roots ⚡": [
+        "Exponent Expertise: Multiplication & Division Properties",
+        "Powers of Products & Quotients",
+        "Big & Small: Scientific Notation"
+      ],
+      "🔜 Coming Soon": [
+        "Rounding with Confidence",
         "Adding and Subtracting Integers",
         "Multiplying and Dividing Integers",
         "Adding and Subtracting Decimals",
@@ -78,52 +96,24 @@ const subjects = {
         "Fractions Operations",
         "Mixed Number Operations",
         "Converting Fractions 🤝 Decimals",
-        "Order of Operations"
-      ],
-      "Number Theory Unlocked 🔑": [
+        "Order of Operations",
         "Fractions 🤝 Percents",
-        "Decimals 🤝 Percents",
-        "Divisibility Rules & Factors",
         "Prime Factorization Power",
-        "Finding GCF (Greatest Common Factor)",
-        "Nailing LCM (Least Common Multiple)"
-      ],
-      "Expressions & Variables 🚀": [
+        "Nailing LCM (Least Common Multiple)",
         "The Language of Algebra: Variables & Verbal Expressions (Words to Algebra)",
-        "Evaluating Variable Expressions",
         "The Distributive Property in Action",
-        "Simplifying by Combining Like Terms"
-      ],
-      "Equations & Inequalities 💡": [
-        "One-Step Equations (Integers, Decimals, Fractions)",
-        "Two-Step Equations (Integers, Decimals)",
-        "Tackling Multi-Step Equations",
-        "Real-World Equation Challenges: One-Step & Two-Step Word Problems"
-      ],
-      "Exponents, Sci-No & Roots ⚡": [
-        "Exponent Expertise: Multiplication & Division Properties",
-        "Powers of Products & Quotients",
-        "Big & Small: Scientific Notation",
-        "Root Camp: Understanding Square Root"
-      ],
-      "Real-World Ratios: Proportions & Percentages 🎯": [
-        "Master Conversions: Percents ↔ Fractions ↔ Decimals",
-        "Ratios & Proportions: Understanding & Solving Proportions",
-        "Proportion Word Problems: Real-Life Applications",
-        "Scaling Up: Similar Figures & Word Problems",
-        "Straightforward Percent Problems",
-        "Calculating Percent Change",
-        "Markup, Discount, & Tax (Easy & Hard Scenarios)",
-        "Simple & Compound Interest"
-      ],
-      "Lines & Systems 📈": [
-        "Finding Slope (points, equations)",
-        "Writing Linear Equations",
-        "Systems of Equations: Solve by Substitution",
-        "System of Equations: Solve by Elimination",
-        "Systems Word Problems"
-      ],
-      "Polynomial Powerhouse 🧱": [
+        "Simplifying by Combining Like Terms",
+        "Real-World Equation Challenges: One-Step & Two-Step Word Problems",
+        "Root Camp: Understanding Square Root",
+        "Ratio & Rate Fundamentals",
+        "Proportional Relationships",
+        "Unit Rate & Unit Price",
+        "Percent Increase & Decrease",
+        "Simple Interest",
+        "Angle Relationships",
+        "Perimeter & Area: Rectangles, Triangles, Circles",
+        "Volume & Surface Area: Prisms & Cylinders",
+        "The Coordinate Plane",
         "Factoring Monomials (Advanced)",
         "Adding & Subtracting Polynomials",
         "Multiplying Polynomials by Monomials",
@@ -136,37 +126,27 @@ const subjects = {
     available: true,
     topicGroups: {
       "🔢 Foundations & Arithmetic": [
-        "Order of Operations",
-        "Evaluating Expressions",
-        "Simplifying Variable Expressions",
         "Distributive Property",
         "Absolute Value",
-        "One-Step Equations",
-        "One-Step Equation Word Problems",
-        "Two-Step & Multi-Step Equations"
+        "Decimals: Add, Subtract",
+        "Decimals: Multiply, Divide"
       ],
-      "📏 Equations & More": [
-        "Absolute Value Equations",
-        "Literal Equations"
+      "📐 Equations": [
+        "Two-Step & Multi-Step Equations",
+        "Absolute Value Equations"
       ],
-      "⚖️ Inequalities & Applications": [
+      "⚖️ Inequalities": [
         "One-Step, Two-Step, Multi-Step Inequalities",
         "Compound & Absolute Value Inequalities",
-        "Word Problems with Inequalities",
-        "Graphing Single-Variable Inequalities"
+        "Word Problems with Inequalities"
       ],
-      "📈 Linear Equations & Inequalities": [
-        "Finding Slope",
-        "Graphing: Slope-Intercept, Standard Form, Absolute Value Equations",
-        "Writing Linear Equations",
-        "Graphing Linear Inequalities"
+      "📈 Linear Equations": [
+        "Writing Linear Equations"
       ],
-      "🔗 Systems of Equations & Inequalities": [
+      "🔗 Systems of Equations": [
         "Solving by Graphing",
         "Solving Substitution",
-        "Solving Elimination",
-        "Systems Word Problems",
-        "Graphing Systems of Inequalities"
+        "Solving Elimination"
       ],
       "🔢 Exponents & Radicals": [
         "Properties of Exponents",
@@ -174,10 +154,25 @@ const subjects = {
         "Square Roots",
         "Radical Expressions: Simplify, Add/Subtract, Multiply, Divide",
         "Solving Radical Equations",
-        "Pythagorean Theorem",
+        "Pythagorean Theorem"
       ],
-      "🌐 Word Problems": [
-        "Word Problems"
+      "🔜 Coming Soon": [
+        "Order of Operations",
+        "Evaluating Expressions",
+        "Simplifying Variable Expressions",
+        "Integers: Add and Subtract",
+        "Integers: Multiply, Divide",
+        "Fractions & Mixed Numbers: Add, Subtract",
+        "One-Step Equations",
+        "One-Step Equation Word Problems",
+        "Literal Equations",
+        "Finding Slope",
+        "Systems of Equations Word Problems",
+        "Word Problems",
+        "Graphing: Slope-Intercept, Standard Form, Absolute Value Equations",
+        "Graphing Linear Inequalities",
+        "Graphing Single-Variable Inequalities",
+        "Graphing Systems of Inequalities"
       ]
     }
   },
@@ -193,22 +188,17 @@ const subjects = {
         "Even and odd functions"
       ],
       "🎪 Quadratic Functions": [
-        "Quadratic Functions: Standard form",
-        "Quadratic Functions: Vertex form",
-        "Quadratic Functions: Factored form",
-        "Quadratic formula and discriminant",
-        "Applications and word problems",
         "Solving quadratic equations by factoring",
-        "Completing the square"
+        "Completing the square",
+        "Quadratic formula and discriminant",
+        "Quadratic Functions: Standard form",
+        "Quadratic Functions: Factored form",
+        "Applications and word problems",
+        "Absolute value functions and equations"
       ],
       "📐 Linear Equations": [
         "Slope-intercept and point-slope forms",
-        "Parallel and perpendicular lines"
-      ],
-      "📏 Absolute Value": [
-        "Absolute value functions and equations"
-      ],
-      "🔢 Systems of Equations": [
+        "Parallel and perpendicular lines",
         "Systems of linear equations: substitution",
         "Systems of linear equations: elimination"
       ],
@@ -219,6 +209,7 @@ const subjects = {
         "Sigma notation"
       ],
       "🔜 Coming Soon": [
+        "Quadratic Functions: Vertex form",
         "Function transformations (translations, reflections, stretches, compressions)",
         "Factoring: Difference of Squares",
         "Factoring: GCF",
@@ -302,6 +293,7 @@ export function ProblemLab() {
   // Setup states
   const [subject, setSubject] = useState<keyof typeof subjects>("pre-algebra");
   const [topic, setTopic] = useState("");
+  const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('Regular');
   const [wordProblems, setWordProblems] = useState(false);
   const [problemCount, setProblemCount] = useState(1);
@@ -352,6 +344,7 @@ export function ProblemLab() {
   const [isLoading, setIsLoading] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [comingSoonTopics, setComingSoonTopics] = useState<{subject: string, topics: string[]}>({subject: '', topics: []});
   const [showAllSteps, setShowAllSteps] = useState(false);
   const [noProblemsFound, setNoProblemsFound] = useState(false);
   
@@ -1246,27 +1239,55 @@ const AskLabTab: React.FC = () => {
 
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Topic</Label>
-                  <Select value={topic} onValueChange={setTopic}>
+                  <Select value={topic} onValueChange={(value) => { setTopic(value); setIsTopicDropdownOpen(false); }} open={isTopicDropdownOpen} onOpenChange={setIsTopicDropdownOpen}>
                     <SelectTrigger className="mt-2 bg-white border border-gray-200 text-gray-800 h-10 hover:bg-gray-50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                       <SelectValue placeholder="Select topic" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border border-gray-200 shadow-md max-h-80">
-                      {Object.entries(subjects[subject].topicGroups).map(([groupName, topics]) => (
-                        <div key={groupName}>
-                          <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10">
-                            {groupName}
-                          </div>
-                              {(topics as string[]).map((t) => (
-                                <SelectItem 
-                                  key={t} 
-                                  value={t} 
-                                  className="text-gray-700 pl-4 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-150"
+                      {Object.entries(subjects[subject].topicGroups).map(([groupName, topics]) => {
+                        // Special handling for Coming Soon section
+                        if (groupName === "🔜 Coming Soon") {
+                          return (
+                            <div key={groupName}>
+                              <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10 flex justify-between items-center">
+                                <span>{groupName}</span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 text-xs text-indigo-700 hover:text-indigo-900 hover:bg-indigo-100 px-2 py-0"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsTopicDropdownOpen(false);
+                                    setComingSoonTopics({subject: subjects[subject].name, topics: topics as string[]});
+                                    setComingSoonOpen(true);
+                                  }}
                                 >
-                                  {t}
-                                </SelectItem>
-                              ))}
-                        </div>
-                      ))}
+                                  See what's coming
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Normal topic groups
+                        return (
+                          <div key={groupName}>
+                            <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10">
+                              {groupName}
+                            </div>
+                            {(topics as string[]).map((t) => (
+                              <SelectItem 
+                                key={t} 
+                                value={t} 
+                                className="text-gray-700 pl-4 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-150"
+                              >
+                                {t}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1592,18 +1613,41 @@ const AskLabTab: React.FC = () => {
         </Card>
       )}
 
-      {/* Coming Soon Modal */}
+      {/* Coming Soon Topics Modal - Glassy, Light & Airy */}
       {comingSoonOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle>Coming Soon</CardTitle>
+        <div className="fixed inset-0 bg-indigo-900/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-auto max-h-[80vh] overflow-hidden flex flex-col shadow-lg border border-white/20 bg-white/80 backdrop-blur-md rounded-xl">
+            <CardHeader className="bg-gradient-to-r from-indigo-600/90 to-purple-600/90 text-white backdrop-blur-sm border-b border-white/10">
+              <CardTitle className="flex items-center gap-2 text-white">
+                <span>Coming Soon to {comingSoonTopics.subject}</span>
+              </CardTitle>
+              <p className="text-white/90 text-sm mt-1">We're working on adding these exciting topics!</p>
             </CardHeader>
-            <CardContent>
-              <p>This feature is currently under development and will be available soon!</p>
+            <CardContent className="overflow-y-auto flex-grow bg-transparent">
+              <div className="space-y-4 py-2">
+                {comingSoonTopics.topics.length > 0 ? (
+                  <ul className="space-y-1">
+                    {comingSoonTopics.topics.map((topic, index) => (
+                      <li key={index} className="flex items-start gap-2 p-2 rounded-lg hover:bg-white/70 transition-all duration-200">
+                        <div className="mt-0.5 text-indigo-500">
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                        <span className="text-indigo-900/80 font-medium">{topic}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-indigo-600/70 italic">No upcoming topics to display.</p>
+                )}
+              </div>
             </CardContent>
-            <div className="p-4 flex justify-end">
-              <Button onClick={() => setComingSoonOpen(false)}>Close</Button>
+            <div className="p-4 border-t border-indigo-100/30 flex justify-end bg-transparent">
+              <Button 
+                onClick={() => setComingSoonOpen(false)}
+                className="bg-gradient-to-r from-[#6C63FF]/90 to-[#5E60CE]/90 text-white hover:opacity-100 hover:shadow-md font-medium px-6 backdrop-blur-sm transition-all duration-300 border border-white/20"
+              >
+                Close
+              </Button>
             </div>
           </Card>
         </div>

@@ -38,7 +38,7 @@ export function WhyMathStackAI() {
   const stats = [
     { icon: Calculator, value: "94.7%", label: "Student Improvement", desc: "Average grade increase" },
     { icon: TrendingUp, value: "2.5x", label: "Learning Speed", desc: "Faster concept mastery" },
-    { icon: Users, value: "10,000+", label: "Active Students", desc: "And growing every day" },
+    { icon: BookOpen, value: "300+", label: "Practice Problems", desc: "Practice makes perfect with a vast library of problems." },
   ]
 
   return (
