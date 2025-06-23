@@ -30,9 +30,9 @@ export function WhyMathStackAI() {
   ]
 
   const testimonials = [
-    { name: "Sarah M.", grade: "10th Grade", text: "Math finally makes sense! I went from C's to A's in just 3 months." },
-    { name: "Alex R.", grade: "College", text: "The AI explanations are better than my professor's lectures." },
-    { name: "Maria L.", grade: "8th Grade", text: "I actually look forward to math practice now!" },
+    { name: "Nisha P.", grade: "10th Grade", text: "I used to bomb my math tests. Now I get A's. It's kinda wild." },
+    { name: "Anaad A.", grade: "College", text: "The AI explanations are better than my professor's lectures." },
+    { name: "Kylie J.", grade: "8th Grade", text: "I don't hate math anymore, so I guess it's working? The game mode is actually fun." },
   ]
 
   const stats = [
@@ -194,7 +194,7 @@ export function WhyMathStackAI() {
               <Sparkles className="w-8 h-8" />
             </div>
             
-            <h2 className="text-5xl md:text-7xl font-black text-gray-900 mb-8 pb-2">
+            <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-8 pb-2">
               Ready to Transform Your
               <br />
               <span className="text-transparent bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text">
@@ -202,7 +202,7 @@ export function WhyMathStackAI() {
               </span>
             </h2>
             
-            <p className="text-2xl text-gray-700 mb-12 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 mb-12 max-w-3xl mx-auto">
               Join thousands of students who've already discovered that math can be their strongest subject.
             </p>
           </div>

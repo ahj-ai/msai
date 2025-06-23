@@ -393,14 +393,6 @@ export const PricingContent = () => {
         <div className="max-w-3xl mx-auto mb-20">
           <h2 className="font-display text-4xl font-bold text-center text-high-contrast tracking-tight mb-12">Frequently Asked Questions</h2>
           <div className="space-y-6">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-0" className="border border-gray-200 rounded-lg p-4 hover:border-[#6C63FF]/30 transition-colors duration-300">
-                <AccordionTrigger className="font-display text-lg font-semibold text-high-contrast tracking-tight hover:no-underline">How does the annual billing work?</AccordionTrigger>
-                <AccordionContent className="font-body text-gray-600 mt-3 leading-relaxed">
-                  You pay $120/year for Premium access. Your subscription will automatically renew each year unless you choose to cancel.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
             
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1" className="border border-gray-200 rounded-lg p-4">
@@ -415,7 +407,7 @@ export const PricingContent = () => {
               <AccordionItem value="item-2" className="border border-gray-200 rounded-lg p-4">
                 <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What kind of customer support is available?</AccordionTrigger>
                 <AccordionContent className="text-gray-600 mt-2">
-                  Premium users receive priority email support with a response time of under 24 hours. All users have access to our comprehensive help center and active community forums.
+                  Please direct all inquiries you have to support@mathstackai.app
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -429,23 +421,9 @@ export const PricingContent = () => {
               </AccordionItem>
             </Accordion>
             
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-4" className="border border-gray-200 rounded-lg p-4">
-                <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">Is there a student discount available?</AccordionTrigger>
-                <AccordionContent className="text-gray-600 mt-2">
-                  Yes, students with a valid .edu email can request a 20% discount on Premium plans.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+
             
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-5" className="border border-gray-200 rounded-lg p-4">
-                <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">Do you offer a money-back guarantee?</AccordionTrigger>
-                <AccordionContent className="text-gray-600 mt-2">
-                  Absolutely! We offer a 30-day money-back guarantee for all Premium subscriptions.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+
           </div>
         </div>
 
