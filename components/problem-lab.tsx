@@ -190,15 +190,16 @@ const subjects = {
         "Domain and range",
         "Function composition",
         "Inverse functions",
-        "Even and odd functions",
-        "Function transformations (translations, reflections, stretches, compressions)"
+        "Even and odd functions"
       ],
       "🎪 Quadratic Functions": [
         "Quadratic Functions: Standard form",
         "Quadratic Functions: Vertex form",
         "Quadratic Functions: Factored form",
         "Quadratic formula and discriminant",
-        "Applications and word problems"
+        "Applications and word problems",
+        "Solving quadratic equations by factoring",
+        "Completing the square"
       ],
       "📐 Linear Equations": [
         "Slope-intercept and point-slope forms",
@@ -216,6 +217,20 @@ const subjects = {
         "Geometric sequences and series",
         "Infinite geometric series",
         "Sigma notation"
+      ],
+      "🔜 Coming Soon": [
+        "Function transformations (translations, reflections, stretches, compressions)",
+        "Factoring: Difference of Squares",
+        "Factoring: GCF",
+        "Factoring: Grouping",
+        "Factoring: Sum/Difference of Cubes",
+        "Factoring: Trinomials (a=1)",
+        "Factoring: Trinomials (a>1)",
+        "Graphing linear inequalities",
+        "Logarithmic Functions",
+        "Properties of Logarithms",
+        "Solving Exponential Equations",
+        "Solving Logarithmic Equations"
       ]
     }
   }
@@ -1281,7 +1296,7 @@ const AskLabTab: React.FC = () => {
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Number of Problems</Label>
                   <div className="mt-2 flex items-center justify-between px-1">
-                    {[1, 2, 3, 4, 5].map((count) => (
+                    {[1, 2, 3, 4].map((count) => (
                       <ProblemCountButton
                         key={count}
                         count={count}
