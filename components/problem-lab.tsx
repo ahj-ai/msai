@@ -34,9 +34,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { GeminiJsonResponse } from '@/lib/gemini/parse-json-response';
+import MathInput from './math-input';
 import { generateProblem } from "@/lib/generate-problem"
 import { ParticleBackground } from "@/components/particle-background"
 import { ImageUpload } from "@/components/image-upload"
+
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -286,6 +289,151 @@ const TestTubeMeter = ({ progress }: { progress: number }) => {
 // Tab type definition
 type ProblemLabTab = 'main' | 'ask' | 'snap';
 
+// Props for the AskLabTab component
+interface AskLabTabProps {
+  question: string;
+  setQuestion: (value: string) => void;
+  handleAskQuestion: () => void;
+  isAskingQuestion: boolean;
+  answer: string | GeminiJsonResponse | null;
+}
+
+// Component for the Ask Lab tab, now extracted as a standalone component
+const AskLabTab: React.FC<AskLabTabProps> = ({
+  question,
+  setQuestion,
+  handleAskQuestion,
+  isAskingQuestion,
+  answer,
+}) => {
+  return (
+    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
+        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <MessageSquare className="w-8 h-8" />
+          Ask the Lab
+        </CardTitle>
+        <p className="text-indigo-200 mt-2 text-lg">
+          Have a specific math question? Type it in using LaTeX for formulas.
+        </p>
+      </CardHeader>
+      <CardContent className="p-8">
+        <div className="relative">
+          <MathInput
+            value={question}
+            onChange={setQuestion}
+            placeholder="e.g., How do I find the derivative of f(x) = x^3 + 2x^2 - 4x + 7?"
+            disabled={isAskingQuestion}
+          />
+          <Button
+            onClick={handleAskQuestion}
+            disabled={isAskingQuestion || !question.trim()}
+            className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 flex items-center gap-2 transition-all duration-200 disabled:bg-indigo-300"
+          >
+            {isAskingQuestion ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Asking...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                Ask
+              </>
+            )}
+          </Button>
+        </div>
+
+        {isAskingQuestion && (
+          <div className="mt-8 flex flex-col items-center justify-center text-center">
+            <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
+            <p className="text-lg font-semibold text-gray-700">The lab is analyzing your question...</p>
+            <p className="text-gray-500">Please wait a moment.</p>
+          </div>
+        )}
+
+        {answer && !isAskingQuestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mt-8 p-6 bg-indigo-50 border border-indigo-200 rounded-xl prose max-w-none"
+          >
+            {typeof answer === 'string' ? (
+              <div className="flex items-center gap-3 text-red-600">
+                <AlertCircle className="w-6 h-6" />
+                <p>{answer}</p>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                  <Brain className="w-6 h-6" />
+                  Lab's Analysis
+                </h3>
+                <div className="p-4 bg-white rounded-lg border border-gray-200">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {(answer as GeminiJsonResponse).problem.statement || 'No problem statement available'}
+                  </ReactMarkdown>
+                </div>
+                {(answer as GeminiJsonResponse).problem.keyConcepts && (answer as GeminiJsonResponse).problem.keyConcepts.length > 0 && (
+                  <div className="mt-3">
+                    <h4 className="font-semibold text-indigo-700">Key Concepts:</h4>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {(answer as GeminiJsonResponse).problem.keyConcepts.map((concept, index) => (
+                        <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                          {concept}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-indigo-700 mb-3">Step-by-step Solution:</h4>
+                  <div className="space-y-4">
+                    {(answer as GeminiJsonResponse).solution.map((step, index) => (
+                      <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
+                        <p className="font-bold text-gray-800">Step {index + 1}: {step.step}</p>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {ensureLatexDelimiters(step.explanation)}
+                        </ReactMarkdown>
+                        {step.work && (
+                          <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {ensureLatexDelimiters(step.work)}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h4 className="text-lg font-bold text-green-800">Final Answer:</h4>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {ensureLatexDelimiters((answer as GeminiJsonResponse).answer.finalResult)}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export function ProblemLab() {
   // Active tab state
   const [activeTab, setActiveTab] = useState<ProblemLabTab>('main');
@@ -312,7 +460,7 @@ export function ProblemLab() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<string | GeminiJsonResponse | null>(null);
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
-  const questionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  
   
   // Screenshot & Solve states
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -658,26 +806,7 @@ export function ProblemLab() {
     <Sparkles className="w-3 h-3 text-yellow-400 inline ml-1" />
   );
   
-  // Handle inserting LaTeX symbols into the textarea
-  const handleInsertLaTeX = (latex: string) => {
-    if (!questionTextareaRef.current) return;
-    
-    const textarea = questionTextareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    
-    // Insert the LaTeX symbol at the cursor position
-    const newText = text.substring(0, start) + latex + text.substring(end);
-    setQuestion(newText);
-    
-    // Focus back on the textarea and set cursor position after the inserted text
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + latex.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
-  };
+  
   
   // Handle question submission to the Ask Lab
   const handleAskQuestion = async () => {
@@ -728,68 +857,47 @@ export function ProblemLab() {
 // Component for the Ask Lab tab
 const AskLabTab: React.FC = () => {
   return (
-    // ... (rest of the code remains the same)
-      <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
-        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <MessageSquare className="w-8 h-8" />
+    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+        <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
+          <MessageSquare className="w-7 h-7" />
           Ask the Lab
         </CardTitle>
-        <p className="text-indigo-100 mt-2">Get instant help with any math question</p>
+        <p className="text-indigo-100 mt-1 text-sm">Get instant help with any math question</p>
       </CardHeader>
-      <CardContent className="p-8 pt-6 bg-white">
+      <CardContent className="p-6 bg-white">
         <div className="space-y-6">
           <div className="pb-4">
             <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem do you need help with?</h3>
             <div className="space-y-2">
               <div className="relative">
-                <textarea 
-                  ref={questionTextareaRef}
-                  value={question}
-                  onChange={(e) => {
-                    setQuestion(e.target.value);
-                    // Maintain focus position after state update
-                    const cursorPosition = e.target.selectionStart;
-                    setTimeout(() => {
-                      if (questionTextareaRef.current) {
-                        questionTextareaRef.current.focus();
-                        questionTextareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
-                      }
-                    }, 0);
-                  }}
-                  className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
-                  placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
-                />
-                <div className="absolute bottom-3 right-3 flex items-center">
-                  <div className="mr-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
-                    <Coins className="w-3 h-3 text-indigo-600" />
-                    <span className="text-xs font-medium text-indigo-600">3</span>
+                  <MathInput
+                    value={question}
+                    onChange={setQuestion}
+                    disabled={isAskingQuestion}
+                    placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
+                  />
+                  <div className="absolute bottom-3 right-3 flex items-center">
+                    <div className="mr-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
+                      <Coins className="w-3 h-3 text-indigo-600" />
+                      <span className="text-xs font-medium text-indigo-600">3</span>
+                    </div>
+                    <Button 
+                      className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
+                      onClick={handleAskQuestion}
+                      disabled={isAskingQuestion || !question.trim()}
+                      title="Costs 3 credits"
+                    >
+                      {isAskingQuestion ? (
+                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      ) : (
+                        <ArrowRight className="w-4 h-4 text-white" />
+                      )}
+                    </Button>
                   </div>
-                  <Button 
-                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
-                    onClick={handleAskQuestion}
-                    disabled={isAskingQuestion || !question.trim()}
-                    title="Costs 3 credits"
-                  >
-                    {isAskingQuestion ? (
-                      <Loader2 className="w-4 h-4 text-white animate-spin" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4 text-white" />
-                    )}
-                  </Button>
                 </div>
-              </div>
               
-              {/* Label and hint for LaTeX keyboard */}
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-indigo-500 font-medium flex items-center gap-1">
-                  <span>Need to write math expressions?</span>
-                  <span className="inline-block animate-bounce">👇</span>
-                </div>
-              </div>
-              
-              {/* LaTeX Keyboard */}
-              <LatexKeyboard onInsert={handleInsertLaTeX} />
+
             </div>
           </div>
           
@@ -805,12 +913,7 @@ const AskLabTab: React.FC = () => {
                   key={index}
                   variant="outline" 
                   className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all h-auto py-3"
-                  onClick={() => {
-                    setQuestion(example);
-                    if (questionTextareaRef.current) {
-                      questionTextareaRef.current.focus();
-                    }
-                  }}
+                  onClick={() => setQuestion(example)}
                 >
                   <span className="whitespace-normal pr-2">{example}</span>
                   <ChevronRight className="w-4 h-4 text-indigo-400 flex-shrink-0" />
@@ -1142,7 +1245,13 @@ const AskLabTab: React.FC = () => {
       
       {/* Render content based on selected tab */}
       {activeTab === 'ask' ? (
-        <AskLabTab />
+        <AskLabTab
+          question={question}
+          setQuestion={setQuestion}
+          handleAskQuestion={handleAskQuestion}
+          isAskingQuestion={isAskingQuestion}
+          answer={answer}
+        />
       ) : activeTab === 'snap' ? (
         renderTabContent()
       ) : (
@@ -1497,38 +1606,36 @@ const AskLabTab: React.FC = () => {
                   <div className="mt-6 border-t pt-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Need a hint?</span>
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={showNextHint}
-                          disabled={!currentProblem?.hints || currentHintIndex >= (currentProblem.hints.length - 1)}
+                          disabled={!currentProblem?.hints || currentHintIndex >= currentProblem.hints.length}
                           className="text-xs px-3 py-1"
                         >
                           {showHint ? 'Next Hint' : 'Show Hint'}
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllSteps(true)}
+                          className="text-xs px-3 py-1 flex items-center gap-1 text-indigo-600 hover:bg-indigo-50"
+                          disabled={showAllSteps}
+                        >
+                          <HelpCircle className="w-4 h-4" />
+                          I'm stumped
+                        </Button>
                       </div>
                     </div>
-                    {showHint && currentProblem.hints && currentProblem.hints.length > 0 && (
-                      <div className="bg-amber-50 border border-amber-100 rounded-md p-2 text-amber-800 text-sm">
+                    {showHint && currentProblem.hints && currentHintIndex < currentProblem.hints.length && (
+                      <div className="bg-amber-50 border border-amber-100 rounded-md p-3 text-amber-900 text-sm">
                         <ReactMarkdown
-  remarkPlugins={[remarkMath]}
-  rehypePlugins={[rehypeKatex]}
->
-  {ensureLatexDelimiters(currentProblem.hints[currentHintIndex])}
-</ReactMarkdown>
-                        <div className="mt-2 flex justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowAllSteps(true)}
-                            className="text-xs px-3 py-1 flex items-center gap-1 font-display font-medium tracking-tight transition-all duration-300 hover:-translate-y-0.5"
-                            disabled={showAllSteps}
-                          >
-                            <span className="inline-block"><HelpCircle className="w-4 h-4 text-indigo-600" /></span>
-                            I'm stumped
-                          </Button>
-                        </div>
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {ensureLatexDelimiters(currentProblem.hints[currentHintIndex])}
+                        </ReactMarkdown>
                       </div>
                     )}
                   </div>
