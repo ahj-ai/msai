@@ -165,7 +165,11 @@ Core Directives:
       finalResponse = NextResponse.json({ answer: parsedAnswer });
     } catch (parseError) {
       console.error('Parse error:', parseError);
-      errorMessageForLogging = `The AI returned a response that could not be parsed: ${parseError.message}`;
+      if (parseError instanceof Error) {
+        errorMessageForLogging = `The AI returned a response that could not be parsed: ${parseError.message}`;
+      } else {
+        errorMessageForLogging = `The AI returned a response that could not be parsed: ${String(parseError)}`;
+      }
       responseForLogging = { raw: responseText };
       statusCodeForLogging = 500;
       finalResponse = NextResponse.json({ 

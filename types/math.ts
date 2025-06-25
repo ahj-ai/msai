@@ -33,3 +33,20 @@ export interface ProblemGenerationParams {
   difficulty: Difficulty
   wordProblems: boolean
 }
+
+export interface GeminiJsonResponse {
+  problem: {
+    title: string;
+    statement: string;
+    keyConcepts: string[];
+  };
+  solution: Array<{
+    step: string;
+    explanation: string;
+    work: string;
+  }>;
+  answer: {
+    finalResult: string;
+    verification: string;
+  };
+}
