@@ -11,7 +11,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const MODEL_NAME = "gemini-2.5-pro";
+const MODEL_NAME = "gemini-2.5-flash";
 const API_KEY = process.env.GEMINI_API_KEY || "";
 
 export async function POST(req: NextRequest) {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     }
     
     // The cost for generating a similar problem
-    const stackCost = OPERATION_COSTS.ASK_QUESTION; // Assuming same cost as asking a question
+    const stackCost = OPERATION_COSTS.GENERATE_SIMILAR;
 
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({
@@ -82,7 +82,8 @@ Core Directives:
 - Use double dollar signs ($$...$$) for block-level or display LaTeX equations. For example, '$$x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$$'.
 - CRITICAL: Every mathematical expression MUST be enclosed in EXACTLY ONE pair of LaTeX delimiters.
 - Follow the EXACT SAME FORMAT as the provided problem, including the problem structure, step-by-step solution approach, key concepts, and verification methods.
-- You MUST return your response as a valid JSON object matching the EXACT structure of the provided problem.`;
+- You MUST return your response as a valid JSON object matching the EXACT structure of the provided problem with problem, solution, and answer fields.
+- IMPORTANT: Make sure your response is PURE JSON, with no explanation text before or after. The output must be valid parsable JSON.`;
 
     // Extract the title or subject from the original problem to reference in the prompt
     const originalTitle = originalProblem.problem?.title || "math problem";
@@ -114,7 +115,7 @@ Core Directives:
       },
       body: JSON.stringify({
         amount: stackCost,
-        operation: 'GENERATE_SIMILAR_PROBLEM',
+        operation: 'GENERATE_SIMILAR',
         description: `Generated similar problem to: "${originalTitle.substring(0, 50)}${originalTitle.length > 50 ? '...' : ''}"`
       })
     });
@@ -133,17 +134,44 @@ Core Directives:
     }
 
     const responseText = geminiResult.response.text();
+    console.log('Raw Gemini response:', responseText);
 
     try {
-      const parsedAnswer = JSON.parse(responseText);
+      // Try to clean up the response if needed
+      let cleanResponse = responseText.trim();
+      
+      // Remove any markdown code block indicators if present
+      if (cleanResponse.startsWith("```json")) {
+        cleanResponse = cleanResponse.replace(/```json\s*/, "");
+      }
+      if (cleanResponse.endsWith("```")) {
+        cleanResponse = cleanResponse.replace(/\s*```$/, "");
+      }
+      
+      // Check if response starts and ends with curly braces (indicating JSON)
+      if (!cleanResponse.startsWith('{') || !cleanResponse.endsWith('}')) {
+        throw new Error('Response is not in proper JSON format');
+      }
+      
+      const parsedAnswer = JSON.parse(cleanResponse);
+      
+      // Validate the expected structure
+      if (!parsedAnswer.problem || !parsedAnswer.solution || !parsedAnswer.answer) {
+        throw new Error('Response missing required fields (problem, solution, or answer)');
+      }
+      
       responseForLogging = parsedAnswer;
       statusCodeForLogging = 200;
       finalResponse = NextResponse.json({ similarProblem: parsedAnswer });
     } catch (parseError) {
-      errorMessageForLogging = "The AI returned a response that could not be parsed.";
+      console.error('Parse error:', parseError);
+      errorMessageForLogging = `The AI returned a response that could not be parsed: ${parseError.message}`;
       responseForLogging = { raw: responseText };
       statusCodeForLogging = 500;
-      finalResponse = NextResponse.json({ error: errorMessageForLogging, rawResponse: responseText }, { status: statusCodeForLogging });
+      finalResponse = NextResponse.json({ 
+        error: errorMessageForLogging, 
+        rawResponse: responseText.substring(0, 500) + (responseText.length > 500 ? '...' : '') 
+      }, { status: statusCodeForLogging });
     }
 
     return finalResponse;
@@ -159,7 +187,7 @@ Core Directives:
     
     const { error: logError } = await supabaseAdmin.from('gemini_api_logs').insert({
         user_id: userId,
-        product: 'similar_problem_generator',
+        product: 'ask_the_lab', // Using existing product type for compatibility with Supabase enum
         model_used: MODEL_NAME,
         prompt: promptForLogging,
         response: responseForLogging,
