@@ -357,6 +357,12 @@ export function ProblemLab() {
   // Track experiment setup progress
   const [setupProgress, setSetupProgress] = useState(0);
   
+  // New state for similar problem generation
+  const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false);
+  const [similarProblem, setSimilarProblem] = useState<GeminiJsonResponse | null>(null);
+  const [showSimilarProblem, setShowSimilarProblem] = useState(false);
+  const [similarProblemError, setSimilarProblemError] = useState<string | null>(null);
+
   // Handle image selection for Snap & Solve
   const handleImageSelect = (file: File | null) => {
     setSelectedImage(file);
@@ -725,6 +731,61 @@ export function ProblemLab() {
     }
   };
 
+  // Handle generating a similar problem
+  const handleGenerateSimilar = async (originalProblem: GeminiJsonResponse) => {
+    setIsGeneratingSimilar(true);
+    setSimilarProblemError(null);
+    setSimilarProblem(null);
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('You must be signed in to use this feature.');
+      }
+
+      const response = await fetch('/api/generate-similar-problem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ originalProblem }),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let errorMsg = 'Failed to generate similar problem.';
+        try {
+          const errorData = JSON.parse(responseText);
+          if (errorData.code === 'INSUFFICIENT_STACKS') {
+            errorMsg = `You don't have enough credits to use this feature. Each similar problem generation costs 3 credits. ${errorData.available ? `You currently have ${errorData.available} credits.` : ''} Visit the pricing page to get more credits.`;
+          } else {
+            errorMsg = errorData.error || errorMsg;
+          }
+        } catch (e) {
+          console.error("Could not parse error response as JSON.", responseText);
+        }
+        throw new Error(errorMsg);
+      }
+
+      const data = JSON.parse(responseText);
+      if (data.answer) {
+        setSimilarProblem(data.answer);
+        setShowSimilarProblem(true);
+      } else {
+        throw new Error('Invalid response format from server.');
+      }
+
+    } catch (error: any) {
+      console.error("Similar problem generation error:", error);
+      const message = error.message || 'An unexpected error occurred.';
+      setSimilarProblemError(message);
+    } finally {
+      setIsGeneratingSimilar(false);
+    }
+  };
+
 // Component for the Ask Lab tab
 const AskLabTab: React.FC = () => {
   return (
@@ -934,6 +995,105 @@ const AskLabTab: React.FC = () => {
                   )}
                 </div>
               )}
+
+              {/* Generate Similar Problem Button */}
+              <div className="mt-6 flex justify-center">
+                <Button
+                  onClick={() => handleGenerateSimilar(answer as GeminiJsonResponse)}
+                  disabled={isGeneratingSimilar}
+                  className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
+                >
+                  {isGeneratingSimilar ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Generating similar problem...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="w-5 h-5" />
+                      Generate a problem just like this one
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Error display for similar problem generation */}
+              {similarProblemError && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2"
+                >
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">{similarProblemError}</span>
+                </motion.div>
+              )}
+
+              {/* Display similar problem */}
+              {showSimilarProblem && similarProblem && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-purple-800 flex items-center gap-2">
+                      <Brain className="w-6 h-6" />
+                      Similar Problem Generated
+                    </h3>
+                    <Button
+                      onClick={() => setShowSimilarProblem(false)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Similar Problem Content */}
+                  <div className="space-y-4">
+                    {/* Problem Section */}
+                    {similarProblem.problem && (
+                      <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
+                        <h4 className="text-md font-semibold text-purple-800 mb-2">
+                          {similarProblem.problem.title || 'New Problem'}
+                        </h4>
+                        <div className="text-gray-700 prose prose-sm max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkMath]}
+                            rehypePlugins={[rehypeKatex]}
+                          >
+                            {similarProblem.problem.statement || 'No problem statement available'}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Generate another or try solving it buttons */}
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => handleGenerateSimilar(answer as GeminiJsonResponse)}
+                        disabled={isGeneratingSimilar}
+                        variant="outline"
+                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                      >
+                        Generate Another
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setAnswer(similarProblem);
+                          setShowSimilarProblem(false);
+                          setSimilarProblem(null);
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        Show Solution
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           ) : answer && typeof answer === 'string' ? (
             // Fallback for plain string answers (e.g., error messages not in JSON format)
@@ -1082,7 +1242,106 @@ const AskLabTab: React.FC = () => {
                           </div>
                         )}
                       </div>
-                    </div>
+
+                      {/* Generate Similar Problem Button */}
+                       <div className="mt-6 flex justify-center">
+                         <Button
+                           onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
+                           disabled={isGeneratingSimilar}
+                           className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
+                         >
+                           {isGeneratingSimilar ? (
+                             <>
+                               <Loader2 className="w-5 h-5 animate-spin" />
+                               Generating similar problem...
+                             </>
+                           ) : (
+                             <>
+                               <Brain className="w-5 h-5" />
+                               Generate a problem just like this one
+                             </>
+                           )}
+                         </Button>
+                       </div>
+
+                       {/* Error display for similar problem generation */}
+                       {similarProblemError && (
+                         <motion.div
+                           initial={{ opacity: 0, y: 10 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2"
+                         >
+                           <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                           <span className="text-sm">{similarProblemError}</span>
+                         </motion.div>
+                       )}
+
+                       {/* Display similar problem */}
+                       {showSimilarProblem && similarProblem && (
+                         <motion.div
+                           initial={{ opacity: 0, y: 20 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm"
+                         >
+                           <div className="mb-4 flex items-center justify-between">
+                             <h3 className="text-lg font-bold text-purple-800 flex items-center gap-2">
+                               <Brain className="w-6 h-6" />
+                               Similar Problem Generated
+                             </h3>
+                             <Button
+                               onClick={() => setShowSimilarProblem(false)}
+                               variant="ghost"
+                               size="sm"
+                               className="text-purple-600 hover:text-purple-800"
+                             >
+                               <X className="w-4 h-4" />
+                             </Button>
+                           </div>
+
+                           {/* Similar Problem Content */}
+                           <div className="space-y-4">
+                             {/* Problem Section */}
+                             {similarProblem.problem && (
+                               <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
+                                 <h4 className="text-md font-semibold text-purple-800 mb-2">
+                                   {similarProblem.problem.title || 'New Problem'}
+                                 </h4>
+                                 <div className="text-gray-700 prose prose-sm max-w-none">
+                                   <ReactMarkdown
+                                     remarkPlugins={[remarkMath]}
+                                     rehypePlugins={[rehypeKatex]}
+                                   >
+                                     {similarProblem.problem.statement || 'No problem statement available'}
+                                   </ReactMarkdown>
+                                 </div>
+                               </div>
+                             )}
+
+                             {/* Generate another or try solving it buttons */}
+                             <div className="flex gap-3 justify-center">
+                               <Button
+                                 onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
+                                 disabled={isGeneratingSimilar}
+                                 variant="outline"
+                                 className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                               >
+                                 Generate Another
+                               </Button>
+                               <Button
+                                 onClick={() => {
+                                   setSolution(similarProblem);
+                                   setShowSimilarProblem(false);
+                                   setSimilarProblem(null);
+                                 }}
+                                 className="bg-purple-600 hover:bg-purple-700 text-white"
+                               >
+                                 Show Solution
+                               </Button>
+                             </div>
+                           </div>
+                         </motion.div>
+                       )}
+                     </div>
                   ) : (
                     <div className="prose prose-indigo">
                       <ReactMarkdown
