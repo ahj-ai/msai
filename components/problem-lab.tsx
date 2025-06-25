@@ -460,7 +460,7 @@ export function ProblemLab() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<string | GeminiJsonResponse | null>(null);
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
-  
+  const questionTextareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Screenshot & Solve states
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -812,7 +812,26 @@ export function ProblemLab() {
     <Sparkles className="w-3 h-3 text-yellow-400 inline ml-1" />
   );
   
-  
+  // Handle inserting LaTeX symbols into the textarea
+  const handleInsertLaTeX = (latex: string) => {
+    if (!questionTextareaRef.current) return;
+    
+    const textarea = questionTextareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    
+    // Insert the LaTeX symbol at the cursor position
+    const newText = text.substring(0, start) + latex + text.substring(end);
+    setQuestion(newText);
+    
+    // Focus back on the textarea and set cursor position after the inserted text
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + latex.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
   
   // Handle question submission to the Ask Lab
   const handleAskQuestion = async () => {
@@ -932,33 +951,53 @@ const AskLabTab: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem do you need help with?</h3>
             <div className="space-y-2">
               <div className="relative">
-                  <MathInput
-                    value={question}
-                    onChange={setQuestion}
-                    disabled={isAskingQuestion}
-                    placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
-                  />
-                  <div className="absolute bottom-3 right-3 flex items-center">
-                    <div className="mr-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
-                      <Coins className="w-3 h-3 text-indigo-600" />
-                      <span className="text-xs font-medium text-indigo-600">3</span>
-                    </div>
-                    <Button 
-                      className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
-                      onClick={handleAskQuestion}
-                      disabled={isAskingQuestion || !question.trim()}
-                      title="Costs 3 credits"
-                    >
-                      {isAskingQuestion ? (
-                        <Loader2 className="w-4 h-4 text-white animate-spin" />
-                      ) : (
-                        <ArrowRight className="w-4 h-4 text-white" />
-                      )}
-                    </Button>
+                <textarea 
+                  ref={questionTextareaRef}
+                  value={question}
+                  onChange={(e) => {
+                    setQuestion(e.target.value);
+                    // Maintain focus position after state update
+                    const cursorPosition = e.target.selectionStart;
+                    setTimeout(() => {
+                      if (questionTextareaRef.current) {
+                        questionTextareaRef.current.focus();
+                        questionTextareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
+                      }
+                    }, 0);
+                  }}
+                  className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
+                  placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
+                />
+                <div className="absolute bottom-3 right-3 flex items-center">
+                  <div className="mr-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
+                    <Coins className="w-3 h-3 text-indigo-600" />
+                    <span className="text-xs font-medium text-indigo-600">3</span>
                   </div>
+                  <Button 
+                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
+                    onClick={handleAskQuestion}
+                    disabled={isAskingQuestion || !question.trim()}
+                    title="Costs 3 credits"
+                  >
+                    {isAskingQuestion ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    ) : (
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    )}
+                  </Button>
                 </div>
+              </div>
               
-
+              {/* Label and hint for LaTeX keyboard */}
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-indigo-500 font-medium flex items-center gap-1">
+                  <span>Need to write math expressions?</span>
+                  <span className="inline-block animate-bounce">👇</span>
+                </div>
+              </div>
+              
+              {/* LaTeX Keyboard */}
+              <LatexKeyboard onInsert={handleInsertLaTeX} />
             </div>
           </div>
           
