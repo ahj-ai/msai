@@ -1,10 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import { MathfieldElement } from 'mathlive';
-
-// The math-virtual-keyboard element is a singleton.
-// It is not a module, but a global object.
-// We declare it here to make TypeScript happy.
-declare const mathVirtualKeyboard: any;
+import React, { useRef, useEffect } from 'react';
 
 // Define the props for the component
 interface MathInputProps {
@@ -15,90 +9,47 @@ interface MathInputProps {
 }
 
 const MathInput: React.FC<MathInputProps> = ({ value, onChange, disabled, placeholder }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mathfieldRef = useRef<MathfieldElement | null>(null);
-
-  // Effect to initialize and clean up the mathfield
+  // Create a ref for the textarea to maintain focus
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // This keeps track of cursor position
+  const cursorPositionRef = useRef<number | null>(null);
+  
+  // Handle change with cursor position preservation
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // Store current cursor position before React updates
+    cursorPositionRef.current = e.target.selectionStart;
+    onChange(e.target.value);
+  };
+  
+  // Restore cursor position after value change
   useEffect(() => {
-    if (containerRef.current) {
-      // Create a new MathfieldElement instance
-      const mfe = new MathfieldElement();
-
-      // --- Keyboard Customization ---
-      // 1. Set keyboard policy to manual for programmatic control
-      mfe.mathVirtualKeyboardPolicy = 'manual';
-
-      // 2. Define focus/blur handlers to show/hide the keyboard
-      const handleFocus = () => {
-        // Use 'compact' layout on mobile, 'default' on desktop
-        if (window.innerWidth < 768) {
-          mathVirtualKeyboard.layouts = ['compact'];
-        } else {
-          mathVirtualKeyboard.layouts = 'default';
-        }
-        mathVirtualKeyboard.show();
-      };
-
-      const handleBlur = () => {
-        mathVirtualKeyboard.hide();
-      };
-
-      // 3. Add event listeners
-      mfe.addEventListener('focusin', handleFocus);
-      mfe.addEventListener('focusout', handleBlur);
-
-      // Set styles directly on the element
-      mfe.style.width = '100%';
-      mfe.style.minHeight = '8rem';
-      mfe.style.padding = '1rem 3rem 1rem 1rem';
-      mfe.style.border = '1px solid #e0e7ff';
-      mfe.style.borderRadius = '0.75rem';
-      mfe.style.outline = 'none';
-      mfe.style.color = '#374151';
-      mfe.style.setProperty('--placeholder-color', '#9ca3af');
-
-      // Add an event listener for input changes
-      mfe.addEventListener('input', (evt) => {
-        onChange((evt.target as MathfieldElement).value);
-      });
-
-      // Append the mathfield to the container
-      containerRef.current.appendChild(mfe);
-      mathfieldRef.current = mfe;
-
-      // Cleanup function to remove the element and listeners when the component unmounts
-      return () => {
-        mfe.removeEventListener('focusin', handleFocus);
-        mfe.removeEventListener('focusout', handleBlur);
-        if (containerRef.current && mfe) {
-          containerRef.current.removeChild(mfe);
-        }
-      };
-    }
-  }, [onChange]); // Run this effect only once on mount
-
-  // Effect to sync the value from the parent component
-  useEffect(() => {
-    if (mathfieldRef.current && mathfieldRef.current.value !== value) {
-      mathfieldRef.current.value = value;
+    // Only restore if we have a position and the element is focused
+    if (
+      textareaRef.current && 
+      cursorPositionRef.current !== null && 
+      document.activeElement === textareaRef.current
+    ) {
+      textareaRef.current.selectionStart = cursorPositionRef.current;
+      textareaRef.current.selectionEnd = cursorPositionRef.current;
     }
   }, [value]);
-
-  // Effect to sync the disabled state
-  useEffect(() => {
-    if (mathfieldRef.current) {
-      mathfieldRef.current.disabled = !!disabled;
-    }
-  }, [disabled]);
-
-  // Effect to sync the placeholder
-  useEffect(() => {
-    if (mathfieldRef.current && placeholder) {
-      mathfieldRef.current.placeholder = placeholder;
-    }
-  }, [placeholder]);
-
-  return <div ref={containerRef} />;
+  
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      onChange={handleChange}
+      disabled={disabled}
+      placeholder={placeholder}
+      className="w-full min-h-[8rem] p-4 pr-12 border border-[#e0e7ff] rounded-xl outline-none text-gray-700 placeholder:text-gray-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300 transition-colors resize-none"
+      style={{
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: '1rem',
+        lineHeight: '1.5',
+      }}
+    />
+  );
 };
 
 export default MathInput;
