@@ -1100,11 +1100,12 @@ const AskLabTab: React.FC = () => {
               )}
 
               {/* Generate Similar Problem Button */}
-              <div className="mt-6 flex justify-center">
+              <div className="mt-6 flex flex-col items-center">
                 <Button
                   onClick={() => handleGenerateSimilar(answer as GeminiJsonResponse)}
                   disabled={isGeneratingSimilar}
                   className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
+                  title="Costs 3 credits"
                 >
                   {isGeneratingSimilar ? (
                     <>
@@ -1118,6 +1119,10 @@ const AskLabTab: React.FC = () => {
                     </>
                   )}
                 </Button>
+                <div className="flex items-center gap-1 mt-2 text-indigo-600">
+                  <Coins className="w-3 h-3" />
+                  <span className="text-xs font-medium">3 credits</span>
+                </div>
               </div>
 
               {/* Error display for similar problem generation */}
@@ -1346,25 +1351,30 @@ const AskLabTab: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Generate Similar Problem Button */}
-                       <div className="mt-6 flex justify-center">
-                         <Button
+                       {/* Generate Similar Problem Button */}
+                       <div className="mt-6 flex flex-col items-center">
+                           <Button
                            onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
                            disabled={isGeneratingSimilar}
                            className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
-                         >
+                           title="Costs 3 credits"
+                           >
                            {isGeneratingSimilar ? (
-                             <>
+                               <>
                                <Loader2 className="w-5 h-5 animate-spin" />
                                Generating similar problem...
-                             </>
+                               </>
                            ) : (
-                             <>
+                               <>
                                <Brain className="w-5 h-5" />
                                Generate a problem just like this one
-                             </>
+                               </>
                            )}
-                         </Button>
+                           </Button>
+                           <div className="flex items-center gap-1 mt-2 text-indigo-600">
+                               <Coins className="w-3 h-3" />
+                               <span className="text-xs font-medium">3 credits</span>
+                           </div>
                        </div>
 
                        {/* Error display for similar problem generation */}
