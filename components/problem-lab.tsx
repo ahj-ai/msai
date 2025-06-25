@@ -835,6 +835,14 @@ export function ProblemLab() {
             answer={answer}
             isAskingQuestion={isAskingQuestion}
             handleAskQuestion={handleAskQuestion}
+            handleGenerateSimilar={generateSimilarProblem}
+            isGeneratingSimilar={isGeneratingSimilar}
+            similarProblem={similarProblem}
+            showSimilarProblem={showSimilarProblem}
+            setShowSimilarProblem={setShowSimilarProblem}
+            setSimilarProblem={setSimilarProblem}
+            similarProblemError={similarProblemError}
+            setSolution={setAnswer}
           />
         )}
         {activeTab === 'snap' && (
