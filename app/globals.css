@@ -43,6 +43,40 @@
     letter-spacing: 0.01em;
     font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "ss01" 1, "ss02" 1, "ss03" 1;
     font-variation-settings: "opsz" auto;
+
+    /* MathLive Virtual Keyboard: Glassmorphism Theme */
+    --keycap-height: 46px;
+    --keycap-gap: 6px;
+    --keyboard-padding: 12px;
+    --keycap-font-size: 1.1rem;
+    --keycap-small-font-size: 0.8rem;
+    --keyboard-background: rgba(20, 15, 40, 0.85);
+    --keyboard-border: 1px solid rgba(173, 157, 255, 0.2);
+    --keyboard-zindex: 2000;
+    --keyboard-backdrop-filter: blur(12px);
+    --keyboard-toolbar-background: rgba(0, 0, 0, 0.3);
+    --keyboard-toolbar-text: rgba(230, 230, 255, 0.8);
+    --keyboard-toolbar-text-active: #fff;
+    --keyboard-toolbar-background-hover: rgba(108, 99, 255, 0.3);
+    --keyboard-toolbar-background-selected: rgba(108, 99, 255, 0.5);
+    --keycap-background: rgba(255, 255, 255, 0.1);
+    --keycap-background-hover: rgba(255, 255, 255, 0.15);
+    --keycap-background-pressed: rgba(255, 255, 255, 0.2);
+    --keycap-text: #f0f0f5;
+    --keycap-border: 1px solid rgba(173, 157, 255, 0.15);
+    --keycap-border-bottom: 2px solid rgba(173, 157, 255, 0.25);
+    --keycap-primary-background: rgba(108, 99, 255, 0.5);
+    --keycap-primary-background-hover: rgba(108, 99, 255, 0.7);
+    --keycap-primary-text: #fff;
+    --keycap-secondary-background: rgba(40, 30, 80, 0.6);
+    --keycap-secondary-background-hover: rgba(50, 40, 90, 0.8);
+    --keycap-secondary-text: #e0e0ff;
+    --keycap-shift-text: #a89fff;
+    --keycap-shift-color: #a89fff;
+    --variant-panel-background: rgba(30, 25, 60, 0.9);
+    --variant-keycap-text: #f0f0f5;
+    --variant-keycap-text-active: #fff;
+    --variant-keycap-background-active: rgba(108, 99, 255, 0.5);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -178,5 +212,11 @@
   
   .text-high-contrast-light {
     color: rgb(245, 245, 250); /* Very light color for maximum contrast on dark backgrounds */
+  }
+
+  /* Apply backdrop-filter to the visible keyboard */
+  .ML__keyboard.is-visible {
+    backdrop-filter: var(--keyboard-backdrop-filter);
+    -webkit-backdrop-filter: var(--keyboard-backdrop-filter);
   }
 }
