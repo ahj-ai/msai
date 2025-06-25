@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import MathInput from './math-input';
+import MathField, { MathFieldRef } from './math-field';
 import { MessageSquare, Send, Loader2, AlertCircle, Brain, Coins, CheckCircle, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -44,29 +44,47 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
   similarProblemError,
   setSolution,
 }) => {
+  // Create a ref for the MathField component following the uncontrolled component pattern
+  const mathFieldRef = React.useRef<MathFieldRef>(null);
   return (
     <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
-        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <MessageSquare className="w-8 h-8" />
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 md:p-8 pb-4 md:pb-6">
+        <CardTitle className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2 md:gap-3">
+          <MessageSquare className="w-6 h-6 md:w-8 md:h-8" />
           Ask the Lab
         </CardTitle>
-        <p className="text-indigo-200 mt-2 text-lg">
+        <p className="text-indigo-200 mt-2 text-base md:text-lg">
           Have a specific math question? Type it in using LaTeX for formulas.
         </p>
       </CardHeader>
-      <CardContent className="p-8">
+      <CardContent className="p-4 md:p-8">
         <div className="relative">
-          <MathInput
-            value={question}
-            onChange={setQuestion}
-            placeholder="e.g., How do I find the derivative of f(x) = x^3 + 2x^2 - 4x + 7?"
+          {/* Use the uncontrolled MathField component with ref */}
+          <MathField
+            value={question} // Initial value only
+            onChange={(value) => {
+              // Update the parent state when the MathField value changes
+              setQuestion(value);
+            }}
+            placeholder="f(x) = x^3 + 2x^2 - 4x + 7"
             disabled={isAskingQuestion}
+            ref={mathFieldRef}
           />
+          
+          {/* No keyboard toggle button needed with built-in MathField functionality */}
+          
+          {/* Submit button - positioned in the bottom right */}
           <Button
-            onClick={handleAskQuestion}
+            onClick={() => {
+              // Get the current value from the mathField ref before submitting
+              if (mathFieldRef.current) {
+                const currentValue = mathFieldRef.current.getValue();
+                setQuestion(currentValue); // Make sure state is up-to-date
+              }
+              handleAskQuestion();
+            }}
             disabled={isAskingQuestion || !question.trim()}
-            className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 flex items-center gap-2 transition-all duration-200 disabled:bg-indigo-300"
+            className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3 py-2 md:px-4 md:py-2 flex items-center gap-1 md:gap-2 text-sm md:text-base transition-all duration-200 disabled:bg-indigo-300"
           >
             {isAskingQuestion ? (
               <>
@@ -81,6 +99,8 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
             )}
           </Button>
         </div>
+        
+        {/* No virtual keyboard needed - using built-in MathField keyboard */}
 
         {isAskingQuestion && (
           <div className="mt-8 flex flex-col items-center justify-center text-center">
