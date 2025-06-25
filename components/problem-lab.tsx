@@ -34,7 +34,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { GeminiJsonResponse } from '@/lib/gemini/parse-json-response';
 import MathInput from './math-input';
 import { generateProblem } from "@/lib/generate-problem"
 import { ParticleBackground } from "@/components/particle-background"
@@ -934,95 +933,8 @@ export function ProblemLab() {
     }
   };
 
-// Component for the Ask Lab tab
-const AskLabTab: React.FC = () => {
-  return (
-    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
-        <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-          <MessageSquare className="w-7 h-7" />
-          Ask the Lab
-        </CardTitle>
-        <p className="text-indigo-100 mt-1 text-sm">Get instant help with any math question</p>
-      </CardHeader>
-      <CardContent className="p-6 bg-white">
-        <div className="space-y-6">
-          <div className="pb-4">
-            <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem do you need help with?</h3>
-            <div className="space-y-2">
-              <div className="relative">
-                <textarea 
-                  ref={questionTextareaRef}
-                  value={question}
-                  onChange={(e) => {
-                    setQuestion(e.target.value);
-                    // Maintain focus position after state update
-                    const cursorPosition = e.target.selectionStart;
-                    setTimeout(() => {
-                      if (questionTextareaRef.current) {
-                        questionTextareaRef.current.focus();
-                        questionTextareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
-                      }
-                    }, 0);
-                  }}
-                  className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
-                  placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
-                />
-                <div className="absolute bottom-3 right-3 flex items-center">
-                  <div className="mr-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
-                    <Coins className="w-3 h-3 text-indigo-600" />
-                    <span className="text-xs font-medium text-indigo-600">3</span>
-                  </div>
-                  <Button 
-                    className="w-8 h-8 p-0 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700"
-                    onClick={handleAskQuestion}
-                    disabled={isAskingQuestion || !question.trim()}
-                    title="Costs 3 credits"
-                  >
-                    {isAskingQuestion ? (
-                      <Loader2 className="w-4 h-4 text-white animate-spin" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4 text-white" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Label and hint for LaTeX keyboard */}
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-indigo-500 font-medium flex items-center gap-1">
-                  <span>Need to write math expressions?</span>
-                  <span className="inline-block animate-bounce">👇</span>
-                </div>
-              </div>
-              
-              {/* LaTeX Keyboard */}
-              <LatexKeyboard onInsert={handleInsertLaTeX} />
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="text-base font-medium text-gray-700 mb-4">Examples you can ask:</h3>
-            <div className="space-y-3">
-              {[
-                "How do I find the derivative of f(x) = x³ + 2x² - 4x + 7?",
-                "Explain the concept of standard deviation with an example.",
-                "What's the difference between permutation and combination?"
-              ].map((example, index) => (
-                <Button 
-                  key={index}
-                  variant="outline" 
-                  className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all h-auto py-3"
-                  onClick={() => setQuestion(example)}
-                >
-                  <span className="whitespace-normal pr-2">{example}</span>
-                  <ChevronRight className="w-4 h-4 text-indigo-400 flex-shrink-0" />
-                </Button>
-              ))}
-            </div>
-          </div>
-          
-          {/* Display answer with sections */}
+  // The duplicate AskLabTab component has been removed.
+  // The properly typed component defined around line 301 is used in the file instead.
           {answer && typeof answer === 'object' && !Array.isArray(answer) ? (
             // Render GeminiJsonResponse
             <motion.div
@@ -1256,11 +1168,6 @@ const AskLabTab: React.FC = () => {
             </motion.div>
           ) : null}
 
-        </div>
-      </CardContent>
-    </Card>
-  );
-  }
   
   // Render the appropriate tab content
   const renderTabContent = () => {

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Problem, Difficulty } from '@/types/math'
 import { FlaskConical, Sparkles, CheckCircle, Beaker, TestTube, HelpCircle, ArrowLeft, ArrowRight, Check, X, MessageSquare, Camera, Brain, ChevronRight, Send, Loader2, AlertCircle, PenTool, Eye, Save, Book, Coins } from 'lucide-react'
 
@@ -9,6 +10,7 @@ interface GeminiJsonResponse {
   problem: {
     title: string;
     statement: string;
+    keyConcepts: string[];
   };
   solution: Array<{
     step: string;
@@ -27,18 +29,21 @@ import { saveUserProblems, getUserProblems } from '@/lib/supabase'
 import LatexKeyboard from './latex-keyboard'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import MathInput from './math-input';
 import { generateProblem } from "@/lib/generate-problem"
 import { ParticleBackground } from "@/components/particle-background"
 import { ImageUpload } from "@/components/image-upload"
+
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css'; 
+import 'katex/dist/katex.min.css';
+import { ensureLatexDelimiters } from "@/utils/format-latex";
 
 // A simple loading component to avoid import issues
 function SimpleLoadingIndicator() {
@@ -64,10 +69,28 @@ const subjects = {
     available: true,
     topicGroups: {
       "Foundational Number Skills 🧱": [
-        "Decimal Place Value Mastery",
-        "Rounding with Confidence"
+        "Decimal Place Value Mastery"
       ],
-      "Arithmetic Operations 🔢": [
+      "Number Theory Unlocked 🔑": [
+        "Decimals 🤝 Percents",
+        "Divisibility Rules & Factors",
+        "Finding GCF (Greatest Common Factor)"
+      ],
+      "Expressions & Variables 🚀": [
+        "Evaluating Variable Expressions"
+      ],
+      "Equations & Inequalities 💡": [
+        "One-Step Equations (Integers, Decimals, Fractions)",
+        "Two-Step Equations (Integers, Decimals)",
+        "Tackling Multi-Step Equations"
+      ],
+      "Exponents, Sci-No & Roots ⚡": [
+        "Exponent Expertise: Multiplication & Division Properties",
+        "Powers of Products & Quotients",
+        "Big & Small: Scientific Notation"
+      ],
+      "🔜 Coming Soon": [
+        "Rounding with Confidence",
         "Adding and Subtracting Integers",
         "Multiplying and Dividing Integers",
         "Adding and Subtracting Decimals",
@@ -75,52 +98,24 @@ const subjects = {
         "Fractions Operations",
         "Mixed Number Operations",
         "Converting Fractions 🤝 Decimals",
-        "Order of Operations"
-      ],
-      "Number Theory Unlocked 🔑": [
+        "Order of Operations",
         "Fractions 🤝 Percents",
-        "Decimals 🤝 Percents",
-        "Divisibility Rules & Factors",
         "Prime Factorization Power",
-        "Finding GCF (Greatest Common Factor)",
-        "Nailing LCM (Least Common Multiple)"
-      ],
-      "Expressions & Variables 🚀": [
+        "Nailing LCM (Least Common Multiple)",
         "The Language of Algebra: Variables & Verbal Expressions (Words to Algebra)",
-        "Evaluating Variable Expressions",
         "The Distributive Property in Action",
-        "Simplifying by Combining Like Terms"
-      ],
-      "Equations & Inequalities 💡": [
-        "One-Step Equations (Integers, Decimals, Fractions)",
-        "Two-Step Equations (Integers, Decimals)",
-        "Tackling Multi-Step Equations",
-        "Real-World Equation Challenges: One-Step & Two-Step Word Problems"
-      ],
-      "Exponents, Sci-No & Roots ⚡": [
-        "Exponent Expertise: Multiplication & Division Properties",
-        "Powers of Products & Quotients",
-        "Big & Small: Scientific Notation",
-        "Root Camp: Understanding Square Root"
-      ],
-      "Real-World Ratios: Proportions & Percentages 🎯": [
-        "Master Conversions: Percents ↔ Fractions ↔ Decimals",
-        "Ratios & Proportions: Understanding & Solving Proportions",
-        "Proportion Word Problems: Real-Life Applications",
-        "Scaling Up: Similar Figures & Word Problems",
-        "Straightforward Percent Problems",
-        "Calculating Percent Change",
-        "Markup, Discount, & Tax (Easy & Hard Scenarios)",
-        "Simple & Compound Interest"
-      ],
-      "Lines & Systems 📈": [
-        "Finding Slope (points, equations)",
-        "Writing Linear Equations",
-        "Systems of Equations: Solve by Substitution",
-        "System of Equations: Solve by Elimination",
-        "Systems Word Problems"
-      ],
-      "Polynomial Powerhouse 🧱": [
+        "Simplifying by Combining Like Terms",
+        "Real-World Equation Challenges: One-Step & Two-Step Word Problems",
+        "Root Camp: Understanding Square Root",
+        "Ratio & Rate Fundamentals",
+        "Proportional Relationships",
+        "Unit Rate & Unit Price",
+        "Percent Increase & Decrease",
+        "Simple Interest",
+        "Angle Relationships",
+        "Perimeter & Area: Rectangles, Triangles, Circles",
+        "Volume & Surface Area: Prisms & Cylinders",
+        "The Coordinate Plane",
         "Factoring Monomials (Advanced)",
         "Adding & Subtracting Polynomials",
         "Multiplying Polynomials by Monomials",
@@ -133,37 +128,27 @@ const subjects = {
     available: true,
     topicGroups: {
       "🔢 Foundations & Arithmetic": [
-        "Order of Operations",
-        "Evaluating Expressions",
-        "Simplifying Variable Expressions",
         "Distributive Property",
         "Absolute Value",
-        "One-Step Equations",
-        "One-Step Equation Word Problems",
-        "Two-Step & Multi-Step Equations"
+        "Decimals: Add, Subtract",
+        "Decimals: Multiply, Divide"
       ],
-      "📏 Equations & More": [
-        "Absolute Value Equations",
-        "Literal Equations"
+      "📐 Equations": [
+        "Two-Step & Multi-Step Equations",
+        "Absolute Value Equations"
       ],
-      "⚖️ Inequalities & Applications": [
+      "⚖️ Inequalities": [
         "One-Step, Two-Step, Multi-Step Inequalities",
         "Compound & Absolute Value Inequalities",
-        "Word Problems with Inequalities",
-        "Graphing Single-Variable Inequalities"
+        "Word Problems with Inequalities"
       ],
-      "📈 Linear Equations & Inequalities": [
-        "Finding Slope",
-        "Graphing: Slope-Intercept, Standard Form, Absolute Value Equations",
-        "Writing Linear Equations",
-        "Graphing Linear Inequalities"
+      "📈 Linear Equations": [
+        "Writing Linear Equations"
       ],
-      "🔗 Systems of Equations & Inequalities": [
+      "🔗 Systems of Equations": [
         "Solving by Graphing",
         "Solving Substitution",
-        "Solving Elimination",
-        "Systems Word Problems",
-        "Graphing Systems of Inequalities"
+        "Solving Elimination"
       ],
       "🔢 Exponents & Radicals": [
         "Properties of Exponents",
@@ -171,10 +156,25 @@ const subjects = {
         "Square Roots",
         "Radical Expressions: Simplify, Add/Subtract, Multiply, Divide",
         "Solving Radical Equations",
-        "Pythagorean Theorem",
+        "Pythagorean Theorem"
       ],
-      "🌐 Word Problems": [
-        "Word Problems"
+      "🔜 Coming Soon": [
+        "Order of Operations",
+        "Evaluating Expressions",
+        "Simplifying Variable Expressions",
+        "Integers: Add and Subtract",
+        "Integers: Multiply, Divide",
+        "Fractions & Mixed Numbers: Add, Subtract",
+        "One-Step Equations",
+        "One-Step Equation Word Problems",
+        "Literal Equations",
+        "Finding Slope",
+        "Systems of Equations Word Problems",
+        "Word Problems",
+        "Graphing: Slope-Intercept, Standard Form, Absolute Value Equations",
+        "Graphing Linear Inequalities",
+        "Graphing Single-Variable Inequalities",
+        "Graphing Systems of Inequalities"
       ]
     }
   },
@@ -187,24 +187,20 @@ const subjects = {
         "Domain and range",
         "Function composition",
         "Inverse functions",
-        "Even and odd functions",
-        "Function transformations (translations, reflections, stretches, compressions)"
+        "Even and odd functions"
       ],
       "🎪 Quadratic Functions": [
-        "Quadratic Functions: Standard form",
-        "Quadratic Functions: Vertex form",
-        "Quadratic Functions: Factored form",
+        "Solving quadratic equations by factoring",
+        "Completing the square",
         "Quadratic formula and discriminant",
-        "Applications and word problems"
+        "Quadratic Functions: Standard form",
+        "Quadratic Functions: Factored form",
+        "Applications and word problems",
+        "Absolute value functions and equations"
       ],
       "📐 Linear Equations": [
         "Slope-intercept and point-slope forms",
-        "Parallel and perpendicular lines"
-      ],
-      "📏 Absolute Value": [
-        "Absolute value functions and equations"
-      ],
-      "🔢 Systems of Equations": [
+        "Parallel and perpendicular lines",
         "Systems of linear equations: substitution",
         "Systems of linear equations: elimination"
       ],
@@ -213,6 +209,21 @@ const subjects = {
         "Geometric sequences and series",
         "Infinite geometric series",
         "Sigma notation"
+      ],
+      "🔜 Coming Soon": [
+        "Quadratic Functions: Vertex form",
+        "Function transformations (translations, reflections, stretches, compressions)",
+        "Factoring: Difference of Squares",
+        "Factoring: GCF",
+        "Factoring: Grouping",
+        "Factoring: Sum/Difference of Cubes",
+        "Factoring: Trinomials (a=1)",
+        "Factoring: Trinomials (a>1)",
+        "Graphing linear inequalities",
+        "Logarithmic Functions",
+        "Properties of Logarithms",
+        "Solving Exponential Equations",
+        "Solving Logarithmic Equations"
       ]
     }
   }
@@ -277,6 +288,151 @@ const TestTubeMeter = ({ progress }: { progress: number }) => {
 // Tab type definition
 type ProblemLabTab = 'main' | 'ask' | 'snap';
 
+// Props for the AskLabTab component
+interface AskLabTabProps {
+  question: string;
+  setQuestion: (value: string) => void;
+  handleAskQuestion: () => void;
+  isAskingQuestion: boolean;
+  answer: string | GeminiJsonResponse | null;
+}
+
+// Component for the Ask Lab tab, now extracted as a standalone component
+const AskLabTab: React.FC<AskLabTabProps> = ({
+  question,
+  setQuestion,
+  handleAskQuestion,
+  isAskingQuestion,
+  answer,
+}) => {
+  return (
+    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
+        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <MessageSquare className="w-8 h-8" />
+          Ask the Lab
+        </CardTitle>
+        <p className="text-indigo-200 mt-2 text-lg">
+          Have a specific math question? Type it in using LaTeX for formulas.
+        </p>
+      </CardHeader>
+      <CardContent className="p-8">
+        <div className="relative">
+          <MathInput
+            value={question}
+            onChange={setQuestion}
+            placeholder="e.g., How do I find the derivative of f(x) = x^3 + 2x^2 - 4x + 7?"
+            disabled={isAskingQuestion}
+          />
+          <Button
+            onClick={handleAskQuestion}
+            disabled={isAskingQuestion || !question.trim()}
+            className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 flex items-center gap-2 transition-all duration-200 disabled:bg-indigo-300"
+          >
+            {isAskingQuestion ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Asking...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                Ask
+              </>
+            )}
+          </Button>
+        </div>
+
+        {isAskingQuestion && (
+          <div className="mt-8 flex flex-col items-center justify-center text-center">
+            <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
+            <p className="text-lg font-semibold text-gray-700">The lab is analyzing your question...</p>
+            <p className="text-gray-500">Please wait a moment.</p>
+          </div>
+        )}
+
+        {answer && !isAskingQuestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mt-8 p-6 bg-indigo-50 border border-indigo-200 rounded-xl prose max-w-none"
+          >
+            {typeof answer === 'string' ? (
+              <div className="flex items-center gap-3 text-red-600">
+                <AlertCircle className="w-6 h-6" />
+                <p>{answer}</p>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                  <Brain className="w-6 h-6" />
+                  Lab's Analysis
+                </h3>
+                <div className="p-4 bg-white rounded-lg border border-gray-200">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {(answer as GeminiJsonResponse).problem.statement || 'No problem statement available'}
+                  </ReactMarkdown>
+                </div>
+                {(answer as GeminiJsonResponse).problem.keyConcepts && (answer as GeminiJsonResponse).problem.keyConcepts.length > 0 && (
+                  <div className="mt-3">
+                    <h4 className="font-semibold text-indigo-700">Key Concepts:</h4>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {(answer as GeminiJsonResponse).problem.keyConcepts.map((concept, index) => (
+                        <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                          {concept}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-indigo-700 mb-3">Step-by-step Solution:</h4>
+                  <div className="space-y-4">
+                    {(answer as GeminiJsonResponse).solution.map((step, index) => (
+                      <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
+                        <p className="font-bold text-gray-800">Step {index + 1}: {step.step}</p>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {ensureLatexDelimiters(step.explanation)}
+                        </ReactMarkdown>
+                        {step.work && (
+                          <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {ensureLatexDelimiters(step.work)}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h4 className="text-lg font-bold text-green-800">Final Answer:</h4>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {ensureLatexDelimiters((answer as GeminiJsonResponse).answer.finalResult)}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export function ProblemLab() {
   // Active tab state
   const [activeTab, setActiveTab] = useState<ProblemLabTab>('main');
@@ -284,6 +440,7 @@ export function ProblemLab() {
   // Setup states
   const [subject, setSubject] = useState<keyof typeof subjects>("pre-algebra");
   const [topic, setTopic] = useState("");
+  const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('Regular');
   const [wordProblems, setWordProblems] = useState(false);
   const [problemCount, setProblemCount] = useState(1);
@@ -310,6 +467,11 @@ export function ProblemLab() {
   const [isLoadingSnap, setIsLoadingSnap] = useState(false);
   const [snapError, setSnapError] = useState<string | null>(null);
   
+  // Problem states
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+  const [showProblemSolving, setShowProblemSolving] = useState(false);
+  
   // Load topics and subjects from database
   useEffect(() => {
     async function loadTopicsAndSubjects() {
@@ -326,14 +488,10 @@ export function ProblemLab() {
     
     loadTopicsAndSubjects();
   }, []);
-  
-  // Problem states
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
-  const [showProblemSolving, setShowProblemSolving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [comingSoonTopics, setComingSoonTopics] = useState<{subject: string, topics: string[]}>({subject: '', topics: []});
   const [showAllSteps, setShowAllSteps] = useState(false);
   const [noProblemsFound, setNoProblemsFound] = useState(false);
   
@@ -346,6 +504,12 @@ export function ProblemLab() {
   // Track experiment setup progress
   const [setupProgress, setSetupProgress] = useState(0);
   
+  // New state for similar problem generation
+  const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false);
+  const [similarProblem, setSimilarProblem] = useState<GeminiJsonResponse | null>(null);
+  const [showSimilarProblem, setShowSimilarProblem] = useState(false);
+  const [similarProblemError, setSimilarProblemError] = useState<string | null>(null);
+
   // Handle image selection for Snap & Solve
   const handleImageSelect = (file: File | null) => {
     setSelectedImage(file);
@@ -356,61 +520,58 @@ export function ProblemLab() {
   // Handle Snap & Solve submission
   const handleSnapSolve = async () => {
     if (!selectedImage) return;
-    
+
     setIsLoadingSnap(true);
     setSnapError('');
     setSolution(null);
-    
+    setCurrentProblemIndex(0);
+
     try {
-      // Get the authentication token from Clerk
       const token = await getToken();
-      
       if (!token) {
-        setSnapError('You need to be signed in to use this feature.');
-        return;
+        throw new Error('You must be signed in to use this feature.');
       }
-      
+
       const formData = new FormData();
       formData.append('image', selectedImage);
-      
+
       const response = await fetch('/api/solve-image', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // The API now returns a structured JSON response
+
+      const responseText = await response.text();
+      console.log("Raw response from /api/solve-image:", responseText);
+
+      if (!response.ok) {
+        let errorMsg = `Server error: ${response.status}`;
         try {
-          // Check if it's a structured JSON response or a legacy string
-          if (typeof data.solution === 'object' && data.solution !== null) {
-            // It's already a JSON object
-            setSolution(data.solution);
-          } else if (typeof data.solution === 'string') {
-            // Legacy support - if it's still returning a string
-            setSolution(data.solution);
+          const errorData = JSON.parse(responseText);
+          if (response.status === 402) {
+            errorMsg = 'Insufficient stacks to perform this action.';
           } else {
-            throw new Error('Invalid response format');
+            errorMsg = errorData.error || errorMsg;
           }
-        } catch (parseError) {
-          console.error('Error parsing JSON response:', parseError);
-          setSnapError('Error parsing the response. Please try again.');
+        } catch (e) {
+          console.error("Could not parse error response as JSON.", responseText);
         }
-      } else {
-        if (data.code === 'INSUFFICIENT_STACKS') {
-          setSnapError(`You don't have enough credits to use this feature. Each image solution costs 5 credits. ${data.available ? `You currently have ${data.available} credits.` : ''} Visit the pricing page to get more credits.`);
-        } else {
-          setSnapError(data.error || 'Failed to process image');
-        }
-        console.error('Screenshot & Solve error:', data.error);
+        throw new Error(errorMsg);
       }
-    } catch (error) {
+
+      const data = JSON.parse(responseText);
+      if (data.answer) {
+        setSolution(data.answer);
+      } else {
+        throw new Error('Invalid response format from server.');
+      }
+
+    } catch (error: any) {
       console.error("Snap & Solve error:", error);
-      setSnapError('An error occurred while processing your image');
+      const message = error.message || 'An unexpected error occurred.';
+      setSnapError(message);
     } finally {
       setIsLoadingSnap(false);
     }
@@ -670,8 +831,8 @@ export function ProblemLab() {
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
-
-  // Handle asking a question
+  
+  // Handle question submission to the Ask Lab
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
     
@@ -683,75 +844,104 @@ export function ProblemLab() {
       const token = await getToken();
       
       if (!token) {
-        setAnswer('You need to be signed in to ask questions.');
+        setAnswer('You need to be signed in to use this feature.');
         return;
       }
       
-      // Call the Gemini API endpoint with authentication
       const response = await fetch('/api/ask-question', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ question: question.trim() }),
+        body: JSON.stringify({ question })
       });
       
       const data = await response.json();
       
       if (response.ok) {
-        // The API now returns a structured JSON response
-        try {
-          // Check if it's a structured JSON response or a legacy string
-          if (typeof data.answer === 'object' && data.answer !== null) {
-            // It's already a JSON object
-            setAnswer(data.answer);
-          } else if (typeof data.answer === 'string') {
-            // Legacy support - if it's still returning a string
-            setAnswer(data.answer);
-          } else {
-            throw new Error('Invalid response format');
-          }
-        } catch (parseError) {
-          console.error('Error parsing JSON response:', parseError);
-          setAnswer(`Error parsing the response. Please try again.`);
-        }
+        // Handle the structured response
+        setAnswer(data.answer);
       } else {
         if (data.code === 'INSUFFICIENT_STACKS') {
           setAnswer(`You don't have enough credits to use this feature. Each question costs 3 credits. ${data.available ? `You currently have ${data.available} credits.` : ''} Visit the pricing page to get more credits.`);
         } else {
-          setAnswer(`Sorry, there was an error processing your question: ${data.error}`);
+          setAnswer(data.error || 'Failed to process your question');
         }
+        console.error('Ask Lab error:', data.error);
       }
     } catch (error) {
-      console.error('Error asking question:', error);
-      setAnswer('Sorry, there was an error processing your question. Please try again.');
+      console.error("Ask Lab error:", error);
+      setAnswer('An error occurred while processing your question. Please try again.');
     } finally {
       setIsAskingQuestion(false);
     }
   };
-  
-  // Component for the Ask Lab tab
-  const AskLabTab: React.FC = () => {  
-    return (
-    <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 pb-6">
-        <CardTitle className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <MessageSquare className="w-8 h-8" />
-          Ask the Lab
-        </CardTitle>
-        <p className="text-indigo-100 mt-2">Get instant help with any math question</p>
-      </CardHeader>
-      <CardContent className="p-8 pt-6 bg-white">
-        <div className="space-y-6">
-          <div className="pb-4">
-            <h3 className="text-lg font-medium text-gray-800 mb-3">What math problem do you need help with?</h3>
-            <div className="space-y-2">
-              <div className="relative">
-                <textarea 
-                  ref={questionTextareaRef}
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
+
+  // Handle generating a similar problem
+  const handleGenerateSimilar = async (originalProblem: GeminiJsonResponse) => {
+    setIsGeneratingSimilar(true);
+    setSimilarProblemError(null);
+    setSimilarProblem(null);
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('You must be signed in to use this feature.');
+      }
+
+      const response = await fetch('/api/generate-similar-problem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ originalProblem }),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let errorMsg = 'Failed to generate similar problem.';
+        try {
+          const errorData = JSON.parse(responseText);
+          if (errorData.code === 'INSUFFICIENT_STACKS') {
+            errorMsg = `You don't have enough credits to use this feature. Each similar problem generation costs 3 credits. ${errorData.available ? `You currently have ${errorData.available} credits.` : ''} Visit the pricing page to get more credits.`;
+          } else {
+            errorMsg = errorData.error || errorMsg;
+          }
+        } catch (e) {
+          console.error("Could not parse error response as JSON.", responseText);
+        }
+        throw new Error(errorMsg);
+      }
+
+      const data = JSON.parse(responseText);
+      if (data.answer) {
+        setSimilarProblem(data.answer);
+        setShowSimilarProblem(true);
+      } else {
+        throw new Error('Invalid response format from server.');
+      }
+
+    } catch (error: any) {
+      console.error("Similar problem generation error:", error);
+      const message = error.message || 'An unexpected error occurred.';
+      setSimilarProblemError(message);
+    } finally {
+      setIsGeneratingSimilar(false);
+    }
+  };
+
+  // We're using the properly typed AskLabTab component defined earlier in the file (around line 301)
+  // This eliminates the duplicate component definition that was here
+                    setTimeout(() => {
+                      if (questionTextareaRef.current) {
+                        questionTextareaRef.current.focus();
+                        questionTextareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
+                      }
+                    }, 0);
+                  }}
                   className="w-full h-32 p-4 pr-12 border border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-gray-700"
                   placeholder="Type your math question here. For example: How do I solve the quadratic equation x² + 5x + 6 = 0?"
                 />
@@ -799,316 +989,87 @@ export function ProblemLab() {
                 <Button 
                   key={index}
                   variant="outline" 
-                  className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all"
-                  onClick={() => {
-                    setQuestion(example);
-                    if (questionTextareaRef.current) {
-                      questionTextareaRef.current.focus();
-                    }
-                  }}
+                  className="w-full justify-between text-left font-normal border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all h-auto py-3"
+                  onClick={() => setQuestion(example)}
                 >
-                  <span>{example}</span>
-                  <ChevronRight className="w-4 h-4 text-indigo-400" />
+                  <span className="whitespace-normal pr-2">{example}</span>
+                  <ChevronRight className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                 </Button>
               ))}
             </div>
           </div>
           
           {/* Display answer with sections */}
-          {answer && (
+          {answer && typeof answer === 'object' && !Array.isArray(answer) ? (
+            // Render GeminiJsonResponse
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mt-6 space-y-6"
             >
               {/* Problem Section */}
-              <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Problem</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={{
-                      h3: ({node, ...props}) => {
-                        // Hide the original '### Problem' heading
-                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                          String(props.children[0]) : '';
-                        return content === 'Problem' ? null : <h3 {...props} />
-                      },
-                      // Only show content until the next '### Step-By-Step Solution' heading
-                      p: ({node, ...props}) => {
-                        const content = props.children ? String(props.children) : '';
-                        if (content.includes('### Step-By-Step Solution')) {
-                          return null;
-                        }
-                        return <p {...props} />;
-                      }
-                    }}
-                  >
-                    {typeof answer === 'string' ? answer.split('### Step-By-Step Solution')[0] : ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              
-              {/* Solution Section */}
-              <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Step-By-Step Solution</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={{
-                      h3: ({node, ...props}) => {
-                        // Hide the original '### Step-By-Step Solution' heading
-                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                          String(props.children[0]) : '';
-                        return content === 'Step-By-Step Solution' ? null : <h3 {...props} />
-                      }
-                    }}
-                  >
-                    {typeof answer === 'string' ? 
-                      answer.includes('### Step-By-Step Solution') ? 
-                        answer.split('### Step-By-Step Solution')[1]?.split('### Answer')[0] || '' : 
-                        '' : 
-                      ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              
-              {/* Answer Section */}
-              <div className="p-5 bg-green-50 border border-green-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Answer</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  {typeof answer === 'string' ? (
-                  // Legacy string/markdown format
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={{
-                      h3: ({node, ...props}) => {
-                        // Hide the original '### Problem' heading
-                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                          String(props.children[0]) : '';
-                        return content === 'Problem' ? null : <h3 {...props} />;
-                      }
-                    }}
-                  >
-                    {answer}
-                  </ReactMarkdown>
-                ) : answer ? (
-                  // New JSON structure format
-                  <div className="space-y-6">
-                    {/* Problem Section */}
-                    <div className="bg-gradient-to-r from-[#6C63FF]/10 to-[#5E60CE]/10 p-4 rounded-lg border border-indigo-100">
-                      <h3 className="text-lg font-semibold text-indigo-800 mb-2 flex items-center">
-                        <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
-                          Problem
-                        </span>
-                      </h3>
-                      <h4 className="font-medium text-gray-900 mb-2">{answer.problem.title}</h4>
-                      <div className="text-gray-700">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {answer.problem.statement}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                    
-                    {/* Solution Section */}
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                      <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                          Step-By-Step Solution
-                        </span>
-                      </h3>
-                      <div className="space-y-6">
-                        {answer.solution.map((step, index) => (
-                          <div key={index} className="border-l-2 border-blue-200 pl-4 py-1">
-                            <div className="font-medium text-blue-800">
-                              Step {index + 1}: {step.step}
-                            </div>
-                            <div className="text-gray-700 mt-1 mb-2">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkMath]}
-                                rehypePlugins={[rehypeKatex]}
-                              >
-                                {step.explanation}
-                              </ReactMarkdown>
-                            </div>
-                            <div className="bg-white p-2 rounded border border-gray-200 mt-1">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkMath]}
-                                rehypePlugins={[rehypeKatex]}
-                              >
-                                {step.work}
-                              </ReactMarkdown>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Answer Section */}
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                      <h3 className="text-lg font-semibold text-green-800 mb-2 flex items-center">
-                        <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                          Answer
-                        </span>
-                      </h3>
-                      <div className="font-medium text-gray-900 mb-1">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {answer.answer.finalResult}
-                        </ReactMarkdown>
-                      </div>
-                      {answer.answer.verification && (
-                        <div className="text-gray-700 mt-2">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkMath]}
-                            rehypePlugins={[rehypeKatex]}
-                          >
-                            {answer.answer.verification}
-                          </ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-  
-  // Component for the Screenshot & Solve tab
-  const ScreenshotSolveTab: React.FC = () => {
-    return (
-    <Card className="w-full max-w-2xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
-        <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-          <Camera className="w-7 h-7" />
-          Screenshot & Solve
-        </CardTitle>
-        <p className="text-indigo-100 mt-1 text-sm">Upload a screenshot of your math problem for an AI-powered solution!</p>
-      </CardHeader>
-      <CardContent className="p-6 bg-white">
-        <div className="space-y-6">
-          {/* Image upload component */}
-          <div className="w-full">
-            <ImageUpload onImageSelect={handleImageSelect} currentImage={selectedImage} />
-          </div>
-
-          {snapError && (
-            <div className="flex items-center p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
-              <span className="text-sm">{snapError}</span>
-            </div>
-          )}
-
-          <div className="relative w-full">
-            <div className="absolute -top-6 right-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
-              <Coins className="w-3 h-3 text-indigo-600" />
-              <span className="text-xs font-medium text-indigo-600">5</span>
-            </div>
-            <Button
-              onClick={handleSnapSolve}
-              disabled={!selectedImage || isLoadingSnap}
-              className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
-              title="Costs 5 credits"
-            >
-              {isLoadingSnap ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Getting solution...
-                </>
-              ) : (
-                <>
-                  Get Solution <Send className="w-4 h-4" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          {solution && !isLoadingSnap && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6 space-y-6"
-            >
-              {/* Problem Section */}
-              <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Problem</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={{
-                      h3: ({node, ...props}) => {
-                        // Hide the original '### Problem' heading
-                        const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                          String(props.children[0]) : '';
-                        return content === 'Problem' ? null : <h3 {...props} />
-                      },
-                      // Only show content until the next '### Step-By-Step Solution' heading
-                      p: ({node, ...props}) => {
-                        const content = props.children ? String(props.children) : '';
-                        if (content.includes('### Step-By-Step Solution')) {
-                          return null;
-                        }
-                        return <p {...props} />;
-                      }
-                    }}
-                  >
-                    {typeof solution === 'string' ? solution.split('### Step-By-Step Solution')[0] : ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-              
-              {/* Solution Section */}
-              <div className="p-5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-3">Step-By-Step Solution</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800">
-                  {typeof solution === 'string' ? (
-                    // Legacy string/markdown format
+              {(answer as GeminiJsonResponse).problem && (
+                <div className="bg-gradient-to-r from-[#6C63FF]/10 to-[#5E60CE]/10 p-4 rounded-lg border border-indigo-100">
+                  <h3 className="text-lg font-semibold text-indigo-800 mb-2 flex items-center">
+                    <span className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] bg-clip-text text-transparent">
+                      Problem
+                    </span>
+                  </h3>
+                  <h4 className="font-medium text-gray-900 mb-2">{(answer as GeminiJsonResponse).problem.title || 'No title available'}</h4>
+                  <div className="text-gray-700 prose prose-sm lg:prose-base max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkMath]}
                       rehypePlugins={[rehypeKatex]}
-                      components={{
-                        h3: ({node, ...props}) => {
-                          // Hide the original '### Step-By-Step Solution' heading
-                          const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                            String(props.children[0]) : '';
-                          return content === 'Step-By-Step Solution' ? null : <h3 {...props} />
-                        }
-                      }}
                     >
-                      {solution.includes('### Step-By-Step Solution') ? 
-                        solution.split('### Step-By-Step Solution')[1].split('### Answer')[0] || '' : 
-                        ''}
+                      {(answer as GeminiJsonResponse).problem.statement || 'No problem statement available'}
                     </ReactMarkdown>
-                  ) : solution ? (
-                    // New JSON structure format - Solution section
-                    <div className="space-y-4">
-                      {solution.solution.map((step, index) => (
-                        <div key={index} className="border-l-2 border-blue-200 pl-4 py-1">
-                          <div className="font-medium text-blue-800">
-                            Step {index + 1}: {step.step}
-                          </div>
-                          <div className="text-gray-700 mt-1 mb-2">
+                  </div>
+                  {(answer as GeminiJsonResponse).problem.keyConcepts && (answer as GeminiJsonResponse).problem.keyConcepts.length > 0 && (
+                    <div className="mt-3">
+                      <h5 className="text-sm font-semibold text-indigo-700 mb-1">Key Concepts:</h5>
+                      <ul className="list-disc list-outside text-sm text-gray-600 space-y-1 ml-5">
+                        {(answer as GeminiJsonResponse).problem.keyConcepts.map((concept: string, idx: number) => (
+                          <li key={idx} className="pl-1">
                             <ReactMarkdown
                               remarkPlugins={[remarkMath]}
                               rehypePlugins={[rehypeKatex]}
                             >
-                              {step.explanation}
+                              {concept}
+                            </ReactMarkdown>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Solution Section */}
+              {(answer as GeminiJsonResponse).solution && (answer as GeminiJsonResponse).solution.length > 0 && (
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                    <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                      Step-By-Step Solution
+                    </span>
+                  </h3>
+                  <div className="space-y-6">
+                    {(answer as GeminiJsonResponse).solution.map((step: GeminiJsonResponse['solution'][0], index: number) => (
+                      <div key={index} className="border-l-2 border-blue-200 pl-4 py-1">
+                        <div className="font-medium text-blue-800">
+                          Step {index + 1}: {step.step || 'No step description'}
+                        </div>
+                        {step.explanation && (
+                          <div className="text-gray-700 mt-1 mb-2 prose prose-sm lg:prose-base max-w-none">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {step.explanation || 'No explanation provided'}
                             </ReactMarkdown>
                           </div>
-                          <div className="bg-white p-2 rounded border border-gray-200 mt-1">
+                        )}
+                        {step.work && (
+                          <div className="bg-white p-2 rounded border border-gray-200 mt-1 prose prose-sm lg:prose-base max-w-none">
                             <ReactMarkdown
                               remarkPlugins={[remarkMath]}
                               rehypePlugins={[rehypeKatex]}
@@ -1116,56 +1077,422 @@ export function ProblemLab() {
                               {step.work}
                             </ReactMarkdown>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Answer Section */}
-              <div className="p-5 bg-green-50 border border-green-100 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Answer</h3>
-                <div className="prose prose-sm lg:prose-base max-w-none text-gray-800 bg-white rounded-md p-4 shadow-xs">
-                  {typeof solution === 'string' ? (
-                    // Legacy string/markdown format
-                    <ReactMarkdown
-                      remarkPlugins={[remarkMath]}
-                      rehypePlugins={[rehypeKatex]}
-                      components={{
-                        h3: ({node, ...props}) => {
-                          // Hide the original '### Answer' heading
-                          const content = Array.isArray(props.children) && props.children.length > 0 ? 
-                            String(props.children[0]) : '';
-                          return content === 'Answer' ? null : <h3 {...props} />
-                        }
-                      }}
-                    >
-                      {solution.includes('### Answer') ? 
-                        solution.split('### Answer')[1] || '' : 
-                        ''}
-                    </ReactMarkdown>
-                  ) : solution ? (
-                    // New JSON structure format - Answer section
-                    <div>
-                      <div className="font-medium text-gray-900 mb-2">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {solution.problem.statement}
-                        </ReactMarkdown>
-                      </div>
+              {(answer as GeminiJsonResponse).answer && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                  <h3 className="text-lg font-semibold text-green-800 mb-2 flex items-center">
+                    <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                      Answer
+                    </span>
+                  </h3>
+                  {(answer as GeminiJsonResponse).answer.finalResult && (
+                    <div className="font-medium text-gray-900 mb-1 prose prose-sm lg:prose-base max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {(answer as GeminiJsonResponse).answer.finalResult}
+                      </ReactMarkdown>
                     </div>
-                  ) : null}
+                  )}
+                  {(answer as GeminiJsonResponse).answer.verification && (
+                    <div className="text-gray-700 mt-2 prose prose-sm lg:prose-base max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {(answer as GeminiJsonResponse).answer.verification}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Generate Similar Problem Button */}
+              <div className="mt-6 flex flex-col items-center">
+                <Button
+                  onClick={() => handleGenerateSimilar(answer as GeminiJsonResponse)}
+                  disabled={isGeneratingSimilar}
+                  className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
+                  title="Costs 3 credits"
+                >
+                  {isGeneratingSimilar ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Generating similar problem...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="w-5 h-5" />
+                      Generate a problem just like this one
+                    </>
+                  )}
+                </Button>
+                <div className="flex items-center gap-1 mt-2 text-indigo-600">
+                  <Coins className="w-3 h-3" />
+                  <span className="text-xs font-medium">3 credits</span>
                 </div>
               </div>
+
+              {/* Error display for similar problem generation */}
+              {similarProblemError && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2"
+                >
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">{similarProblemError}</span>
+                </motion.div>
+              )}
+
+              {/* Display similar problem */}
+              {showSimilarProblem && similarProblem && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-purple-800 flex items-center gap-2">
+                      <Brain className="w-6 h-6" />
+                      Similar Problem Generated
+                    </h3>
+                    <Button
+                      onClick={() => setShowSimilarProblem(false)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Similar Problem Content */}
+                  <div className="space-y-4">
+                    {/* Problem Section */}
+                    {similarProblem.problem && (
+                      <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
+                        <h4 className="text-md font-semibold text-purple-800 mb-2">
+                          {similarProblem.problem.title || 'New Problem'}
+                        </h4>
+                        <div className="text-gray-700 prose prose-sm max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkMath]}
+                            rehypePlugins={[rehypeKatex]}
+                          >
+                            {similarProblem.problem.statement || 'No problem statement available'}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Generate another or try solving it buttons */}
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => handleGenerateSimilar(answer as GeminiJsonResponse)}
+                        disabled={isGeneratingSimilar}
+                        variant="outline"
+                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                      >
+                        Generate Another
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setAnswer(similarProblem);
+                          setShowSimilarProblem(false);
+                          setSimilarProblem(null);
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        Show Solution
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
-          )}
+          ) : answer && typeof answer === 'string' ? (
+            // Fallback for plain string answers (e.g., error messages not in JSON format)
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 p-5 bg-red-50 border border-red-100 rounded-lg shadow-sm"
+            >
+              <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider mb-3">Information</h3>
+              <div className="prose prose-sm lg:prose-base max-w-none text-gray-800">
+                <ReactMarkdown>{answer}</ReactMarkdown>
+              </div>
+            </motion.div>
+          ) : null}
+
         </div>
       </CardContent>
     </Card>
   );
+  }
+  
+  // Render the appropriate tab content
+  const renderTabContent = () => {
+    if (activeTab === 'snap') {
+      return (
+        <Card className="w-full max-w-2xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+            <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
+              <Camera className="w-7 h-7" />
+              Screenshot & Solve
+            </CardTitle>
+            <p className="text-indigo-100 mt-1 text-sm">Upload a screenshot of your math problem for an AI-powered solution!</p>
+          </CardHeader>
+          <CardContent className="p-6 bg-white">
+            <div className="space-y-6">
+              {/* Image upload component */}
+              <div className="w-full">
+                <ImageUpload onImageSelect={handleImageSelect} currentImage={selectedImage} />
+              </div>
+
+              {snapError && (
+                <div className="flex items-center p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+                  <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                  <span className="text-sm">{snapError}</span>
+                </div>
+              )}
+
+              <div className="relative w-full">
+                <div className="absolute -top-6 right-2 flex items-center gap-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">
+                  <Coins className="w-3 h-3 text-indigo-600" />
+                  <span className="text-xs font-medium text-indigo-600">5</span>
+                </div>
+                <Button
+                  onClick={handleSnapSolve}
+                  disabled={!selectedImage || isLoadingSnap}
+                  className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base tracking-wide rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+                  title="Costs 5 credits"
+                >
+                  {isLoadingSnap ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Getting solution...
+                    </>
+                  ) : (
+                    <>
+                      Get Solution <Send className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {solution && !isLoadingSnap && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 space-y-6"
+                >
+                  {typeof solution === 'object' && solution.problem ? (
+                    <div className="prose prose-indigo max-w-none">
+                      {/* Problem Section */}
+                      <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-100">
+                        <h3 className="text-lg font-bold text-indigo-800 flex items-center">
+                          <Book className="w-5 h-5 mr-2" /> Problem: {solution.problem.title}
+                        </h3>
+                        <div className="mt-2 text-gray-700">
+                          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                            {solution.problem.statement}
+                          </ReactMarkdown>
+                        </div>
+                        {solution.problem.keyConcepts && solution.problem.keyConcepts.length > 0 && (
+                          <div className="mt-3">
+                            <h4 className="font-semibold text-sm text-indigo-700">Key Concepts:</h4>
+                            <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
+                              {solution.problem.keyConcepts.map((concept: string, index: number) => (
+                                <li key={index}>{concept}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Solution Section */}
+                      <div className="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-100">
+                        <h3 className="text-lg font-bold text-blue-800 flex items-center">
+                          <PenTool className="w-5 h-5 mr-2" /> Solution Steps
+                        </h3>
+                        <ol className="list-decimal list-inside mt-2 space-y-4">
+                          {solution.solution.map((step: { step: string; work: string; explanation: string }, index: number) => (
+                            <li key={index} className="pl-2">
+                              <strong className="font-semibold text-gray-800">{step.step}</strong>
+                              <div className="pl-4 border-l-2 border-blue-200 mt-1">
+                                <div className="text-gray-700">
+                                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                    {step.explanation}
+                                  </ReactMarkdown>
+                                </div>
+                                {step.work && (
+                                  <div className="mt-2 p-2 bg-white rounded-md border border-gray-200">
+                                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                      {step.work}
+                                    </ReactMarkdown>
+                                  </div>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+
+                      {/* Answer Section */}
+                      <div className="mt-4 p-4 rounded-lg bg-green-50 border border-green-100">
+                        <h3 className="text-lg font-bold text-green-800 flex items-center">
+                          <CheckCircle className="w-5 h-5 mr-2" /> Final Answer
+                        </h3>
+                        <div className="mt-2 text-gray-800 font-semibold">
+                           <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                            {solution.answer.finalResult}
+                          </ReactMarkdown>
+                        </div>
+                        {solution.answer.verification && (
+                          <div className="mt-2 text-sm text-gray-600">
+                            <strong className="font-semibold">Verification:</strong>
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                              {solution.answer.verification}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
+
+                       {/* Generate Similar Problem Button */}
+                       <div className="mt-6 flex flex-col items-center">
+                           <Button
+                           onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
+                           disabled={isGeneratingSimilar}
+                           className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
+                           title="Costs 3 credits"
+                           >
+                           {isGeneratingSimilar ? (
+                               <>
+                               <Loader2 className="w-5 h-5 animate-spin" />
+                               Generating similar problem...
+                               </>
+                           ) : (
+                               <>
+                               <Brain className="w-5 h-5" />
+                               Generate a problem just like this one
+                               </>
+                           )}
+                           </Button>
+                           <div className="flex items-center gap-1 mt-2 text-indigo-600">
+                               <Coins className="w-3 h-3" />
+                               <span className="text-xs font-medium">3 credits</span>
+                           </div>
+                       </div>
+
+                       {/* Error display for similar problem generation */}
+                       {similarProblemError && (
+                         <motion.div
+                           initial={{ opacity: 0, y: 10 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2"
+                         >
+                           <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                           <span className="text-sm">{similarProblemError}</span>
+                         </motion.div>
+                       )}
+
+                       {/* Display similar problem */}
+                       {showSimilarProblem && similarProblem && (
+                         <motion.div
+                           initial={{ opacity: 0, y: 20 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm"
+                         >
+                           <div className="mb-4 flex items-center justify-between">
+                             <h3 className="text-lg font-bold text-purple-800 flex items-center gap-2">
+                               <Brain className="w-6 h-6" />
+                               Similar Problem Generated
+                             </h3>
+                             <Button
+                               onClick={() => setShowSimilarProblem(false)}
+                               variant="ghost"
+                               size="sm"
+                               className="text-purple-600 hover:text-purple-800"
+                             >
+                               <X className="w-4 h-4" />
+                             </Button>
+                           </div>
+
+                           {/* Similar Problem Content */}
+                           <div className="space-y-4">
+                             {/* Problem Section */}
+                             {similarProblem.problem && (
+                               <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
+                                 <h4 className="text-md font-semibold text-purple-800 mb-2">
+                                   {similarProblem.problem.title || 'New Problem'}
+                                 </h4>
+                                 <div className="text-gray-700 prose prose-sm max-w-none">
+                                   <ReactMarkdown
+                                     remarkPlugins={[remarkMath]}
+                                     rehypePlugins={[rehypeKatex]}
+                                   >
+                                     {similarProblem.problem.statement || 'No problem statement available'}
+                                   </ReactMarkdown>
+                                 </div>
+                               </div>
+                             )}
+
+                             {/* Generate another or try solving it buttons */}
+                             <div className="flex gap-3 justify-center">
+                               <Button
+                                 onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
+                                 disabled={isGeneratingSimilar}
+                                 variant="outline"
+                                 className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                               >
+                                 Generate Another
+                               </Button>
+                               <Button
+                                 onClick={() => {
+                                   setSolution(similarProblem);
+                                   setShowSimilarProblem(false);
+                                   setSimilarProblem(null);
+                                 }}
+                                 className="bg-purple-600 hover:bg-purple-700 text-white"
+                               >
+                                 Show Solution
+                               </Button>
+                             </div>
+                           </div>
+                         </motion.div>
+                       )}
+                     </div>
+                  ) : (
+                    <div className="prose prose-indigo">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {typeof solution === 'string' ? solution : ''}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+    
+    // Return content for other tabs (main, ask) in similar format...
+    // For now just return null for unimplemented tabs
+    return null;
+  }
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center py-12 px-4 overflow-hidden">
@@ -1179,33 +1506,39 @@ export function ProblemLab() {
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'main' ? 
               'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            <Beaker className="w-4 h-4" />
-            The Algebratory
+            <Beaker className="w-5 h-5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">The Algebratory</span>
           </button>
           <button 
             onClick={() => setActiveTab('ask')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'ask' ? 
               'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            <MessageSquare className="w-4 h-4" />
-            Ask the Lab
+            <MessageSquare className="w-5 h-5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Ask the Lab</span>
           </button>
           <button 
             onClick={() => setActiveTab('snap')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-colors ${activeTab === 'snap' ? 
               'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            <Camera className="w-4 h-4" />
-            Screenshot & Solve
+            <Camera className="w-5 h-5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Screenshot & Solve</span>
           </button>
         </div>
       </div>
       
       {/* Render content based on selected tab */}
       {activeTab === 'ask' ? (
-        <AskLabTab />
+        <AskLabTab
+          question={question}
+          setQuestion={setQuestion}
+          handleAskQuestion={handleAskQuestion}
+          isAskingQuestion={isAskingQuestion}
+          answer={answer}
+        />
       ) : activeTab === 'snap' ? (
-        <ScreenshotSolveTab />
+        renderTabContent()
       ) : (
         /* Main Problem Lab Content - Original content */
         <>
@@ -1264,7 +1597,7 @@ export function ProblemLab() {
           </CardHeader>
           <CardContent className="p-6 bg-white">
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Subject</Label>
                   <Select 
@@ -1296,33 +1629,61 @@ export function ProblemLab() {
 
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Topic</Label>
-                  <Select value={topic} onValueChange={setTopic}>
+                  <Select value={topic} onValueChange={(value) => { setTopic(value); setIsTopicDropdownOpen(false); }} open={isTopicDropdownOpen} onOpenChange={setIsTopicDropdownOpen}>
                     <SelectTrigger className="mt-2 bg-white border border-gray-200 text-gray-800 h-10 hover:bg-gray-50 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                       <SelectValue placeholder="Select topic" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border border-gray-200 shadow-md max-h-80">
-                      {Object.entries(subjects[subject].topicGroups).map(([groupName, topics]) => (
-                        <div key={groupName}>
-                          <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10">
-                            {groupName}
-                          </div>
-                              {(topics as string[]).map((t) => (
-                                <SelectItem 
-                                  key={t} 
-                                  value={t} 
-                                  className="text-gray-700 pl-4 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-150"
+                      {Object.entries(subjects[subject].topicGroups).map(([groupName, topics]) => {
+                        // Special handling for Coming Soon section
+                        if (groupName === "🔜 Coming Soon") {
+                          return (
+                            <div key={groupName}>
+                              <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10 flex justify-between items-center">
+                                <span>{groupName}</span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 text-xs text-indigo-700 hover:text-indigo-900 hover:bg-indigo-100 px-2 py-0"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsTopicDropdownOpen(false);
+                                    setComingSoonTopics({subject: subjects[subject].name, topics: topics as string[]});
+                                    setComingSoonOpen(true);
+                                  }}
                                 >
-                                  {t}
-                                </SelectItem>
-                              ))}
-                        </div>
-                      ))}
+                                  See what's coming
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Normal topic groups
+                        return (
+                          <div key={groupName}>
+                            <div className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50/70 sticky top-0 z-10">
+                              {groupName}
+                            </div>
+                            {(topics as string[]).map((t) => (
+                              <SelectItem 
+                                key={t} 
+                                value={t} 
+                                className="text-gray-700 pl-4 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-150"
+                              >
+                                {t}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Difficulty</Label>
                   <Select value={difficulty} onValueChange={handleDifficultyChange}>
@@ -1346,7 +1707,7 @@ export function ProblemLab() {
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Number of Problems</Label>
                   <div className="mt-2 flex items-center justify-between px-1">
-                    {[1, 2, 3, 4, 5].map((count) => (
+                    {[1, 2, 3, 4].map((count) => (
                       <ProblemCountButton
                         key={count}
                         count={count}
@@ -1393,7 +1754,7 @@ export function ProblemLab() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 flex flex-col lg:flex-row gap-8">
                   <Button
                     onClick={generateProblems}
                     disabled={!topic || isLoading || setupProgress < 100}
@@ -1411,7 +1772,7 @@ export function ProblemLab() {
                     ) : setupProgress < 100 ? (
                       <>
                         Complete setup first
-                        <span className="inline-block w-5 h-5 rounded-full border-2 border-white/50 flex items-center justify-center">
+                        <span className="inline-block w-5 h-5 rounded-full border-2 border-white/50 flex-shrink-0">
                           <HelpCircle className="w-3 h-3" />
                         </span>
                       </>
@@ -1458,20 +1819,21 @@ export function ProblemLab() {
                     </div>
                   </div>
                   <Button variant="ghost" className="text-white hover:bg-indigo-700" onClick={() => setShowProblemSolving(false)}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Lab
+                    <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Back to Lab</span>
                   </Button>
                 </div>
               </CardHeader>
               
-              <CardContent className="p-8 pt-6 bg-white">
-                <div className="mb-8 rounded-lg bg-gray-50 border border-gray-100 p-6 shadow-sm">
+              <CardContent className="p-4 sm:p-6 md:p-8 pt-6 bg-white">
+                <div className="mb-8 rounded-lg bg-gray-50 border border-gray-100 p-4 sm:p-6 shadow-sm">
                   <h3 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-3">Problem</h3>
                   <div className="whitespace-pre-wrap text-lg font-medium text-gray-800">
                     <ReactMarkdown
                       remarkPlugins={[remarkMath]}
                       rehypePlugins={[rehypeKatex]}
                     >
-                      {currentProblem.question}
+                      {ensureLatexDelimiters(currentProblem.question)}
                     </ReactMarkdown>
                   </div>
                 </div>
@@ -1529,53 +1891,70 @@ export function ProblemLab() {
                   <div className="mt-6 border-t pt-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Need a hint?</span>
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={showNextHint}
-                          disabled={!currentProblem?.hints || currentHintIndex >= (currentProblem.hints.length - 1)}
+                          disabled={!currentProblem?.hints || currentHintIndex >= currentProblem.hints.length}
                           className="text-xs px-3 py-1"
                         >
                           {showHint ? 'Next Hint' : 'Show Hint'}
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllSteps(true)}
+                          className="text-xs px-3 py-1 flex items-center gap-1 text-indigo-600 hover:bg-indigo-50"
+                          disabled={showAllSteps}
+                        >
+                          <HelpCircle className="w-4 h-4" />
+                          I'm stumped
+                        </Button>
                       </div>
                     </div>
-                    {showHint && currentProblem.hints && currentProblem.hints.length > 0 && (
-                      <div className="bg-amber-50 border border-amber-100 rounded-md p-2 text-amber-800 text-sm">
-                        <p>{currentProblem.hints[currentHintIndex]}</p>
-                        <div className="mt-2 flex justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowAllSteps(true)}
-                            className="text-xs px-3 py-1 flex items-center gap-1"
-                            disabled={showAllSteps}
-                          >
-                            <span className="inline-block"><HelpCircle className="w-4 h-4 text-indigo-600" /></span>
-                            I'm stumped
-                          </Button>
-                        </div>
+                    {showHint && currentProblem.hints && currentHintIndex < currentProblem.hints.length && (
+                      <div className="bg-amber-50 border border-amber-100 rounded-md p-3 text-amber-900 text-sm">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {ensureLatexDelimiters(currentProblem.hints[currentHintIndex])}
+                        </ReactMarkdown>
                       </div>
                     )}
                   </div>
                   {/* Solution Steps (shown when correct or stumped) */}
                   {(isCorrect || showAllSteps) && currentProblem.solutionSteps && (
                     <div className="mt-8 pt-6 border-t border-gray-100">
-                      <h3 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <h3 className="text-sm font-display font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <Check className="w-4 h-4" /> Solution Steps
                       </h3>
                       <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
                         <ol className="list-decimal pl-5 space-y-4">
                           {currentProblem.solutionSteps.map((step, index) => (
-                            <li key={index} className="text-gray-700 text-base">
+                            <li key={index} className="text-gray-700 text-base font-body">
                               <div className="bg-white p-3 rounded-md shadow-xs">
-                                <ReactMarkdown
-                                  remarkPlugins={[remarkMath]}
-                                  rehypePlugins={[rehypeKatex]}
+                                <div className="font-body leading-relaxed">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkMath]}
+                                    rehypePlugins={[rehypeKatex]}
+                                    components={{
+                                    // @ts-ignore - inline is actually available in the props but TypeScript doesn't recognize it
+                                    code: ({ node, inline, className, children, ...props }: any) => (
+                                      <code className={`${className || ''} ${inline ? 'font-mono text-sm' : 'font-mono text-sm'}`} {...props}>
+                                        {children}
+                                      </code>
+                                    ),
+                                    // @ts-ignore - node is actually available in the props but TypeScript doesn't recognize it
+                                    strong: ({ node, children }: any) => (
+                                      <strong className="font-bold">{children}</strong>
+                                    )
+                                  }}
                                 >
-                                  {step}
+                                  {ensureLatexDelimiters(step)}
                                 </ReactMarkdown>
+                                </div>
                               </div>
                             </li>
                           ))}
@@ -1589,7 +1968,7 @@ export function ProblemLab() {
                             onClick={saveProblemsToSupabase}
                             disabled={isSavingProblems}
                             variant="outline"
-                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 flex items-center gap-2"
+                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 flex items-center gap-2 font-display font-medium tracking-tight transition-all duration-300 hover:-translate-y-0.5"
                           >
                             {isSavingProblems ? (
                               <>
@@ -1608,7 +1987,7 @@ export function ProblemLab() {
                       
                       {/* Success message after saving */}
                       {problemsSaved && (
-                        <div className="mt-4 p-2 bg-green-50 border border-green-100 rounded text-green-700 text-sm flex items-center gap-2">
+                        <div className="mt-4 p-2 bg-green-50 border border-green-100 rounded text-green-700 text-sm flex items-center gap-2 font-body">
                           <CheckCircle className="w-4 h-4" />
                           Problem saved successfully!
                         </div>
@@ -1622,18 +2001,41 @@ export function ProblemLab() {
         </Card>
       )}
 
-      {/* Coming Soon Modal */}
+      {/* Coming Soon Topics Modal - Glassy, Light & Airy */}
       {comingSoonOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle>Coming Soon</CardTitle>
+        <div className="fixed inset-0 bg-indigo-900/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-auto max-h-[80vh] overflow-hidden flex flex-col shadow-lg border border-white/20 bg-white/80 backdrop-blur-md rounded-xl">
+            <CardHeader className="bg-gradient-to-r from-indigo-600/90 to-purple-600/90 text-white backdrop-blur-sm border-b border-white/10">
+              <CardTitle className="flex items-center gap-2 text-white">
+                <span>Coming Soon to {comingSoonTopics.subject}</span>
+              </CardTitle>
+              <p className="text-white/90 text-sm mt-1">We're working on adding these exciting topics!</p>
             </CardHeader>
-            <CardContent>
-              <p>This feature is currently under development and will be available soon!</p>
+            <CardContent className="overflow-y-auto flex-grow bg-transparent">
+              <div className="space-y-4 py-2">
+                {comingSoonTopics.topics.length > 0 ? (
+                  <ul className="space-y-1">
+                    {comingSoonTopics.topics.map((topic, index) => (
+                      <li key={index} className="flex items-start gap-2 p-2 rounded-lg hover:bg-white/70 transition-all duration-200">
+                        <div className="mt-0.5 text-indigo-500">
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                        <span className="text-indigo-900/80 font-medium">{topic}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-indigo-600/70 italic">No upcoming topics to display.</p>
+                )}
+              </div>
             </CardContent>
-            <div className="p-4 flex justify-end">
-              <Button onClick={() => setComingSoonOpen(false)}>Close</Button>
+            <div className="p-4 border-t border-indigo-100/30 flex justify-end bg-transparent">
+              <Button 
+                onClick={() => setComingSoonOpen(false)}
+                className="bg-gradient-to-r from-[#6C63FF]/90 to-[#5E60CE]/90 text-white hover:opacity-100 hover:shadow-md font-medium px-6 backdrop-blur-sm transition-all duration-300 border border-white/20"
+              >
+                Close
+              </Button>
             </div>
           </Card>
         </div>
