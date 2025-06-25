@@ -162,7 +162,7 @@ Core Directives:
       
       responseForLogging = parsedAnswer;
       statusCodeForLogging = 200;
-      finalResponse = NextResponse.json({ similarProblem: parsedAnswer });
+      finalResponse = NextResponse.json({ answer: parsedAnswer });
     } catch (parseError) {
       console.error('Parse error:', parseError);
       errorMessageForLogging = `The AI returned a response that could not be parsed: ${parseError.message}`;
