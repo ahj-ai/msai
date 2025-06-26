@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import MathField, { MathFieldRef } from './math-field';
-import { MessageSquare, Send, Loader2, AlertCircle, Brain, Coins, CheckCircle, X } from 'lucide-react';
+import { MessageSquare, Send, Loader2, AlertCircle, Brain, Coins, CheckCircle, X, TextIcon, FunctionSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -29,6 +29,8 @@ interface AskTheLabProps {
   setSolution?: (solution: GeminiJsonResponse) => void;
 }
 
+type InputMode = 'equation' | 'word-problem';
+
 const AskTheLab: React.FC<AskTheLabProps> = ({
   question,
   setQuestion,
@@ -44,8 +46,14 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
   similarProblemError,
   setSolution,
 }) => {
+  // State to toggle between equation input and word problem input
+  const [inputMode, setInputMode] = useState<InputMode>('equation');
+  
   // Create a ref for the MathField component following the uncontrolled component pattern
   const mathFieldRef = React.useRef<MathFieldRef>(null);
+  
+  // Create a ref for the textarea
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   return (
     <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 md:p-8 pb-4 md:pb-6">
@@ -58,46 +66,80 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
         </p>
       </CardHeader>
       <CardContent className="p-4 md:p-8">
-        <div className="relative">
-          {/* Use the uncontrolled MathField component with ref */}
-          <MathField
-            value={question} // Initial value only
-            onChange={(value) => {
-              // Update the parent state when the MathField value changes
-              setQuestion(value);
-            }}
-            placeholder="f(x) = x^3 + 2x^2 - 4x + 7"
-            disabled={isAskingQuestion}
-            ref={mathFieldRef}
-          />
-          
-          {/* No keyboard toggle button needed with built-in MathField functionality */}
-          
-          {/* Submit button - positioned in the bottom right */}
-          <Button
-            onClick={() => {
-              // Get the current value from the mathField ref before submitting
-              if (mathFieldRef.current) {
-                const currentValue = mathFieldRef.current.getValue();
-                setQuestion(currentValue); // Make sure state is up-to-date
-              }
-              handleAskQuestion();
-            }}
-            disabled={isAskingQuestion || !question.trim()}
-            className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3 py-2 md:px-4 md:py-2 flex items-center gap-1 md:gap-2 text-sm md:text-base transition-all duration-200 disabled:bg-indigo-300"
-          >
-            {isAskingQuestion ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Asking...
-              </>
+        <div className="relative mb-4 rounded-lg border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-200 focus-within:border-indigo-500 overflow-hidden transition-all duration-200">
+          <div className="flex border-b border-gray-200 bg-gray-50/50">
+            <button
+              onClick={() => setInputMode('equation')}
+              className={`flex-1 p-3 text-center font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-2 ${
+                inputMode === 'equation'
+                  ? 'bg-white text-indigo-600 border-b-2 border-indigo-600'
+                  : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              <FunctionSquare className="w-5 h-5" />
+              Equation
+            </button>
+            <div className="w-px bg-gray-200"></div>
+            <button
+              onClick={() => setInputMode('word-problem')}
+              className={`flex-1 p-3 text-center font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-2 ${
+                inputMode === 'word-problem'
+                  ? 'bg-white text-purple-600 border-b-2 border-purple-600'
+                  : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              <TextIcon className="w-5 h-5" />
+              Word Problem
+            </button>
+          </div>
+
+          <div className="relative">
+            {inputMode === 'equation' ? (
+              <MathField
+                value={question}
+                onChange={setQuestion}
+                placeholder="f(x) = x^3 + 2x^2 - 4x + 7"
+                disabled={isAskingQuestion}
+                ref={mathFieldRef}
+                className="w-full border-0 focus:ring-0 !min-h-[130px] md:!min-h-[150px] bg-white"
+              />
             ) : (
-              <>
-                <Send className="w-5 h-5" />
-                Ask
-              </>
+              <textarea
+                ref={textareaRef}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Describe your math problem here..."
+                disabled={isAskingQuestion}
+                className="w-full p-4 rounded-b-lg border-0 focus:ring-0 transition-all duration-200 min-h-[130px] md:min-h-[150px] font-normal text-base bg-white resize-none"
+              />
             )}
-          </Button>
+            
+            <Button
+              onClick={() => {
+                if (inputMode === 'equation' && mathFieldRef.current) {
+                  const currentValue = mathFieldRef.current.getValue();
+                  setQuestion(currentValue);
+                } else if (inputMode === 'word-problem' && textareaRef.current) {
+                  setQuestion(textareaRef.current.value);
+                }
+                handleAskQuestion();
+              }}
+              disabled={isAskingQuestion || !question.trim()}
+              className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3 py-2 md:px-4 md:py-2 flex items-center gap-1 md:gap-2 text-sm md:text-base transition-all duration-200 disabled:bg-indigo-300"
+            >
+              {isAskingQuestion ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Asking...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Ask
+                </>
+              )}
+            </Button>
+          </div>
         </div>
         
         {/* No virtual keyboard needed - using built-in MathField keyboard */}

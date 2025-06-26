@@ -145,62 +145,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Interactive AI Demo Section */}
-        <section className="section bg-gradient-to-r from-[#6C63FF]/5 to-[#5E60CE]/5">
-          <div className="container">
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white border border-[#6C63FF]/20 rounded-2xl p-8 shadow-xl">
-                <div className="text-center mb-8">
-                  <h3 className="font-display text-3xl font-bold text-gray-900 mb-4">Watch AI Solve in Real-Time</h3>
-                  <p className="text-gray-600 font-body">Type any math problem and see the magic happen</p>
-                </div>
-                
-                <div className="bg-gray-900 rounded-2xl p-6 mb-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-400 text-sm ml-2 font-mono">MathStack AI Console</span>
-                  </div>
-                  
-                  <div className="font-mono">
-                    <div className="text-green-400 mb-2">$ solve: {mathProblem}</div>
-                    {showSolution && (
-                      <div className="text-cyan-300 animate-fadeIn">
-                        <div>Step 1: Subtract 5 from both sides</div>
-                        <div className="ml-4 text-gray-400">2x + 5 - 5 = 13 - 5</div>
-                        <div className="ml-4 text-gray-400">2x = 8</div>
-                        <div className="mt-2">Step 2: Divide both sides by 2</div>
-                        <div className="ml-4 text-gray-400">x = 4</div>
-                        <div className="text-green-400 mt-2">✓ Solution: x = 4</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex gap-4 justify-center">
-                  <button 
-                    onClick={() => setShowSolution(!showSolution)}
-                    className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#6C63FF] text-white px-8 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-lg font-display"
-                  >
-                    {showSolution ? 'Reset' : 'Solve Step-by-Step'}
-                  </button>
-                  <button 
-                    onClick={() => {
-                      const problems = ["3x + 7 = 16", "2(x - 3) = 10", "x/4 + 2 = 6"]
-                      setMathProblem(problems[Math.floor(Math.random() * problems.length)])
-                      setShowSolution(false)
-                    }}
-                    className="bg-white border border-[#6C63FF] text-[#6C63FF] hover:bg-[#6C63FF]/5 px-8 py-3 rounded-xl font-semibold transition-all font-display"
-                  >
-                    Try Another
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Comparison Section */}
         <section className="section bg-gray-50">
             <div className="container rhythm-y-lg">
