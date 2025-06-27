@@ -5,10 +5,9 @@ export const subjects = {
     name: "Pre-Algebra",
     available: true,
     topicGroups: {
-      "Foundational Number Skills 🧱": [
-        "Decimal Place Value Mastery"
-      ],
+
       "Number Theory Unlocked 🔑": [
+        "Decimal Place Value Mastery",
         "Decimals 🤝 Percents",
         "Divisibility Rules & Factors",
         "Finding GCF (Greatest Common Factor)"

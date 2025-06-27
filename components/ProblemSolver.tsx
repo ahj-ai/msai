@@ -67,6 +67,57 @@ const ProblemSolver: React.FC<ProblemSolverProps> = ({
                   <span className="font-medium mr-2">{currentProblem.subject}:</span>
                   <span>{currentProblem.topic}</span>
                 </div>
+                {currentProblem.difficulty && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium" 
+                    style={{
+                      backgroundColor: currentProblem.difficulty === 'Regular' ? 'rgba(52, 211, 153, 0.2)' : 
+                                      currentProblem.difficulty === 'Challenging' ? 'rgba(251, 191, 36, 0.2)' : 
+                                      'rgba(239, 68, 68, 0.2)',
+                      color: currentProblem.difficulty === 'Regular' ? 'rgb(52, 211, 153)' : 
+                             currentProblem.difficulty === 'Challenging' ? 'rgb(251, 191, 36)' : 
+                             'rgb(239, 68, 68)',
+                      border: `1px solid ${currentProblem.difficulty === 'Regular' ? 'rgba(52, 211, 153, 0.4)' : 
+                                            currentProblem.difficulty === 'Challenging' ? 'rgba(251, 191, 36, 0.4)' : 
+                                            'rgba(239, 68, 68, 0.4)'}`
+                    }}
+                  >
+                    {currentProblem.difficulty === 'Regular' && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20M2 12h20"/>
+                      </svg>
+                    )}
+                    {currentProblem.difficulty === 'Challenging' && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 12h20M12 2v20"/>
+                        <path d="M20 16l-4-4 4-4"/>
+                      </svg>
+                    )}
+                    {currentProblem.difficulty === 'Advanced' && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 12h20M12 2v20"/>
+                        <path d="M20 16l-4-4 4-4M4 8l4 4-4 4"/>
+                      </svg>
+                    )}
+                    Difficulty: {currentProblem.difficulty}
+                  </motion.div>
+                )}
+                <div className="flex items-center mt-3">
+                  <div className="relative w-full max-w-xs bg-white/20 h-2 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="absolute left-0 top-0 h-full bg-white"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${((currentProblemIndex + 1) / problems.length) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                  <span className="ml-2 text-xs text-white/90 font-medium">
+                    {currentProblemIndex + 1} of {problems.length} problems in this topic
+                  </span>
+                </div>
               </div>
               <Button variant="ghost" className="text-white hover:bg-indigo-700" onClick={() => setShowProblemSolving(false)}>
                 <ArrowLeft className="h-4 w-4 sm:mr-2" />
@@ -173,6 +224,59 @@ const ProblemSolver: React.FC<ProblemSolverProps> = ({
                   </div>
                 )}
               </div>
+              {isCorrect && currentProblemIndex === problems.length - 1 && (
+                <motion.div 
+                  className="mt-6 mb-4 p-6 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg text-white text-center shadow-xl overflow-hidden relative"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <motion.div 
+                    className="absolute inset-0 opacity-20"
+                    initial={{ backgroundPosition: '0% 50%', backgroundSize: '100% 100%' }}
+                    animate={{ 
+                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                      backgroundSize: ['100% 100%', '200% 200%', '100% 100%'],
+                    }}
+                    transition={{ repeat: Infinity, duration: 5 }}
+                    style={{ 
+                      backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%)' 
+                    }}
+                  />
+                  
+                  <div className="text-2xl font-bold mb-2">🎉 Topic Mastery Achieved! 🎉</div>
+                  <p className="text-indigo-100 mb-4">
+                    Congratulations! You've completed all problems in {currentProblem.topic}.
+                  </p>
+                  <motion.div
+                    className="flex justify-center space-x-1 mb-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    {Array(5).fill(null).map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="text-2xl"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.5 + (i * 0.1) }}
+                      >
+                        ⭐️
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="mt-2 bg-white/10 hover:bg-white/20 border-white/40 text-white" 
+                    onClick={() => setShowProblemSolving(false)}
+                  >
+                    Back to Problem Lab
+                  </Button>
+                </motion.div>
+              )}
+              
               {(isCorrect || showAllSteps) && currentProblem.solutionSteps && (
                 <div className="mt-8 pt-6 border-t border-gray-100">
                   <h3 className="text-sm font-display font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-2">
