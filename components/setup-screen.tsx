@@ -144,13 +144,13 @@ const SetupScreen = ({
                           : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-indigo-100"
                       }`}
                     >
-                      <div className="flex flex-col items-center justify-center space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <Icon className="w-5 h-5" />
-                          <span className="font-semibold">{m.label}</span>
-                        </div>
-                        <span className="text-xs opacity-80">{m.description}</span>
-                      </div>
+                      <div className="flex flex-col items-center justify-center space-y-1 whitespace-normal break-words w-full min-h-[72px] p-0">
+  <div className="flex items-center space-x-2">
+    <Icon className="w-5 h-5" />
+    <span className="font-semibold">{m.label}</span>
+  </div>
+  <span className="text-xs opacity-80 text-center whitespace-normal break-words w-full" style={{ wordBreak: 'break-word' }}>{m.description}</span>
+</div>
                     </Button>
                   </motion.div>
                 )
