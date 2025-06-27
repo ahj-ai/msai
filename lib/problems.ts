@@ -229,3 +229,41 @@ export async function getAllSubjects(): Promise<string[]> {
   
   return Array.from(subjectsSet);
 }
+
+// Get the total number of problems for a given topic
+export async function getProblemsCountByTopic(
+  subject: string,
+  topic: string
+): Promise<number> {
+  const { count, error } = await supabase
+    .from('math_problems')
+    .select('*', { count: 'exact', head: true })
+    .eq('subject', subject)
+    .eq('topic', topic);
+
+  if (error) {
+    console.error('Error fetching problems count:', error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+// Get all problem IDs for a given topic
+export async function getProblemIdsByTopic(
+  subject: string,
+  topic: string
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('math_problems')
+    .select('id')
+    .eq('subject', subject)
+    .eq('topic', topic);
+
+  if (error) {
+    console.error('Error fetching problem IDs:', error);
+    return [];
+  }
+
+  return data.map((problem) => problem.id);
+}

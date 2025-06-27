@@ -47,7 +47,7 @@ function SimpleLoadingIndicator() {
         </div>
       </div>
       <p className="text-lg font-medium text-indigo-700 animate-pulse">
-        Generating Problem...
+        Crafting your problem...
       </p>
     </div>
   )
@@ -212,10 +212,6 @@ export function ProblemLab() {
     setSetupProgress(progress);
   }, [subject, topic, difficulty, problemCount]);
 
-  // Handle difficulty change
-  const handleDifficultyChange = (value: Difficulty) => {
-    setDifficulty(value);
-  };
   
   const router = useRouter();
 
@@ -241,13 +237,13 @@ export function ProblemLab() {
         router.push(`/practice/${problemId}`);
       } else {
         setNoProblemsFound(true);
+        setIsLoading(false); // Stop loading as we are staying on the page
       }
     } catch (error) {
       console.error('Error generating problems:', error);
-      alert('Failed to generate problems. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+      setNoProblemsFound(true); // Re-use the modal for error display
+      setIsLoading(false); // Stop loading on error
+    } 
   };
   
 
@@ -375,8 +371,7 @@ export function ProblemLab() {
             setComingSoonOpen={setComingSoonOpen}
             comingSoonTopics={comingSoonTopics}
             setComingSoonTopics={setComingSoonTopics}
-            difficulty={difficulty}
-            handleDifficultyChange={handleDifficultyChange}
+
             setProblemCount={setProblemCount}
             wordProblems={wordProblems}
             setWordProblems={setWordProblems}

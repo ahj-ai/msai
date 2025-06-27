@@ -23,8 +23,7 @@ interface PracticeProblemGeneratorProps {
   setComingSoonOpen: (value: boolean) => void;
   comingSoonTopics: { subject: string; topics: string[] };
   setComingSoonTopics: (value: { subject: string; topics: string[] }) => void;
-  difficulty: Difficulty;
-  handleDifficultyChange: (value: Difficulty) => void;
+
   setProblemCount: (value: number) => void;
   wordProblems: boolean;
   setWordProblems: (value: boolean) => void;
@@ -48,8 +47,7 @@ const PracticeProblemGenerator: React.FC<PracticeProblemGeneratorProps> = ({
   setComingSoonOpen,
   comingSoonTopics,
   setComingSoonTopics,
-  difficulty,
-  handleDifficultyChange,
+
   setProblemCount,
   wordProblems,
   setWordProblems,
@@ -98,8 +96,7 @@ const PracticeProblemGenerator: React.FC<PracticeProblemGeneratorProps> = ({
         setIsTopicDropdownOpen={setIsTopicDropdownOpen}
         setComingSoonOpen={setComingSoonOpen}
         setComingSoonTopics={setComingSoonTopics}
-        difficulty={difficulty}
-        handleDifficultyChange={handleDifficultyChange}
+
         problemCount={problemCount}
         setProblemCount={setProblemCount}
         wordProblems={wordProblems}

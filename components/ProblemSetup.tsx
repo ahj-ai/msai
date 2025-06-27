@@ -46,8 +46,7 @@ interface ProblemSetupProps {
   setIsTopicDropdownOpen: (value: boolean) => void;
   setComingSoonOpen: (value: boolean) => void;
   setComingSoonTopics: (value: { subject: string; topics: string[] }) => void;
-  difficulty: Difficulty;
-  handleDifficultyChange: (value: Difficulty) => void;
+
   problemCount: number;
   setProblemCount: (value: number) => void;
   wordProblems: boolean;
@@ -65,8 +64,7 @@ const ProblemSetup: React.FC<ProblemSetupProps> = ({
   setTopic,
   isTopicDropdownOpen,
   setIsTopicDropdownOpen,
-  difficulty,
-  handleDifficultyChange,
+
   problemCount,
   setProblemCount,
   wordProblems,

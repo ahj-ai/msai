@@ -4,25 +4,30 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, X, HelpCircle, Check, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { CheckCircle, X, HelpCircle, Check, Eye, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Problem } from '@/types/math';
+import { getProblemIdsByTopic } from '@/lib/problems';
 import { ensureLatexDelimiters } from '@/utils/format-latex';
 import MathInput from './math-input';
 
 interface PracticeProblemProps {
   problem: Problem;
+  totalProblems: number;
 }
 
-const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem }) => {
+const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblems }) => {
+  const router = useRouter();
   const [userAnswer, setUserAnswer] = useState('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [showAllSteps, setShowAllSteps] = useState(false);
+  const [isFetchingNext, setIsFetchingNext] = useState(false);
 
   const checkAnswer = () => {
     const correctAnswer = (problem.answer ?? '').toString().trim();
@@ -34,6 +39,29 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem }) => {
     setShowHint(true);
     if (problem.hints && currentHintIndex < problem.hints.length - 1) {
       setCurrentHintIndex(currentHintIndex + 1);
+    }
+  };
+
+  const handleNextProblem = async () => {
+    if (!problem.subject || !problem.topic) return;
+
+    setIsFetchingNext(true);
+    try {
+      const allIds = await getProblemIdsByTopic(problem.subject, problem.topic);
+      const otherIds = allIds.filter(id => id !== problem.id);
+
+      if (otherIds.length > 0) {
+        const nextProblemId = otherIds[Math.floor(Math.random() * otherIds.length)];
+        router.push(`/practice/${nextProblemId}`);
+      } else {
+        // TODO: Show a toast notification that they've completed the topic
+        console.log("You've completed all problems in this topic!");
+        setIsFetchingNext(false);
+      }
+    } catch (error) {
+      console.error("Failed to fetch next problem", error);
+      // TODO: Show an error toast
+      setIsFetchingNext(false);
     }
   };
 
@@ -50,6 +78,16 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem }) => {
               <span>{problem.topic}</span>
             </div>
           </div>
+          {totalProblems > 0 && (
+            <div className="text-right">
+              <div className="text-lg font-bold text-white">
+                {totalProblems}
+              </div>
+              <div className="text-xs text-indigo-200">
+                Problems
+              </div>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-6 md:p-8">
@@ -118,6 +156,32 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem }) => {
                 ))}
               </ol>
             </div>
+          </div>
+        )}
+
+        {isCorrect && totalProblems > 1 && (
+          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+            <Button
+              onClick={handleNextProblem}
+              disabled={isFetchingNext}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-2 transition-all duration-200"
+            >
+              {isFetchingNext ? (
+                <>
+                  <motion.div
+                    className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Next Problem
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </Button>
           </div>
         )}
       </CardContent>
