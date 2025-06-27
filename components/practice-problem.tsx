@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { CheckCircle, X, HelpCircle, Check, Eye, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -13,6 +14,7 @@ import 'katex/dist/katex.min.css';
 import { Problem } from '@/types/math';
 import { getProblemIdsByTopic } from '@/lib/problems';
 import { ensureLatexDelimiters } from '@/utils/format-latex';
+import { checkAnswerEquivalence } from '@/utils/math-compare';
 import MathInput from './math-input';
 
 interface PracticeProblemProps {
@@ -28,12 +30,14 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [showAllSteps, setShowAllSteps] = useState(false);
   const [isFetchingNext, setIsFetchingNext] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [problemIds, setProblemIds] = useState<string[]>([]);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(-1);
 
-  const checkAnswer = () => {
-    const correctAnswer = (problem.answer ?? '').toString().trim();
-    const userAnswerFormatted = userAnswer.toString().trim();
-    setIsCorrect(userAnswerFormatted === correctAnswer);
-  };
+  const checkAnswer = useCallback(() => {
+    const correctAnswer = problem.answer !== undefined ? String(problem.answer) : '';
+    setIsCorrect(checkAnswerEquivalence(userAnswer, correctAnswer));
+  }, [problem.answer, userAnswer]);
 
   const showNextHint = () => {
     setShowHint(true);
@@ -42,30 +46,60 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
     }
   };
 
-  const handleNextProblem = async () => {
-    if (!problem.subject || !problem.topic) return;
-
-    setIsFetchingNext(true);
-    try {
-      const allIds = await getProblemIdsByTopic(problem.subject, problem.topic);
-      const otherIds = allIds.filter(id => id !== problem.id);
-
-      if (otherIds.length > 0) {
-        const nextProblemId = otherIds[Math.floor(Math.random() * otherIds.length)];
-        router.push(`/practice/${nextProblemId}`);
-      } else {
-        // TODO: Show a toast notification that they've completed the topic
-        console.log("You've completed all problems in this topic!");
-        setIsFetchingNext(false);
+  useEffect(() => {
+    const fetchProblemIds = async () => {
+      if (problem.subject && problem.topic) {
+        try {
+          const ids = await getProblemIdsByTopic(problem.subject, problem.topic);
+          setProblemIds(ids);
+          const currentIndex = ids.findIndex(id => id === problem.id);
+          setCurrentProblemIndex(currentIndex);
+        } catch (error) {
+          console.error("Failed to fetch problem IDs", error);
+        }
       }
-    } catch (error) {
-      console.error("Failed to fetch next problem", error);
-      // TODO: Show an error toast
-      setIsFetchingNext(false);
+    };
+
+    fetchProblemIds();
+  }, [problem.id, problem.subject, problem.topic]);
+
+  const handleNextProblem = useCallback(() => {
+    const nextProblemIndex = currentProblemIndex + 1;
+    if (nextProblemIndex < problemIds.length) {
+      const nextProblemId = problemIds[nextProblemIndex];
+      setIsLoading(true);
+      setIsFetchingNext(true);
+      
+      // Create a smooth transition
+      const transition = setTimeout(() => {
+        router.push(`/practice/${nextProblemId}`);
+      }, 300); // Short delay for smooth transition
+      
+      return () => clearTimeout(transition);
+    } else {
+      // TODO: Show a toast notification that they've completed the topic
+      console.log("You've completed all problems in this topic!");
     }
-  };
+  }, [currentProblemIndex, problemIds, router]);
+
+  // Reset states when the problem changes
+  useEffect(() => {
+    setUserAnswer('');
+    setIsCorrect(null);
+    setShowHint(false);
+    setCurrentHintIndex(0);
+    setShowAllSteps(false);
+    setIsLoading(false);
+    setIsFetchingNext(false);
+  }, [problem.id]);
 
   return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
     <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
         <div className="flex justify-between items-center">
@@ -78,13 +112,13 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
               <span>{problem.topic}</span>
             </div>
           </div>
-          {totalProblems > 0 && (
+          {currentProblemIndex !== -1 && problemIds.length > 0 && (
             <div className="text-right">
               <div className="text-lg font-bold text-white">
-                {totalProblems}
+                Problem {currentProblemIndex + 1} of {problemIds.length}
               </div>
               <div className="text-xs text-indigo-200">
-                Problems
+                Topic Progress
               </div>
             </div>
           )}
@@ -99,8 +133,24 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
 
         <div className="mt-8">
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <MathInput value={userAnswer} onChange={setUserAnswer} placeholder="Enter your answer" />
-            <Button onClick={checkAnswer} className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold">Check Answer</Button>
+            <MathInput 
+              value={userAnswer} 
+              onChange={setUserAnswer} 
+              placeholder="Enter your answer" 
+              onSubmit={checkAnswer}  /* Add Enter key shortcut */
+            />
+            <Button 
+              onClick={checkAnswer} 
+              className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl touch-manipulation"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : "Check Answer"}
+            </Button>
           </div>
         </div>
 
@@ -116,12 +166,22 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
           {problem.hints && problem.hints.length > 0 && (
-            <Button onClick={showNextHint} variant="outline" className="flex-1">
+            <Button 
+              onClick={showNextHint} 
+              variant="outline" 
+              className="flex-1 py-6 rounded-xl touch-manipulation"
+              disabled={isLoading}
+            >
               <HelpCircle className="mr-2 h-4 w-4" />
               Get a Hint
             </Button>
           )}
-          <Button onClick={() => setShowAllSteps(true)} variant="outline" className="flex-1">
+          <Button 
+            onClick={() => setShowAllSteps(true)} 
+            variant="outline" 
+            className="flex-1 py-6 rounded-xl touch-manipulation"
+            disabled={isLoading}
+          >
             <Eye className="mr-2 h-4 w-4" />
             Show Solution
           </Button>
@@ -159,20 +219,16 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
           </div>
         )}
 
-        {isCorrect && totalProblems > 1 && (
+        {isCorrect && currentProblemIndex < problemIds.length - 1 && (
           <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
             <Button
               onClick={handleNextProblem}
-              disabled={isFetchingNext}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-2 transition-all duration-200"
+              disabled={isFetchingNext || currentProblemIndex >= problemIds.length - 1 || isLoading}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-2 transition-all duration-200 py-6 px-8 rounded-xl touch-manipulation"
             >
               {isFetchingNext ? (
                 <>
-                  <motion.div
-                    className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Loading...
                 </>
               ) : (
@@ -186,6 +242,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
         )}
       </CardContent>
     </Card>
+    </motion.div>
   );
 };
 

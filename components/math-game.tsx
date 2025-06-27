@@ -6,6 +6,7 @@ import dynamic from "next/dynamic"
 import { generateProblem } from "@/utils/generate-problem"
 import type { Topic, GameMode } from "@/types/game"
 import { useSoundEffects } from "@/hooks/use-sound-effects"
+import { checkAnswerEquivalence } from '@/utils/math-compare'
 
 const SetupScreen = dynamic(() => import("./setup-screen"), { ssr: false })
 const GameScreen = dynamic(() => import("./game-screen"), { ssr: false })
@@ -67,33 +68,9 @@ const [difficulty, setDifficulty] = useState<Difficulty>("🧠")
     const answerTime = (Date.now() - questionStartTime) / 1000
     setLastAnswerTime(answerTime)
     setTotalResponseTime((prev) => prev + answerTime)
-
-    // Parse the user answer, handling both decimal and fraction formats
-    let submittedAnswer: number
-    if (userAnswer.includes('/')) {
-      // Handle fraction format (e.g., "1/4")
-      const parts = userAnswer.split('/')
-      if (parts.length === 2) {
-        const numerator = Number.parseFloat(parts[0].trim())
-        const denominator = Number.parseFloat(parts[1].trim())
-        if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-          submittedAnswer = numerator / denominator
-        } else {
-          // Invalid fraction format
-          submittedAnswer = NaN
-        }
-      } else {
-        // Too many slash characters
-        submittedAnswer = NaN
-      }
-    } else {
-      // Standard decimal format
-      submittedAnswer = Number.parseFloat(userAnswer)
-    }
     
-    const correctAnswer = problem.answer
-    // Use a small epsilon for floating point comparison
-    const isCorrect = !isNaN(submittedAnswer) && Math.abs(submittedAnswer - correctAnswer) < 0.01
+    const correctAnswer = String(problem.answer)
+    const isCorrect = checkAnswerEquivalence(userAnswer, correctAnswer)
 
     if (isCorrect) {
       soundEffects.playCorrect()

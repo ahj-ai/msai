@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CheckCircle, XCircle, ArrowRight, Lightbulb } from 'lucide-react'
+import { checkAnswerEquivalence } from '@/utils/math-compare'
 
 interface ProblemSolvingScreenProps {
   problem: {
@@ -22,9 +23,17 @@ const ProblemSolvingScreen: React.FC<ProblemSolvingScreenProps> = ({ problem, on
   const [showSolution, setShowSolution] = useState(false)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsCorrect(userAnswer.trim().toLowerCase() === problem.solution.toLowerCase())
+  const handleSubmit = useCallback((e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setIsCorrect(checkAnswerEquivalence(userAnswer, problem.solution))
+  }, [userAnswer, problem.solution])
+  
+  // Handle keyboard events for the input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSubmit()
+    }
   }
 
   return (
@@ -59,6 +68,7 @@ const ProblemSolvingScreen: React.FC<ProblemSolvingScreenProps> = ({ problem, on
                 type="text"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Enter your answer"
                 className="w-full h-12 bg-purple-800/30 border-purple-400/30 text-purple-100 placeholder-purple-300/50 focus:border-blue-400/50 focus:ring-blue-400/20 transition-all duration-300"
               />

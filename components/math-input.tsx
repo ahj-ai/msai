@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, KeyboardEvent } from 'react';
 
 // Define the props for the component
 interface MathInputProps {
@@ -6,9 +6,10 @@ interface MathInputProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  onSubmit?: () => void;
 }
 
-const MathInput: React.FC<MathInputProps> = ({ value, onChange, disabled, placeholder }) => {
+const MathInput: React.FC<MathInputProps> = ({ value, onChange, disabled, placeholder, onSubmit }) => {
   // Create a ref for the textarea to maintain focus
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -20,6 +21,15 @@ const MathInput: React.FC<MathInputProps> = ({ value, onChange, disabled, placeh
     // Store current cursor position before React updates
     cursorPositionRef.current = e.target.selectionStart;
     onChange(e.target.value);
+  };
+  
+  // Handle keyboard shortcuts
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Submit on Enter key, unless Shift is pressed (for multiline input)
+    if (e.key === 'Enter' && !e.shiftKey && onSubmit) {
+      e.preventDefault();
+      onSubmit();
+    }
   };
   
   // Restore cursor position after value change
@@ -40,9 +50,10 @@ const MathInput: React.FC<MathInputProps> = ({ value, onChange, disabled, placeh
       ref={textareaRef}
       value={value}
       onChange={handleChange}
+      onKeyDown={handleKeyDown}
       disabled={disabled}
       placeholder={placeholder}
-      className="w-full min-h-[8rem] p-4 pr-12 border border-[#e0e7ff] rounded-xl outline-none text-gray-700 placeholder:text-gray-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300 transition-colors resize-none"
+      className="w-full min-h-[8rem] p-4 pr-12 border border-[#e0e7ff] rounded-xl outline-none text-gray-700 placeholder:text-gray-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300 transition-colors resize-none touch-manipulation"
       style={{
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fontSize: '1rem',
