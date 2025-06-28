@@ -155,10 +155,16 @@ const ProblemSolver: React.FC<ProblemSolverProps> = ({
                   />
                   <Button 
                     className="rounded-l-none"
-                    onClick={checkAnswer}
-                    disabled={isCorrect === true}
+                    onClick={isCorrect === true ? goToNextProblem : checkAnswer}
                   >
-                    Check
+                    {isCorrect === true ? (
+                      <>
+                        {currentProblemIndex < problems.length - 1 ? 'Next Problem' : 'Finish'}
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </>
+                    ) : (
+                      'Check'
+                    )}
                   </Button>
                 </div>
               </div>
@@ -176,17 +182,7 @@ const ProblemSolver: React.FC<ProblemSolverProps> = ({
                 </div>
               )}
               
-              {isCorrect && (
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    onClick={goToNextProblem}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    {currentProblemIndex < problems.length - 1 ? 'Next Problem' : 'Finish'}
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+              {/* Removed separate Next Problem button as it's now integrated with the Check button */}
               
               <div className="mt-6 border-t pt-4">
                 <div className="flex items-center justify-between mb-2">

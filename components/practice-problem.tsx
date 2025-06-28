@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -63,6 +63,9 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
     fetchProblemIds();
   }, [problem.id, problem.subject, problem.topic]);
 
+  // State for celebration animation
+  const [showCelebration, setShowCelebration] = useState(false);
+
   const handleNextProblem = useCallback(() => {
     const nextProblemIndex = currentProblemIndex + 1;
     if (nextProblemIndex < problemIds.length) {
@@ -77,8 +80,8 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
       
       return () => clearTimeout(transition);
     } else {
-      // TODO: Show a toast notification that they've completed the topic
-      console.log("You've completed all problems in this topic!");
+      // Show celebration animation when all problems are completed
+      setShowCelebration(true);
     }
   }, [currentProblemIndex, problemIds, router]);
 
@@ -94,12 +97,65 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
   }, [problem.id]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <>
+      {/* Celebration overlay */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div 
+            key="celebration-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div 
+              key="celebration-modal"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ 
+                scale: 1,
+                opacity: 1
+              }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ 
+                type: "spring",
+                damping: 20,
+                stiffness: 300
+              }}
+              className="bg-white rounded-2xl p-10 text-center shadow-2xl max-w-md"
+            >
+              <motion.div
+                animate={{ 
+                  rotate: [0, 10, -10, 10, 0],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity,
+                  repeatType: "reverse" 
+                }}
+                className="text-6xl mb-4"
+              >
+                🎉
+              </motion.div>
+              <h2 className="text-2xl font-bold text-indigo-700 mb-2">Congratulations!</h2>
+              <p className="text-gray-700 mb-6">You've completed all problems in this topic!</p>
+              <Button 
+                onClick={() => router.push('/problem-lab')}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl"
+              >
+                Return to Practice Hub
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
     <Card className="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border border-indigo-100 shadow-xl rounded-2xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
         <div className="flex justify-between items-center">
@@ -112,45 +168,60 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
               <span>{problem.topic}</span>
             </div>
           </div>
-          {currentProblemIndex !== -1 && problemIds.length > 0 && (
-            <div className="text-right">
-              <div className="text-lg font-bold text-white">
-                Problem {currentProblemIndex + 1} of {problemIds.length}
-              </div>
-              <div className="text-xs text-indigo-200">
-                Topic Progress
-              </div>
+          <div className="text-right">
+            <div className="text-lg font-semibold mb-1">
+              Problem {currentProblemIndex + 1} of {totalProblems}
             </div>
-          )}
+            <div className="text-xs text-indigo-100">
+              Topic Progress
+            </div>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6 md:p-8">
-        <div className="prose prose-lg max-w-none">
+      <CardContent className="p-6 pt-8">
+        <div className="prose prose-stone max-w-none mb-8 bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
           <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
             {ensureLatexDelimiters(problem.question)}
           </ReactMarkdown>
         </div>
 
         <div className="mt-8">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <MathInput 
-              value={userAnswer} 
-              onChange={setUserAnswer} 
-              placeholder="Enter your answer" 
-              onSubmit={checkAnswer}  /* Add Enter key shortcut */
-            />
-            <Button 
-              onClick={checkAnswer} 
-              className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl touch-manipulation"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : "Check Answer"}
-            </Button>
+          {/* Answer input wrapper */}
+          <div className="flex flex-col w-full">
+            {/* Math input and button row */}
+            <div className="flex items-center gap-4">
+              <div className="flex-grow relative">
+                <MathInput 
+                  value={userAnswer} 
+                  onChange={setUserAnswer} 
+                  placeholder="Enter your answer" 
+                  onSubmit={isCorrect ? handleNextProblem : checkAnswer}
+                  disabled={isCorrect === true}
+                />
+              </div>
+              <div className="flex-shrink-0">
+                <Button 
+                  onClick={isCorrect ? handleNextProblem : checkAnswer} 
+                  className={`flex items-center justify-center py-3 px-8 rounded-xl font-medium text-white transition-all ${isCorrect ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-green-500 hover:bg-green-600'}`}
+                  disabled={isLoading}
+                  style={{ height: '56px' }} /* Match height with input */
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : isCorrect ? (
+                    <>
+                      {currentProblemIndex < problemIds.length - 1 ? 'Next Problem' : 'Finish'}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  ) : (
+                    'Check Answer'
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -164,26 +235,26 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
           </motion.div>
         )}
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {problem.hints && problem.hints.length > 0 && (
             <Button 
               onClick={showNextHint} 
               variant="outline" 
-              className="flex-1 py-6 rounded-xl touch-manipulation"
+              className="py-6 rounded-xl hover:bg-indigo-50 border-indigo-100 hover:border-indigo-200 transition-all duration-200"
               disabled={isLoading}
             >
-              <HelpCircle className="mr-2 h-4 w-4" />
-              Get a Hint
+              <HelpCircle className="mr-2 h-5 w-5 text-indigo-500" />
+              <span className="font-medium">Get a Hint</span>
             </Button>
           )}
           <Button 
             onClick={() => setShowAllSteps(true)} 
             variant="outline" 
-            className="flex-1 py-6 rounded-xl touch-manipulation"
+            className="py-6 rounded-xl hover:bg-purple-50 border-purple-100 hover:border-purple-200 transition-all duration-200"
             disabled={isLoading}
           >
-            <Eye className="mr-2 h-4 w-4" />
-            Show Solution
+            <Eye className="mr-2 h-5 w-5 text-purple-500" />
+            <span className="font-medium">Show Solution</span>
           </Button>
         </div>
 
@@ -219,30 +290,11 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
           </div>
         )}
 
-        {isCorrect && currentProblemIndex < problemIds.length - 1 && (
-          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-            <Button
-              onClick={handleNextProblem}
-              disabled={isFetchingNext || currentProblemIndex >= problemIds.length - 1 || isLoading}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-2 transition-all duration-200 py-6 px-8 rounded-xl touch-manipulation"
-            >
-              {isFetchingNext ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  Next Problem
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </Button>
-          </div>
-        )}
+        {/* Removed separate Next Problem button - now integrated with Check Answer button */}
       </CardContent>
     </Card>
     </motion.div>
+    </>
   );
 };
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { generateProblem } from '@/lib/math-utils'
 import type { DifficultyLevel } from '@/types/game'
+import BrainiacAnswerInput from '@/components/brainiac-answer-input'
 
 interface GameScreenProps {
   difficulty: DifficultyLevel
@@ -54,16 +55,12 @@ export function GameScreen({ difficulty, onGameOver }: GameScreenProps) {
         {problem.question}
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="number"
+        <BrainiacAnswerInput
           value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          className="w-full p-2 bg-gray-700 rounded"
-          autoFocus
+          onChange={setAnswer}
+          onCheck={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
+          placeholder="Enter your answer..."
         />
-        <Button type="submit" className="w-full">
-          Submit
-        </Button>
       </form>
     </div>
   )

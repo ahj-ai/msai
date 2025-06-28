@@ -7,111 +7,86 @@
 // Topics organized by subject
 export const availableTopicsBySubject: Record<string, string[]> = {
   "pre-algebra": [
-    // Foundational Number Skills
+    "Adding and Subtracting Integers",
+    "Big & Small: Scientific Notation",
+    "Combining Like Terms",
     "Decimal Place Value Mastery",
     "Decimals",
-    
-    // Number Theory Unlocked
     "Decimals 🤝 Percents",
     "Divisibility Rules & Factors",
-    "Finding GCF",
-    "Prime Factorization Power",
-    "Nailing LCM",
-    "Fractions 🤝 Percents",
-    
-    // Expressions & Variables
     "Evaluating Variable Expressions",
-    "Variables & Expressions",
-    "Combining Like Terms",
-    "Simplifying by Combining Like Terms",
-    
-    // Equations & Inequalities
-    "One-Step Equations",
-    "Two-Step Equations",
-    "Multi-Step Equations",
-    "Tackling Multi-Step Equations",
-    
-    // Exponents, Sci-No & Roots
     "Exponent Expertise: Multiplication & Division Properties",
     "Exponent Expertise: Powers of Products & Quotients",
-    "Big & Small: Scientific Notation",
-    "Root Camp: Understanding Square Roots",
-    
-    // Other topics
-    "Adding and Subtracting Integers",
-    "The Distributive Property in Action",
+    "Finding GCF",
     "Fractions",
-    "Order of Operations"
+    "Fractions 🤝 Percents",
+    "Multi-Step Equations",
+    "Nailing LCM",
+    "One-Step Equations",
+    "Order of Operations",
+    "Prime Factorization Power",
+    "Root Camp: Understanding Square Roots",
+    "Simplifying by Combining Like Terms",
+    "Tackling Multi-Step Equations",
+    "The Distributive Property in Action",
+    "Two-Step Equations",
+    "Variables & Expressions"
   ],
   "algebra-1": [
-    // Foundations & Arithmetic
-    "Distributive Property",
     "Absolute Value",
+    "Absolute Value Equations",
+    "Compound & Absolute Value Inequalities",
     "Decimals: Add, Subtract",
     "Decimals: Multiply, Divide",
+    "Distributive Property",
+    "Evaluating Expressions",
+    "Finding Slope",
+    "Fractions & Mixed Numbers: Add, Subtract",
     "Integers: Add and Subtract",
     "Integers: Multiply, Divide",
-    "Fractions & Mixed Numbers: Add, Subtract",
-    "Order of Operations",
-    "Evaluating Expressions",
-    "Simplifying Variable Expressions",
-    
-    // Equations
-    "One-Step Equations",
-    "Two-Step & Multi-Step Equations",
-    "Absolute Value Equations",
     "Literal Equations",
+    "One-Step Equations",
     "One-Step Equation Word Problems",
-    
-    // Inequalities
     "One-Step, Two-Step, Multi-Step Inequalities",
-    "Compound & Absolute Value Inequalities",
-    "Word Problems with Inequalities",
-    
-    // Linear Equations & Graphing
-    "Finding Slope",
-    "Writing Linear Equations",
-    "Solving by Graphing",
-    "Solving Substitution",
-    "Solving Elimination",
-    "Systems of Equations Word Problems",
-    
-    // Exponents & Radicals
+    "Order of Operations",
     "Properties of Exponents",
-    "Scientific Notation",
-    "Square Roots",
-    "Radical Expressions: Simplify, Add/Subtract, Multiply, Divide",
-    "Solving Radical Equations",
     "Pythagorean Theorem",
-    
-    // Other topics
-    "Word Problems"
+    "Radical Expressions: Simplify, Add/Subtract, Multiply, Divide",
+    "Scientific Notation",
+    "Simplifying Variable Expressions",
+    "Solving by Graphing",
+    "Solving Elimination",
+    "Solving Radical Equations",
+    "Solving Substitution",
+    "Square Roots",
+    "Systems of Equations Word Problems",
+    "Two-Step & Multi-Step Equations",
+    "Word Problems",
+    "Word Problems with Inequalities",
+    "Writing Linear Equations"
   ],
   "algebra-2": [
-    // Functions
-    "Function notation and evaluation",
-    "Function composition",
-    "Inverse functions",
-    
-    // Quadratic Functions
-    "Quadratic Functions: Standard form",
-    "Quadratic Functions: Factored form",
-    "Quadratic formula and discriminant",
-    
-    // Sequences and Series
+    "Absolute value functions and equations",
+    "Applications and word problems",
     "Arithmetic sequences and series",
+    "Completing the square",
+    "Domain and range",
+    "Even and odd functions",
+    "Function composition",
+    "Function notation and evaluation",
     "Geometric sequences and series",
-    
-    // Linear Equations
-    "Slope-intercept and point-slope forms",
+    "Infinite geometric series",
+    "Inverse functions",
     "Parallel and perpendicular lines",
-    
-    // Systems of Equations
-    "Systems of linear equations: substitution",
+    "Quadratic formula and discriminant",
+    "Quadratic Functions: Factored form",
+    "Quadratic Functions: Standard form",
+    "Quadratic Functions: Vertex form",
+    "Sigma notation",
+    "Slope-intercept and point-slope forms",
+    "Solving quadratic equations by factoring",
     "Systems of linear equations: elimination",
-    
-    // Other topics
-    "Applications and word problems"
+    "Systems of linear equations: substitution"
   ]
 };
 

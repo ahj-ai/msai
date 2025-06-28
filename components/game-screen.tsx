@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence, useAnimation } from "framer-motion"
-import { ArrowLeft, Zap, Star, Timer, Trophy, Sparkles, Heart } from "lucide-react"
+import { ArrowLeft, Zap, Star, Timer, Trophy, Sparkles, Heart, Smartphone, Keyboard } from "lucide-react"
 import "katex/dist/katex.min.css"
 import Latex from "react-latex-next"
+import BrainiacAnswerInput from "./brainiac-answer-input"
+import { useState, useEffect } from "react"
 
 interface GameScreenProps {
   problem: {
@@ -49,11 +51,18 @@ const GameScreen: React.FC<GameScreenProps> = ({
   lives = 3,
 }) => {
   const inputAnimation = useAnimation()
+  const [showNumpadUI, setShowNumpadUI] = useState(false)
+  
+  // Check if the device is mobile on mount
+  useEffect(() => {
+    const isMobileDevice = window.innerWidth <= 768
+    setShowNumpadUI(isMobileDevice)
+  }, [])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (value: string) => {
     // Allow digits, minus, slash, sqrt, pi, dot, letters, and spaces
-    const value = e.target.value.replace(/[^\d\-\/\.\s\wπ√]/gi, "")
-    setUserAnswer(value)
+    const sanitizedValue = value.replace(/[^\d\-\/\.\s\wπ√]/gi, "")
+    setUserAnswer(sanitizedValue)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,6 +76,10 @@ const GameScreen: React.FC<GameScreenProps> = ({
       }
       onSubmit()
     }
+  }
+  
+  const toggleNumpad = () => {
+    setShowNumpadUI(prev => !prev)
   }
 
   // Generate sparkles for the streak milestone
@@ -196,24 +209,50 @@ const GameScreen: React.FC<GameScreenProps> = ({
         </div>
 
         <div className="relative">
-          <form onSubmit={handleSubmit}>
-            <motion.div animate={inputAnimation}>
-              <Input
-                type="text"
-                inputMode="text"
-                pattern="-?[\d\.\/]*"
-                onChange={handleInputChange}
-                value={userAnswer}
-                placeholder="Enter number or fraction (e.g. 2/6)..."
-                className={`text-center text-2xl py-6 bg-white border text-gray-800 placeholder-gray-400 font-mono ${
-                  isCorrect
-                    ? "ring-2 ring-green-500/50 border-green-500"
-                    : isIncorrect
-                      ? "ring-2 ring-red-500/50 border-red-500"
-                      : "focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 border-indigo-100"
-                } transition-all duration-300 shadow-sm`}
-              />
+          <form onSubmit={handleSubmit} className="relative">
+            <motion.div animate={inputAnimation} className="mb-2">
+              {showNumpadUI ? (
+                <BrainiacAnswerInput 
+                  value={userAnswer}
+                  onChange={handleInputChange}
+                  onCheck={() => userAnswer && onSubmit()}
+                  placeholder="Type your answer..."
+                  className={
+                    isCorrect
+                      ? "ring-2 ring-green-500/50 border-green-500"
+                      : isIncorrect
+                        ? "ring-2 ring-red-500/50 border-red-500"
+                        : "focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 border-indigo-100"
+                  }
+                />
+              ) : (
+                <Input
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="Type your answer..."
+                  autoFocus
+                  className={`w-full text-center text-3xl py-6 font-mono font-medium bg-white rounded-xl ${
+                    isCorrect
+                      ? "ring-2 ring-green-500/50 border-green-500"
+                      : isIncorrect
+                        ? "ring-2 ring-red-500/50 border-red-500"
+                        : "focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 border-indigo-100"
+                  } transition-all duration-300 shadow-sm`}
+                />
+              )}
             </motion.div>
+            
+            {/* Toggle button for numpad/keyboard */}
+            <Button 
+              type="button"
+              variant="outline" 
+              size="icon"
+              onClick={toggleNumpad}
+              className="absolute right-3 top-3 bg-white/80 backdrop-blur-sm shadow-sm z-10"
+            >
+              {showNumpadUI ? <Keyboard className="h-4 w-4" /> : <Smartphone className="h-4 w-4" />}
+            </Button>
           </form>
           {isCorrect && (
             <motion.div
