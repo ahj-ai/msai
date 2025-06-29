@@ -10,17 +10,17 @@ let supabaseInstance: SupabaseClient | null = null;
 function getSupabaseClient() {
   // Return existing instance if already initialized
   if (supabaseInstance) return supabaseInstance;
-  
+
   // Get environment variables at runtime
-  // Support both local development (NEXT_PUBLIC_ prefix) and Vercel production (no prefix)
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-  
+  // Prefer server-side (non-prefixed) variables, but fall back to public ones for flexibility.
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   // Validate environment variables
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your environment configuration.');
+    throw new Error('Missing Supabase URL or Anon Key. Please check your .env.local file and ensure SUPABASE_URL and SUPABASE_ANON_KEY (or their NEXT_PUBLIC_ counterparts) are set.');
   }
-  
+
   // Create and store the client instance
   supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
   return supabaseInstance;

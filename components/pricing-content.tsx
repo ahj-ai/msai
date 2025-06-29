@@ -392,38 +392,116 @@ export const PricingContent = () => {
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto mb-20">
           <h2 className="font-display text-4xl font-bold text-center text-high-contrast tracking-tight mb-12">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border border-gray-200 rounded-lg p-4">
-                <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is the cancellation policy?</AccordionTrigger>
-                <AccordionContent className="text-gray-600 mt-2">
-                  You can cancel your subscription at any time. Your Premium access will continue until the end of your current billing period. No further charges will be made after cancellation.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-2" className="border border-gray-200 rounded-lg p-4">
-                <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What kind of customer support is available?</AccordionTrigger>
-                <AccordionContent className="text-gray-600 mt-2">
-                  Please direct all inquiries you have to support@mathstackai.app
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-3" className="border border-gray-200 rounded-lg p-4">
-                <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">Are there any usage limits?</AccordionTrigger>
-                <AccordionContent className="text-gray-600 mt-2">
-                  Premium users enjoy unlimited access to all features. Free users have access to basic features with some limitations on advanced functionality and daily usage.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            
+          <div className="space-y-12">
+            {/* General Section */}
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">General</h3>
+              <Accordion type="single" collapsible className="w-full space-y-4">
+                <AccordionItem value="general-1" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is MathStackAI?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    MathStackAI is an AI-powered platform designed to help you master math. We offer a suite of tools, including a "Problem Lab" for practicing specific concepts, a "Brainiac" game to improve your mental math speed, and an "Ask the Lab" feature to get instant, step-by-step solutions to your questions.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="general-2" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">How is MathStackAI different from other learning apps?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    MathStackAI is built specifically for math and is designed to provide a more engaging and effective learning experience. While other tools might give you an answer, we focus on helping you understand the "why" behind the solution. Our platform is also available 24/7, providing instant help whenever you need it.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
 
-            
+            {/* Features Section */}
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">Features</h3>
+              <Accordion type="single" collapsible className="w-full space-y-4">
+                <AccordionItem value="features-1" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is the "Problem Lab"?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    The Problem Lab is your personal practice area. You can generate unlimited practice problems for various subjects and topics, from Pre-Algebra to Algebra II, and get immediate feedback and step-by-step solutions to help you master the concepts.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="features-2" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is "Brainiac"?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    Brainiac is our adaptive mental math game designed to make learning fun and improve your speed and accuracy. You can challenge yourself with quick-fire rounds and track your progress as your skills grow.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="features-3" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is "Ask the Lab"?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    "Ask the Lab" is your on-demand AI math tutor. You can type in any math question, and our AI will provide a detailed, step-by-step solution to help you understand the underlying concepts.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="features-4" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is "Screenshot & Solve"?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    With "Screenshot & Solve," you can upload a picture of a math problem, and our AI will analyze it and provide a comprehensive solution. This feature is perfect for when you're stuck on a problem from a textbook or online assignment.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
 
+            {/* Pricing & Subscription Section */}
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">Pricing & Subscription</h3>
+              <Accordion type="single" collapsible className="w-full space-y-4">
+                <AccordionItem value="pricing-1" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What are "Stacks" and how do they work?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    "Stacks" are our virtual currency used to access premium features. You receive a certain number of Stacks with your monthly plan, and you can purchase more at any time.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-2" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">How much do premium features cost in Stacks?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    <ul className="list-disc pl-6 space-y-1">
+                      <li>Asking a new text-based question: <span className="font-semibold">3 Stacks</span></li>
+                      <li>Asking a new image-based question ("Screenshot & Solve"): <span className="font-semibold">5 Stacks</span></li>
+                      <li>Asking a follow-up to a text question: <span className="font-semibold">1 Stack</span></li>
+                      <li>Asking a follow-up to an image question: <span className="font-semibold">2 Stacks</span></li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-3" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What do I get with the Free plan?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    The Free plan gives you access to unlimited practice problem sets and 50 Stacks per month to use on premium features.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-4" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What is included in the MathStackAI Pro plan?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    The Pro plan includes everything in the Free plan, plus 300 Stacks per month to use on premium features like "Ask the Lab" and "Screenshot & Solve".
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-5" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">Do my monthly Stacks roll over?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    No, the Stacks that are part of your monthly plan (both Free and Pro) do not roll over to the next month. They reset at the beginning of your billing cycle.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-6" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">Do Stacks I purchase expire?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    No, any Stacks that you purchase separately never expire.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-7" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">What happens if I run out of Stacks?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    If you run out of Stacks, you can easily purchase more at any time to continue using the premium features without interruption.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="pricing-8" className="border border-gray-200 rounded-lg p-4">
+                  <AccordionTrigger className="text-lg font-medium text-gray-900 hover:no-underline">Can I change my plan anytime?</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 mt-2">
+                    Yes, you can upgrade or downgrade your plan at any time to better suit your needs.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
           </div>
         </div>
 
