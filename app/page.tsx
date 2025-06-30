@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { SignedIn, SignedOut, SignUpButton } from '@clerk/nextjs';
 import { RedirectToDashboard } from '../components/redirect-to-dashboard';
 import { FeatureCard } from '../components/feature-card';
@@ -237,8 +238,14 @@ export default function Home() {
 
             {/* Sub-feature: Ask the AI */}
             <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center md:order-last">
-                <span className="text-gray-500">[Visual of clicking for a hint/solution]</span>
+              <div className="rounded-lg overflow-hidden md:order-last">
+                <Image
+                  src="/images/askthelab.png"
+                  alt="Ask the Lab interface showing a math equation solver"
+                  width={650}
+                  height={400}
+                  className="w-full h-auto shadow-lg border border-gray-100 rounded-lg"
+                />
               </div>
               <div className="text-center md:text-left">
                 <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Ask the AI: Your 24/7 Math Expert</h3>
@@ -256,8 +263,43 @@ export default function Home() {
                   Don't know how to type that tricky integral or matrix? Just take a picture. Snap and Solve digitizes the problem and gives you a complete solution.
                 </p>
               </div>
-              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">[Animation of phone scanning a problem]</span>
+              <div className="rounded-lg overflow-hidden">
+                <Image
+                  src="/images/snap&solve.png"
+                  alt="Screenshot and Solve feature interface"
+                  width={650}
+                  height={400}
+                  className="w-full h-auto shadow-lg border border-gray-100 rounded-lg"
+                />
+              </div>
+            </div>
+
+            {/* Sub-feature: Generate Similar Problem */}
+            <div className="grid md:grid-cols-2 gap-12 items-center mt-20">
+              <div className="rounded-lg overflow-hidden md:order-last">
+                <Image
+                  src="/images/lab-analysis.png"
+                  alt="Lab's Analysis showing step-by-step math solutions"
+                  width={650}
+                  height={550}
+                  className="w-full h-auto shadow-lg border border-gray-100 rounded-lg"
+                />
+              </div>
+              <div className="text-center md:text-left">
+                <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Generate Similar Problems: Master Any Concept</h3>
+                <p className="font-body text-lg text-gray-600 leading-relaxed">
+                  Once you've solved a problem, our AI can generate similar problems that reinforce the same concept but with different values and scenarios. This spaced repetition approach helps you build true mastery through targeted practice.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <div className="bg-[#6C63FF]/10 text-[#6C63FF] py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9 9 0 0 0-9 9 9 9 0 0 0 9 9 9 9 0 0 0 9-9Z"/><path d="m9 15 6-6"/><path d="M11 15h4v-4"/></svg>
+                    Generate Similar Problem
+                  </div>
+                  <div className="bg-[#6C63FF]/10 text-[#6C63FF] py-2 px-4 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Show Solution
+                  </div>
+                </div>
               </div>
             </div>
           </div>
