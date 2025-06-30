@@ -6,6 +6,7 @@ import { SignedIn, SignedOut, SignUpButton } from '@clerk/nextjs';
 import { RedirectToDashboard } from '../components/redirect-to-dashboard';
 import { FeatureCard } from '../components/feature-card';
 import { Brain, Zap, Target, Award, ArrowRight, CheckCircle, XCircle, Trophy } from 'lucide-react';
+import { WhyMathStackAI } from '@/components/why-mathstack-ai';
 
 interface Feature {
   icon: React.ReactNode;
@@ -88,9 +89,8 @@ export default function Home() {
             <div className="max-w-5xl mx-auto text-center">
 
               <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-extrabold mb-8 pb-2 tracking-tight">
-                Built for Math.<br />
-                <span className="animate-gradient-x bg-gradient-to-r from-[#6C63FF] via-[#8A6FFD] to-[#5E60CE] bg-clip-text text-transparent text-hover-animate">Built for You.</span>
-              </h1>
+  Your Personal AI <span className="animate-gradient-x bg-gradient-to-r from-[#6C63FF] via-[#8A6FFD] to-[#5E60CE] bg-clip-text text-transparent text-hover-animate">Math Tutor</span>
+</h1>
               <style jsx>{`
                 @keyframes gradient-x {
                   0% {
@@ -109,8 +109,8 @@ export default function Home() {
                 }
               `}</style>
               <p className="font-body text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
-                MathStack AI gives you results—not walls of text. Get instant step-by-step solutions, master speed with Brainiac, and practice unlimited problems in the Problem Lab.
-              </p>
+  Stop wrestling with generic AI. Get instant, step-by-step solutions, master concepts with gamified practice, and tackle any problem with a photo.
+</p>
 
               {/* Social proof */}
               <div className="flex flex-wrap justify-center items-center gap-6 mb-10 text-sm text-gray-500">
@@ -176,21 +176,73 @@ export default function Home() {
             </div>
         </section>
 
-        {/* Features Section */}
+        {/* New Feature Sections */}
         <section className="section bg-white">
           <div className="container">
-            <div className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="font-display text-4xl font-bold mb-6 tracking-tight">Built for Math Mastery</h2>
-              <p className="font-body text-xl text-gray-600 leading-relaxed">While ChatGPT tries to do everything, we do one thing perfectly: make you a math genius.</p>
+            {/* Brainiac Feature */}
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
+              <div className="text-center md:text-left">
+                <h3 className="font-display text-lg font-semibold text-[#6C63FF] mb-2 tracking-wide">The Mental Math Speed Game</h3>
+                <h2 className="font-display text-4xl font-extrabold mb-4 tracking-tight">Brainiac</h2>
+                <p className="font-body text-lg text-gray-600 leading-relaxed">
+                  Race against the clock to solve math problems, improve your speed and accuracy, and climb the leaderboard. Brainiac makes practicing math feel like a game, not a chore. Are you ready to test your skills?
+                </p>
+              </div>
+              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500">[Animated GIF of Brainiac Gameplay]</span>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {features.map((feature, index) => (
-                <FeatureCard key={index} icon={feature.icon} title={feature.title} description={feature.description} link="/why-mathstack-ai" />
-              ))}
+
+            {/* Problem Lab Main Section */}
+            <div className="text-center mb-16">
+              <h2 className="font-display text-4xl font-extrabold mb-4 tracking-tight">The Problem Lab: Your All-in-One Math Hub</h2>
+              <p className="font-body text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                The Problem Lab is your central command for mastering math. It combines unlimited practice, instant AI help, and photo-solving into one seamless experience.
+              </p>
+            </div>
+
+            {/* Sub-feature: Practice Hub */}
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+              <div className="text-center md:text-left">
+                <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Practice Hub: Your Unlimited Playground</h3>
+                <p className="font-body text-lg text-gray-600 leading-relaxed">
+                  Generate unlimited practice problems for any math concept. Choose your topic and difficulty, and the Problem Lab will create a personalized quiz for you.
+                </p>
+              </div>
+              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500">[Visual of selecting topic/difficulty and seeing problems]</span>
+              </div>
+            </div>
+
+            {/* Sub-feature: Ask the AI */}
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center md:order-last">
+                <span className="text-gray-500">[Visual of clicking for a hint/solution]</span>
+              </div>
+              <div className="text-center md:text-left">
+                <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Ask the AI: Your 24/7 Math Expert</h3>
+                <p className="font-body text-lg text-gray-600 leading-relaxed">
+                  Stuck on a problem? Use the integrated 'Ask the AI' to get unstuck with hints or full step-by-step solutions.
+                </p>
+              </div>
+            </div>
+
+            {/* Sub-feature: Snap and Solve */}
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="text-center md:text-left">
+                <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Snap and Solve: Your Camera is Your Calculator</h3>
+                <p className="font-body text-lg text-gray-600 leading-relaxed">
+                  Don't know how to type that tricky integral or matrix? Just take a picture. Snap and Solve digitizes the problem and gives you a complete solution.
+                </p>
+              </div>
+              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500">[Animation of phone scanning a problem]</span>
+              </div>
             </div>
           </div>
         </section>
+
+        <WhyMathStackAI />
 
         {/* CTA Section */}
         <section className="section bg-gray-900 text-white">
