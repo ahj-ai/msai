@@ -217,6 +217,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
                   onChange={handleInputChange}
                   onCheck={() => userAnswer && onSubmit()}
                   placeholder="Type your answer..."
+                  disabled={isCorrect || isIncorrect}
                   className={
                     isCorrect
                       ? "ring-2 ring-green-500/50 border-green-500"

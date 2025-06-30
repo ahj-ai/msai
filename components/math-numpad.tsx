@@ -26,6 +26,7 @@ const MathNumpad = ({
     onBackspace();
   };
 
+  // Only trigger validation when the submit button is explicitly clicked
   const handleCheck = () => {
     if (onCheck) {
       onCheck();
@@ -60,7 +61,14 @@ const MathNumpad = ({
       <Button variant="outline" onClick={handleBackspace} className={cn(buttonClass, 'bg-gray-100')}><Delete className="h-5 w-5" /></Button>
       <Button variant="outline" onClick={() => handleButtonClick('+')} className={cn(buttonClass, 'text-lg')}><Plus className="h-5 w-5" /></Button>
 
-      {/* No Submit Button - we're using the main submit button instead */}
+      {/* Submit Button */}
+      <Button
+        variant="default"
+        onClick={handleCheck}
+        className={cn(buttonClass, 'col-span-4 bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:opacity-90 text-white')}
+      >
+        Submit Answer
+      </Button>
     </div>
   );
 };

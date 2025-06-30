@@ -46,20 +46,26 @@ const BrainiacAnswerInput = ({
     }
   };
   
-  // Handle checking the answer
+  // Handle checking the answer - only when submit button is explicitly clicked
   const handleCheck = () => {
-    if (onCheck) {
-      onCheck(currentValue);
+    if (currentValue.trim()) {
+      // First, update the parent component with the current value
+      if (onChange) {
+        onChange(currentValue);
+      }
+      // Then trigger the check with the current value
+      if (onCheck) {
+        onCheck(currentValue);
+      }
     }
   };
   
-  // Handle numpad input
+  // Handle numpad input - only update the internal value, don't validate
   const handleNumpadInput = (value: string) => {
     const newValue = currentValue + value;
     setCurrentValue(newValue);
-    if (onChange) {
-      onChange(newValue);
-    }
+    // Only update the internal state, don't trigger external onChange
+    // This prevents validation on each key press
     inputRef.current?.focus();
   };
   
@@ -68,9 +74,7 @@ const BrainiacAnswerInput = ({
     if (currentValue.length > 0) {
       const newValue = currentValue.slice(0, -1);
       setCurrentValue(newValue);
-      if (onChange) {
-        onChange(newValue);
-      }
+      // Don't trigger onChange to prevent validation on backspace
     }
     inputRef.current?.focus();
   };
@@ -120,7 +124,7 @@ const BrainiacAnswerInput = ({
             variant="default"
             className="w-full bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:opacity-90 text-white py-5 font-medium text-base"
             onClick={handleCheck}
-            disabled={disabled || !currentValue.trim()}
+            disabled={disabled}
           >
             Submit Answer
           </Button>
