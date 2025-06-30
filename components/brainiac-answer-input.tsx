@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import MathField, { MathFieldRef } from './math-field';
-import MathNumpad from './math-numpad';
-import { useMediaQuery } from '../hooks/use-media-query';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Keyboard, X } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
+import MathNumpad from '@/components/math-numpad';
 
 interface BrainiacAnswerInputProps {
   value?: string | number;
@@ -25,99 +25,117 @@ const BrainiacAnswerInput = ({
   disabled = false,
   className,
 }: BrainiacAnswerInputProps) => {
-  const mathFieldRef = useRef<MathFieldRef>(null);
-  const [showNumpad, setShowNumpad] = useState(false);
   const [currentValue, setCurrentValue] = useState(value?.toString() || '');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [showNumpad, setShowNumpad] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
   
-  // Force show numpad for testing
-  const isMobile = true; // Temporarily hardcode to true for testing
-  
-  // Show numpad by default for testing
+  // Set numpad visibility based on device on mount
   useEffect(() => {
-    // Always show numpad for testing
-    setShowNumpad(true);
-    console.log('Numpad should be visible');
-  }, []);
+    if (isMobile) {
+      setShowNumpad(true);
+    }
+  }, [isMobile]);
   
-  // Handle changes to the math field
-  const handleMathFieldChange = (value: string) => {
-    setCurrentValue(value);
+  // Handle changes to the input field
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setCurrentValue(newValue);
     if (onChange) {
-      onChange(value);
+      onChange(newValue);
     }
   };
   
   // Handle checking the answer
   const handleCheck = () => {
-    if (onCheck && mathFieldRef.current) {
-      onCheck(mathFieldRef.current.getValue());
+    if (onCheck) {
+      onCheck(currentValue);
     }
   };
   
-  // Calculate bottom padding to ensure content isn't hidden by numpad
-  const contentStyle = {
-    paddingBottom: showNumpad && isMobile ? '280px' : '0px',
+  // Handle numpad input
+  const handleNumpadInput = (value: string) => {
+    const newValue = currentValue + value;
+    setCurrentValue(newValue);
+    if (onChange) {
+      onChange(newValue);
+    }
+    inputRef.current?.focus();
   };
   
+  // Handle numpad backspace
+  const handleNumpadBackspace = () => {
+    if (currentValue.length > 0) {
+      const newValue = currentValue.slice(0, -1);
+      setCurrentValue(newValue);
+      if (onChange) {
+        onChange(newValue);
+      }
+    }
+    inputRef.current?.focus();
+  };
+  
+  // Update internal value when prop changes
+  useEffect(() => {
+    if (value !== undefined) {
+      setCurrentValue(value.toString());
+    }
+  }, [value]);
+  
   return (
-    <div className={cn('relative', className)} style={contentStyle}>
-      {/* Debug information */}
-      <div className="bg-yellow-100 text-black p-2 mb-2 rounded border border-yellow-400">
-        Debug: isMobile={isMobile.toString()}, showNumpad={showNumpad.toString()}
-      </div>
-      <div className="relative">
-        <MathField
-          ref={mathFieldRef}
-          value={value?.toString()}
-          onChange={handleMathFieldChange}
-          placeholder={placeholder}
-          disabled={disabled}
-          className="rounded-md"
-        />
+    <div className={cn('w-full', className)}>
+      <div className="w-full space-y-3">
+        <div className="relative">
+          <Input
+            ref={inputRef}
+            type="text"
+            value={currentValue}
+            onChange={handleInputChange}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="rounded-md pr-12 py-6 text-lg" 
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleCheck();
+              }
+            }}
+          />
+          
+          {/* Only the numpad toggle button remains in the input */}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+              onClick={() => setShowNumpad(!showNumpad)}
+            >
+              {showNumpad ? <X className="h-4 w-4" /> : <Keyboard className="h-4 w-4" />}
+            </Button>
+          )}
+        </div>
         
-        {/* Toggle numpad button (only visible on mobile) */}
-        {isMobile && !showNumpad && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-2 bottom-2 bg-white shadow-sm"
-            onClick={() => setShowNumpad(true)}
+        {/* Only show the main submit button when numpad is hidden or on desktop */}
+        {(!showNumpad || !isMobile) && (
+          <Button 
+            variant="default"
+            className="w-full bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:opacity-90 text-white py-5 font-medium text-base"
+            onClick={handleCheck}
+            disabled={disabled || !currentValue.trim()}
           >
-            <Keyboard className="h-4 w-4" />
+            Submit Answer
           </Button>
         )}
         
-        {/* Close numpad button (only when numpad is shown) */}
+        {/* Numpad (only visible on mobile and when toggled on) */}
         {showNumpad && isMobile && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-2 bottom-2 bg-white shadow-sm z-50"
-            onClick={() => setShowNumpad(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <MathNumpad
+            onDigitPress={handleNumpadInput}
+            onBackspace={handleNumpadBackspace}
+            onCheck={handleCheck} // Keep this for the numpad's submit button
+            className="mt-4"
+          />
         )}
       </div>
-      
-      {/* Check answer button (only visible when numpad is not shown) */}
-      {!showNumpad && (
-        <Button 
-          onClick={handleCheck}
-          disabled={disabled || !currentValue.trim()}
-          className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white"
-        >
-          Check Answer
-        </Button>
-      )}
-      
-      {/* Numpad (only visible on mobile and when toggled on) */}
-      {showNumpad && isMobile && (
-        <MathNumpad
-          mathFieldRef={mathFieldRef}
-          onCheck={handleCheck}
-        />
-      )}
     </div>
   );
 };
