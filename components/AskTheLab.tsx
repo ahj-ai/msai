@@ -29,7 +29,7 @@ interface AskTheLabProps {
   setSolution?: (solution: GeminiJsonResponse) => void;
 }
 
-type InputMode = 'equation' | 'word-problem';
+type InputMode = 'equation-solver' | 'custom-problem';
 
 const AskTheLab: React.FC<AskTheLabProps> = ({
   question,
@@ -47,7 +47,7 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
   setSolution,
 }) => {
   // State to toggle between equation input and word problem input
-  const [inputMode, setInputMode] = useState<InputMode>('equation');
+  const [inputMode, setInputMode] = useState<InputMode>('equation-solver');
   
   // Create a ref for the MathField component following the uncontrolled component pattern
   const mathFieldRef = React.useRef<MathFieldRef>(null);
@@ -62,39 +62,39 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
           Ask the Lab
         </CardTitle>
         <p className="text-indigo-200 mt-2 text-base md:text-lg">
-          Have a specific math question? Type it in using LaTeX for formulas.
+          Type Any Math Question. Get Instant, Step-by-Step Help.
         </p>
       </CardHeader>
       <CardContent className="p-4 md:p-8">
         <div className="relative mb-4 rounded-lg border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-200 focus-within:border-indigo-500 overflow-hidden transition-all duration-200">
           <div className="flex border-b border-gray-200 bg-gray-50/50">
             <button
-              onClick={() => setInputMode('equation')}
+              onClick={() => setInputMode('equation-solver')}
               className={`flex-1 p-3 text-center font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-2 ${
-                inputMode === 'equation'
+                inputMode === 'equation-solver'
                   ? 'bg-white text-indigo-600 border-b-2 border-indigo-600'
                   : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
               <FunctionSquare className="w-5 h-5" />
-              Equation
+              Equation Solver
             </button>
             <div className="w-px bg-gray-200"></div>
             <button
-              onClick={() => setInputMode('word-problem')}
+              onClick={() => setInputMode('custom-problem')}
               className={`flex-1 p-3 text-center font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-2 ${
-                inputMode === 'word-problem'
+                inputMode === 'custom-problem'
                   ? 'bg-white text-purple-600 border-b-2 border-purple-600'
                   : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
               <TextIcon className="w-5 h-5" />
-              Word Problem
+              Enter a Custom Problem
             </button>
           </div>
 
           <div className="relative">
-            {inputMode === 'equation' ? (
+            {inputMode === 'equation-solver' ? (
               <MathField
                 value={question}
                 onChange={setQuestion}
@@ -108,18 +108,18 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
                 ref={textareaRef}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Describe your math problem here..."
+                placeholder="e.g., A train travels at 60 mph..."
                 disabled={isAskingQuestion}
-                className="w-full p-4 rounded-b-lg border-0 focus:ring-0 transition-all duration-200 min-h-[130px] md:min-h-[150px] font-normal text-base bg-white resize-none"
+                className="w-full p-4 border-none focus:ring-0 focus:outline-none transition-all duration-200 text-gray-800 bg-transparent min-h-[120px] resize-y"
               />
             )}
             
             <Button
               onClick={() => {
-                if (inputMode === 'equation' && mathFieldRef.current) {
+                if (inputMode === 'equation-solver' && mathFieldRef.current) {
                   const currentValue = mathFieldRef.current.getValue();
                   setQuestion(currentValue);
-                } else if (inputMode === 'word-problem' && textareaRef.current) {
+                } else if (inputMode === 'custom-problem' && textareaRef.current) {
                   setQuestion(textareaRef.current.value);
                 }
                 handleAskQuestion();

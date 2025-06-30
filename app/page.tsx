@@ -6,7 +6,6 @@ import { SignedIn, SignedOut, SignUpButton } from '@clerk/nextjs';
 import { RedirectToDashboard } from '../components/redirect-to-dashboard';
 import { FeatureCard } from '../components/feature-card';
 import { Brain, Zap, Target, Award, ArrowRight, CheckCircle, XCircle, Trophy } from 'lucide-react';
-import { WhyMathStackAI } from '@/components/why-mathstack-ai';
 
 interface Feature {
   icon: React.ReactNode;
@@ -185,7 +184,7 @@ export default function Home() {
                 <h3 className="font-display text-lg font-semibold text-[#6C63FF] mb-2 tracking-wide">The Mental Math Speed Game</h3>
                 <h2 className="font-display text-4xl font-extrabold mb-4 tracking-tight">Brainiac</h2>
                 <p className="font-body text-lg text-gray-600 leading-relaxed">
-                  Race against the clock to solve math problems, improve your speed and accuracy, and climb the leaderboard. Brainiac makes practicing math feel like a game, not a chore. Are you ready to test your skills?
+                  Race against the clock to solve math problems, improve your speed and accuracy, and climb the leaderboard. While other apps make math feel like a chore, Brainiac makes practice fun and competitive. The engaging, game-like experience keeps you motivated with detailed progress tracking.
                 </p>
               </div>
               <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
@@ -197,7 +196,7 @@ export default function Home() {
             <div className="text-center mb-16">
               <h2 className="font-display text-4xl font-extrabold mb-4 tracking-tight">The Problem Lab: Your All-in-One Math Hub</h2>
               <p className="font-body text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                The Problem Lab is your central command for mastering math. It combines unlimited practice, instant AI help, and photo-solving into one seamless experience.
+                The Problem Lab is your central command for mastering math. Unlike generic AI tools that only react to questions, our Problem Lab proactively helps you build lasting understanding through personalized practice and targeted support.
               </p>
             </div>
 
@@ -206,11 +205,33 @@ export default function Home() {
               <div className="text-center md:text-left">
                 <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Practice Hub: Your Unlimited Playground</h3>
                 <p className="font-body text-lg text-gray-600 leading-relaxed">
-                  Generate unlimited practice problems for any math concept. Choose your topic and difficulty, and the Problem Lab will create a personalized quiz for you.
+                  Generate unlimited practice problems for any math concept. The Problem Lab learns your strengths and weaknesses, creating custom problem sets that target exactly what you need to improve — true personalization, not one-size-fits-all solutions.
                 </p>
               </div>
-              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">[Visual of selecting topic/difficulty and seeing problems]</span>
+              <div className="rounded-lg overflow-hidden shadow-lg bg-white p-4 space-y-4 border border-gray-200">
+                {/* --- Visual Placeholder --- */}
+                
+                {/* Placeholder for the first image: The Practice Hub selection */}
+                <div className="bg-gradient-to-r from-[#8A6FFD] to-[#6C63FF] p-6 rounded-xl text-white">
+
+                    <div className="bg-white/25 p-3 rounded-lg mb-3 font-medium">Subject: Pre-Algebra</div>
+                    <div className="bg-white/25 p-3 rounded-lg font-medium">Topic: Select a topic...</div>
+                    <div className="bg-white text-center text-[#6C63FF] font-bold py-3 mt-5 rounded-lg shadow-md">Try a Problem →</div>
+                </div>
+
+                {/* Placeholder for the second image: The practice problem itself */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-md">
+                    <h4 className="font-bold text-xl text-gray-800 mb-2">Practice Problem</h4>
+                    <p className="text-gray-600 mb-4">Evaluate the expression <code className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md">5y - 10</code> when <code className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md">y = 3</code>.</p>
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-grow p-3 border rounded-lg text-gray-500">Enter your answer</div>
+                        <div className="bg-green-500 text-white font-bold py-3 px-6 rounded-lg">Check</div>
+                    </div>
+                    <div className="flex justify-center gap-4">
+                        <button className="text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 py-2 px-4 rounded-lg transition-colors">Get a Hint</button>
+                        <button className="text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 py-2 px-4 rounded-lg transition-colors">Show Solution</button>
+                    </div>
+                </div>
               </div>
             </div>
 
@@ -222,7 +243,7 @@ export default function Home() {
               <div className="text-center md:text-left">
                 <h3 className="font-display text-2xl font-bold mb-3 tracking-tight">Ask the AI: Your 24/7 Math Expert</h3>
                 <p className="font-body text-lg text-gray-600 leading-relaxed">
-                  Stuck on a problem? Use the integrated 'Ask the AI' to get unstuck with hints or full step-by-step solutions.
+                  Stuck on a problem? Use the integrated 'Ask the AI' to get unstuck with hints or full step-by-step solutions. Powered by Google's most advanced AI model, it doesn't just solve problems—it understands mathematical reasoning and explains concepts in ways that make sense to you.
                 </p>
               </div>
             </div>
@@ -242,7 +263,100 @@ export default function Home() {
           </div>
         </section>
 
-        <WhyMathStackAI />
+        {/* The Numbers Speak for Themselves Section */}
+        <section className="section bg-gray-50">
+          <div className="container">
+            <div className="text-center mb-16">
+              <h2 className="font-display text-4xl font-extrabold mb-4 tracking-tight">
+                The <span className="text-[#6C63FF]">Numbers</span> Speak for Themselves
+              </h2>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Stat Card 1 */}
+              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 bg-[#6C63FF]/10 rounded-full flex items-center justify-center">
+                    <span className="text-[#6C63FF]">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 11v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><rect x="2" y="7" width="20" height="4" rx="2"/><path d="M12 5V3"/><path d="M10 9h4"/></svg>
+                    </span>
+                  </div>
+                </div>
+                <h3 className="font-display text-4xl font-extrabold mb-2">94.7%</h3>
+                <div className="font-bold text-gray-800 mb-1">Student Improvement</div>
+                <p className="text-gray-600 text-sm">Average grade increase</p>
+              </div>
+              
+              {/* Stat Card 2 */}
+              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 bg-[#6C63FF]/10 rounded-full flex items-center justify-center">
+                    <span className="text-[#6C63FF]">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    </span>
+                  </div>
+                </div>
+                <h3 className="font-display text-4xl font-extrabold mb-2">2.5x</h3>
+                <div className="font-bold text-gray-800 mb-1">Learning Speed</div>
+                <p className="text-gray-600 text-sm">Faster concept mastery</p>
+              </div>
+              
+              {/* Stat Card 3 */}
+              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 bg-[#6C63FF]/10 rounded-full flex items-center justify-center">
+                    <span className="text-[#6C63FF]">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                    </span>
+                  </div>
+                </div>
+                <h3 className="font-display text-4xl font-extrabold mb-2">300+</h3>
+                <div className="font-bold text-gray-800 mb-1">Practice Problems</div>
+                <p className="text-gray-600 text-sm">Practice makes perfect with a vast library of problems.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Testimonials Section */}
+        <section className="section">
+          <div className="container">
+            <div className="text-center mb-16">
+              <h2 className="font-display text-4xl font-extrabold mb-4 tracking-tight">
+                What Our <span className="text-[#6C63FF]">Students</span> Say
+              </h2>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Testimonial 1 */}
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-md transition-shadow">
+                <h3 className="font-display font-bold text-xl mb-1">Nisha P.</h3>
+                <p className="text-gray-600 mb-4 text-sm">10th Grade</p>
+                <p className="italic text-gray-700">
+                  "I used to bomb my math tests. Now I get A's. It's kinda wild."
+                </p>
+              </div>
+              
+              {/* Testimonial 2 */}
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-md transition-shadow">
+                <h3 className="font-display font-bold text-xl mb-1">Anaad A.</h3>
+                <p className="text-gray-600 mb-4 text-sm">College</p>
+                <p className="italic text-gray-700">
+                  "The AI explanations are better than my professor's lectures."
+                </p>
+              </div>
+              
+              {/* Testimonial 3 */}
+              <div className="bg-gray-50 p-8 rounded-xl hover:shadow-md transition-shadow">
+                <h3 className="font-display font-bold text-xl mb-1">Kylie J.</h3>
+                <p className="text-gray-600 mb-4 text-sm">8th Grade</p>
+                <p className="italic text-gray-700">
+                  "I don't hate math anymore, so I guess it's working? The game mode is actually fun."
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* CTA Section */}
         <section className="section bg-gray-900 text-white">
