@@ -188,8 +188,31 @@ export default function Home() {
                   Race against the clock to solve math problems, improve your speed and accuracy, and climb the leaderboard. While other apps make math feel like a chore, Brainiac makes practice fun and competitive. The engaging, game-like experience keeps you motivated with detailed progress tracking.
                 </p>
               </div>
-              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">[Animated GIF of Brainiac Gameplay]</span>
+              <div className="max-w-5xl mx-auto">
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                      {/* Image 1: Gameplay */}
+                      <div className="w-full h-auto">
+                          <Image
+                              src="/images/brainiac-gameplay.jpeg"
+                              alt="The Brainiac math game screen showing a problem and user stats."
+                              width={500}
+                              height={550}
+                              className="rounded-xl shadow-md border border-white"
+                          />
+                      </div>
+                      {/* Image 2: Results */}
+                      <div className="w-full h-auto">
+                          <Image
+                              src="/images/brainiac-results.jpeg"
+                              alt="The Brainiac final score screen showing statistics like accuracy, time, and streak."
+                              width={500}
+                              height={550}
+                              className="rounded-xl shadow-md border border-white"
+                          />
+                      </div>
+                  </div>
+                </div>
               </div>
             </div>
 
