@@ -11,6 +11,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Camera, Send, Loader2, AlertCircle, Coins, Book, PenTool, CheckCircle, Brain, X } from 'lucide-react';
+import { formatLatexForGemini } from "@/utils/format-latex";
 
 interface SnapAndSolveProps {
   selectedImage: File | null;
@@ -131,13 +132,13 @@ const SnapAndSolve: React.FC<SnapAndSolveProps> = ({
                           <div className="pl-4 border-l-2 border-blue-200 mt-1">
                             <div className="text-gray-700">
                               <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                {step.explanation}
+                                {formatLatexForGemini(step.explanation)}
                               </ReactMarkdown>
                             </div>
                             {step.work && (
                               <div className="mt-2 p-2 bg-white rounded-md border border-gray-200">
                                 <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                  {step.work}
+                                  {formatLatexForGemini(step.work)}
                                 </ReactMarkdown>
                               </div>
                             )}
@@ -152,117 +153,117 @@ const SnapAndSolve: React.FC<SnapAndSolveProps> = ({
                       <CheckCircle className="w-5 h-5 mr-2" /> Final Answer
                     </h3>
                     <div className="mt-2 text-gray-800 font-semibold">
-                       <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                        {solution.answer.finalResult}
+                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        {formatLatexForGemini(solution.answer.finalResult)}
                       </ReactMarkdown>
                     </div>
                     {solution.answer.verification && (
                       <div className="mt-2 text-sm text-gray-600">
                         <strong className="font-semibold">Verification:</strong>
                         <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                          {solution.answer.verification}
+                          {formatLatexForGemini(solution.answer.verification)}
                         </ReactMarkdown>
                       </div>
                     )}
                   </div>
 
-                   <div className="mt-6 flex flex-col items-center">
-                       <Button
-                       onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
-                       disabled={isGeneratingSimilar}
-                       className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
-                       title="Costs 3 credits"
-                       >
-                       {isGeneratingSimilar ? (
-                           <>
-                           <Loader2 className="w-5 h-5 animate-spin" />
-                           Generating similar problem...
-                           </>
-                       ) : (
-                           <>
-                           <Brain className="w-5 h-5" />
-                           Generate a problem just like this one
-                           </>
-                       )}
-                       </Button>
-                       <div className="flex items-center gap-1 mt-2 text-indigo-600">
-                           <Coins className="w-3 h-3" />
-                           <span className="text-xs font-medium">3 credits</span>
-                       </div>
-                   </div>
+                  <div className="mt-6 flex flex-col items-center">
+                    <Button
+                      onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
+                      disabled={isGeneratingSimilar}
+                      className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
+                      title="Costs 3 credits"
+                    >
+                      {isGeneratingSimilar ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Generating similar problem...
+                        </>
+                      ) : (
+                        <>
+                          <Brain className="w-5 h-5" />
+                          Generate a problem just like this one
+                        </>
+                      )}
+                    </Button>
+                    <div className="flex items-center gap-1 mt-2 text-indigo-600">
+                      <Coins className="w-3 h-3" />
+                      <span className="text-xs font-medium">3 credits</span>
+                    </div>
+                  </div>
 
-                   {similarProblemError && (
-                     <motion.div
-                       initial={{ opacity: 0, y: 10 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2"
-                     >
-                       <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                       <span className="text-sm">{similarProblemError}</span>
-                     </motion.div>
-                   )}
+                  {similarProblemError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2"
+                    >
+                      <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm">{similarProblemError}</span>
+                    </motion.div>
+                  )}
 
-                   {showSimilarProblem && similarProblem && (
-                     <motion.div
-                       initial={{ opacity: 0, y: 20 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm"
-                     >
-                       <div className="mb-4 flex items-center justify-between">
-                         <h3 className="text-lg font-bold text-purple-800 flex items-center gap-2">
-                           <Brain className="w-6 h-6" />
-                           Similar Problem Generated
-                         </h3>
-                         <Button
-                           onClick={() => setShowSimilarProblem(false)}
-                           variant="ghost"
-                           size="sm"
-                           className="text-purple-600 hover:text-purple-800"
-                         >
-                           <X className="w-4 h-4" />
-                         </Button>
-                       </div>
+                  {showSimilarProblem && similarProblem && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm"
+                    >
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-purple-800 flex items-center gap-2">
+                          <Brain className="w-6 h-6" />
+                          Similar Problem Generated
+                        </h3>
+                        <Button
+                          onClick={() => setShowSimilarProblem(false)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-purple-600 hover:text-purple-800"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
 
-                       <div className="space-y-4">
-                         {similarProblem.problem && (
-                           <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
-                             <h4 className="text-md font-semibold text-purple-800 mb-2">
-                               {similarProblem.problem.title || 'New Problem'}
-                             </h4>
-                             <div className="text-gray-700 prose prose-sm max-w-none">
-                               <ReactMarkdown
-                                 remarkPlugins={[remarkMath]}
-                                 rehypePlugins={[rehypeKatex]}
-                               >
-                                 {similarProblem.problem.statement || 'No problem statement available'}
-                               </ReactMarkdown>
-                             </div>
-                           </div>
-                         )}
+                      <div className="space-y-4">
+                        {similarProblem.problem && (
+                          <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
+                            <h4 className="text-md font-semibold text-purple-800 mb-2">
+                              {similarProblem.problem.title || 'New Problem'}
+                            </h4>
+                            <div className="text-gray-700 prose prose-sm max-w-none">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkMath]}
+                                rehypePlugins={[rehypeKatex]}
+                              >
+                                {formatLatexForGemini(similarProblem.problem.statement) || 'No problem statement available'}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        )}
 
-                         <div className="flex gap-3 justify-center">
-                           <Button
-                             onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
-                             disabled={isGeneratingSimilar}
-                             variant="outline"
-                             className="border-purple-300 text-purple-700 hover:bg-purple-50"
-                           >
-                             Generate Another
-                           </Button>
-                           <Button
-                             onClick={() => {
-                               setSolution(similarProblem);
-                               setShowSimilarProblem(false);
-                               setSimilarProblem(null);
-                             }}
-                             className="bg-purple-600 hover:bg-purple-700 text-white"
-                           >
-                             Show Solution
-                           </Button>
-                         </div>
-                       </div>
-                     </motion.div>
-                   )}
+                        <div className="flex gap-3 justify-center">
+                          <Button
+                            onClick={() => handleGenerateSimilar(solution as GeminiJsonResponse)}
+                            disabled={isGeneratingSimilar}
+                            variant="outline"
+                            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                          >
+                            Generate Another
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSolution(similarProblem);
+                              setShowSimilarProblem(false);
+                              setSimilarProblem(null);
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                          >
+                            Show Solution
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               ) : (
                 <div className="prose prose-indigo">

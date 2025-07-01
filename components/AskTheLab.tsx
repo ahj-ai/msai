@@ -165,91 +165,116 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
                 <p>{answer}</p>
               </div>
             ) : (
-              <div>
-                <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2">
-                  <Brain className="w-6 h-6" />
+              <div className="space-y-8">
+                {/* Main Title */}
+                <h3 className="text-2xl font-bold text-indigo-800 flex items-center gap-3 border-b-2 border-indigo-200 pb-3">
+                  <Brain className="w-7 h-7" />
                   Lab's Analysis
                 </h3>
-                <div className="p-4 bg-white rounded-lg border border-gray-200">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                  >
-                    {(answer as GeminiJsonResponse).problem.statement || 'No problem statement available'}
-                  </ReactMarkdown>
-                </div>
-                {(answer as GeminiJsonResponse).problem.keyConcepts && (answer as GeminiJsonResponse).problem.keyConcepts.length > 0 && (
-                  <div className="mt-3">
-                    <h4 className="font-semibold text-indigo-700">Key Concepts:</h4>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {(answer as GeminiJsonResponse).problem.keyConcepts.map((concept, index) => (
-                        <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-                          {concept}
-                        </span>
+
+                {/* Problem Section */}
+                {(answer as GeminiJsonResponse).problem && (
+                  <div className="p-6 bg-indigo-50/80 rounded-xl border border-indigo-200">
+                    <h4 className="text-xl font-bold text-indigo-800 mb-3">
+                      {ensureLatexDelimiters((answer as GeminiJsonResponse).problem.title || 'Problem')}
+                    </h4>
+                    <div className="prose prose-sm max-w-none text-gray-800">
+                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        {ensureLatexDelimiters((answer as GeminiJsonResponse).problem.statement || 'No problem statement available')}
+                      </ReactMarkdown>
+                    </div>
+                    {(answer as GeminiJsonResponse).problem.keyConcepts && (answer as GeminiJsonResponse).problem.keyConcepts.length > 0 && (
+                      <div className="mt-4">
+                        <h5 className="font-semibold text-indigo-700">Key Concepts:</h5>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(answer as GeminiJsonResponse).problem.keyConcepts.map((concept: string, index: number) => (
+                            <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">
+                              {ensureLatexDelimiters(concept)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Solution Section */}
+                {(answer as GeminiJsonResponse).solution && (
+                  <div>
+                    <h4 className="text-xl font-bold text-blue-800 mb-3">Step-by-step Solution</h4>
+                    <div className="space-y-4">
+                      {(answer as GeminiJsonResponse).solution.map((step: { step: string; explanation: string; work: string }, index: number) => (
+                        <div key={index} className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                          <p className="font-bold text-gray-800">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {`**Step ${index + 1}:** ${ensureLatexDelimiters(step.step)}`}
+                            </ReactMarkdown>
+                          </p>
+                          <div className="prose prose-sm max-w-none text-gray-600 mt-1">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                              {ensureLatexDelimiters(step.explanation)}
+                            </ReactMarkdown>
+                          </div>
+                          {step.work && (
+                            <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {ensureLatexDelimiters(step.work)}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold text-indigo-700 mb-3">Step-by-step Solution:</h4>
-                  <div className="space-y-4">
-                    {(answer as GeminiJsonResponse).solution.map((step, index) => (
-                      <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
-                        <p className="font-bold text-gray-800">Step {index + 1}: {step.step}</p>
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {ensureLatexDelimiters(step.explanation)}
-                        </ReactMarkdown>
-                        {step.work && (
-                          <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkMath]}
-                              rehypePlugins={[rehypeKatex]}
-                            >
-                              {ensureLatexDelimiters(step.work)}
-                            </ReactMarkdown>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <h4 className="text-lg font-bold text-green-800">Final Answer:</h4>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                  >
-                    {ensureLatexDelimiters((answer as GeminiJsonResponse).answer.finalResult)}
-                  </ReactMarkdown>
-                </div>
 
-                {/* Similar Problem Generation Button */}
+                {/* Final Answer Section */}
+                {(answer as GeminiJsonResponse).answer && (
+                  <div className="p-6 bg-green-50/80 rounded-xl border border-green-200">
+                    <h4 className="text-xl font-bold text-green-800 mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-6 h-6" />
+                      Final Answer
+                    </h4>
+                    <div className="prose prose-sm max-w-none text-gray-800">
+                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        {ensureLatexDelimiters((answer as GeminiJsonResponse).answer.finalResult)}
+                      </ReactMarkdown>
+                    </div>
+                    {(answer as GeminiJsonResponse).answer.verification && (
+                      <div className="mt-4 pt-3 border-t border-green-200">
+                        <p className="text-sm text-green-700">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {`**Verification:** ${ensureLatexDelimiters((answer as GeminiJsonResponse).answer.verification)}`}
+                            </ReactMarkdown>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Generate Similar Problem Section */}
                 {handleGenerateSimilar && (
-                  <div className="mt-6 flex flex-col items-center">
+                  <div className="mt-8 pt-6 border-t border-indigo-200 flex flex-col items-center">
                     <Button
                       onClick={() => handleGenerateSimilar(answer as GeminiJsonResponse)}
                       disabled={isGeneratingSimilar}
                       className="bg-gradient-to-r from-[#6C63FF] to-[#5E60CE] hover:from-[#5E60CE] hover:to-[#4F46E5] text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-70"
-                      title="Costs 3 credits"
                     >
                       {isGeneratingSimilar ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" />
-                          Generating similar problem...
+                          Generating...
                         </>
                       ) : (
                         <>
                           <Brain className="w-5 h-5" />
-                          Generate a problem just like this one
+                          Generate a Similar Problem
                         </>
                       )}
                     </Button>
                     <div className="flex items-center gap-1 mt-2 text-indigo-600">
                       <Coins className="w-3 h-3" />
-                      <span className="text-xs font-medium">3 credits</span>
+                      <span className="text-xs font-medium">Costs 3 credits</span>
                     </div>
                   </div>
                 )}
@@ -292,14 +317,11 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
                       {similarProblem.problem && (
                         <div className="bg-white/70 p-4 rounded-lg border border-purple-100">
                           <h4 className="text-md font-semibold text-purple-800 mb-2">
-                            {similarProblem.problem.title || 'New Problem'}
+                            {ensureLatexDelimiters(similarProblem.problem.title || 'New Problem')}
                           </h4>
                           <div className="text-gray-700 prose prose-sm max-w-none">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkMath]}
-                              rehypePlugins={[rehypeKatex]}
-                            >
-                              {similarProblem.problem.statement || 'No problem statement available'}
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                              {ensureLatexDelimiters(similarProblem.problem.statement || 'No problem statement available')}
                             </ReactMarkdown>
                           </div>
                         </div>
@@ -318,7 +340,6 @@ const AskTheLab: React.FC<AskTheLabProps> = ({
                         )}
                         <Button
                           onClick={() => {
-                            // Set the solution to the similar problem
                             if (setSolution && typeof setSolution === 'function') {
                               setSolution(similarProblem);
                             }

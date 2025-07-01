@@ -13,7 +13,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Problem } from '@/types/math';
 import { getProblemIdsByTopic } from '@/lib/problems';
-import { ensureLatexDelimiters } from '@/utils/format-latex';
+import { ensureLatexDelimiters, formatLatexForGemini } from '@/utils/format-latex';
 import { checkAnswerEquivalence } from '@/utils/math-compare';
 import MathInput from './math-input';
 
@@ -181,7 +181,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
       <CardContent className="p-6 pt-8">
         <div className="prose prose-stone max-w-none mb-8 bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
           <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-            {ensureLatexDelimiters(problem.question)}
+            {formatLatexForGemini(problem.question)}
           </ReactMarkdown>
         </div>
 
@@ -263,7 +263,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
             <h3 className="font-semibold text-yellow-800">Hint</h3>
             <p className="text-yellow-700 mt-2">
               <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {ensureLatexDelimiters(problem.hints[currentHintIndex])}
+                {formatLatexForGemini(problem.hints[currentHintIndex])}
               </ReactMarkdown>
             </p>
           </motion.div>
@@ -280,7 +280,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({ problem, totalProblem
                   <li key={index} className="text-gray-700">
                     <div className="bg-white p-3 rounded-md shadow-xs">
                       <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                        {ensureLatexDelimiters(step)}
+                        {formatLatexForGemini(step)}
                       </ReactMarkdown>
                     </div>
                   </li>

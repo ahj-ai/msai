@@ -10,6 +10,7 @@
  */
 export function ensureLatexDelimiters(text: string): string {
   if (!text) return '';
+    // Skip if it's likely a LaTeX expression
   
   // Replace LaTeX fractions that aren't already delimited
   // This handles cases like "(\frac{3}{4})" that should be "$(\frac{3}{4})$"

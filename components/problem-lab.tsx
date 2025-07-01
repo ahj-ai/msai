@@ -27,7 +27,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import { ensureLatexDelimiters } from "@/utils/format-latex";
+import { ensureLatexDelimiters, formatLatexForGemini } from "@/utils/format-latex";
 import AskTheLab from './AskTheLab';
 import PracticeProblemGenerator from './PracticeProblemGenerator';
 import SnapAndSolve from './SnapAndSolve';
