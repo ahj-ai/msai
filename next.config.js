@@ -45,6 +45,17 @@ const nextConfig = {
   },
   // Configure page extensions
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  
+  // Image configuration for Netlify deployment
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'mathstackai.app',
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SignedIn, SignedOut, SignUpButton } from '@clerk/nextjs';
+// Images referenced directly from public folder
 import { RedirectToDashboard } from '../components/redirect-to-dashboard';
 import { FeatureCard } from '../components/feature-card';
 import { Brain, Zap, Target, Award, ArrowRight, CheckCircle, XCircle, Trophy } from 'lucide-react';
@@ -199,6 +200,7 @@ export default function Home() {
                               width={500}
                               height={550}
                               className="rounded-xl shadow-md border border-white"
+                              priority
                           />
                       </div>
                       {/* Image 2: Results */}
@@ -209,6 +211,7 @@ export default function Home() {
                               width={500}
                               height={550}
                               className="rounded-xl shadow-md border border-white"
+                              priority
                           />
                       </div>
                   </div>
