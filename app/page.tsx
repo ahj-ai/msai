@@ -217,7 +217,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="mt-12 text-center">
+            <div className="md:col-span-2 mt-16 text-center">
               <Link href="/brainiac" className="btn-primary inline-flex items-center justify-center px-8 py-4 text-lg font-display font-bold text-white relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 rounded-xl shadow-lg">
                 <span className="relative z-10 tracking-tight">See How Fast You Can Solve</span>
                 <ArrowRight className="ml-2 w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
