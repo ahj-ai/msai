@@ -190,33 +190,40 @@ export default function Home() {
                 </p>
               </div>
               <div className="max-w-5xl mx-auto">
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                      {/* Image 1: Gameplay */}
-                      <div className="w-full h-auto">
-                          <Image
-                              src="/images/brainiac-gameplay.jpeg"
-                              alt="The Brainiac math game screen showing a problem and user stats."
-                              width={500}
-                              height={550}
-                              className="rounded-xl shadow-md border border-white"
-                              priority
-                          />
-                      </div>
-                      {/* Image 2: Results */}
-                      <div className="w-full h-auto">
-                          <Image
-                              src="/images/brainiac-results.jpeg"
-                              alt="The Brainiac final score screen showing statistics like accuracy, time, and streak."
-                              width={500}
-                              height={550}
-                              className="rounded-xl shadow-md border border-white"
-                              priority
-                          />
-                      </div>
-                  </div>
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    {/* Image 1: Gameplay */}
+                    <div className="w-full h-auto">
+                        <Image
+                            src="/images/brainiac-gameplay.jpeg"
+                            alt="The Brainiac math game screen showing a problem and user stats."
+                            width={500}
+                            height={550}
+                            className="rounded-xl shadow-md border border-white"
+                            priority
+                        />
+                    </div>
+                    {/* Image 2: Results */}
+                    <div className="w-full h-auto">
+                        <Image
+                            src="/images/brainiac-results.jpeg"
+                            alt="The Brainiac final score screen showing statistics like accuracy, time, and streak."
+                            width={500}
+                            height={550}
+                            className="rounded-xl shadow-md border border-white"
+                            priority
+                        />
+                    </div>
                 </div>
               </div>
+            </div>
+            <div className="mt-12 text-center">
+              <Link href="/brainiac" className="btn-primary inline-flex items-center justify-center px-8 py-4 text-lg font-display font-bold text-white relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 rounded-xl shadow-lg">
+                <span className="relative z-10 tracking-tight">See How Fast You Can Solve</span>
+                <ArrowRight className="ml-2 w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#8A6FFD] to-[#6C63FF] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </Link>
+            </div>
             </div>
 
             {/* Problem Lab Main Section */}
@@ -327,6 +334,13 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="mt-16 text-center">
+              <Link href="/problem-lab" className="btn-primary inline-flex items-center justify-center px-8 py-4 text-lg font-display font-bold text-white relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 rounded-xl shadow-lg">
+                <span className="relative z-10 tracking-tight">Master Concepts in Problem Lab</span>
+                <ArrowRight className="ml-2 w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#8A6FFD] to-[#6C63FF] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </Link>
             </div>
           </div>
         </section>
